@@ -282,6 +282,7 @@ const FlexCarousel = ({
   captureWheel = true,
   onChange,
   onSelect,
+  onVisualReady,
   className = '',
   style
 }) => {
@@ -289,7 +290,7 @@ const FlexCarousel = ({
   const settingsRef = useRef(null);
   const itemsRef = useRef(items);
   const engineRef = useRef(null);
-  const callbacksRef = useRef({ onChange, onSelect });
+  const callbacksRef = useRef({ onChange, onSelect, onVisualReady });
   const [active, setActive] = useState(0);
   const [revealed, setRevealed] = useState(false);
   const [focusOpen, setFocusOpen] = useState(false);
@@ -302,7 +303,7 @@ const FlexCarousel = ({
 
   useEffect(() => {
     itemsRef.current = list;
-    callbacksRef.current = { onChange, onSelect };
+    callbacksRef.current = { onChange, onSelect, onVisualReady };
     settingsRef.current = {
       intro,
       cardHeight,
@@ -429,6 +430,7 @@ const FlexCarousel = ({
     let last = performance.now();
     let visible = true;
     let alive = true;
+    let visualReadyNotified = false;
     let dirty = true;
     let activeIndex = -1;
     let interactedAt = -Infinity;
@@ -963,6 +965,20 @@ const FlexCarousel = ({
         lensUniforms.uStrength.value = effects.strength * (1 - focusEase);
         lensUniforms.uSceneAlpha.value = effects.sceneAlpha;
         renderer.render({ scene: lensMesh });
+        // MUSA adapter: retain the HTML gallery until a real WebGL frame
+        // displays a card. Remote photos can fail CORS or GPU rendering.
+        if (!visualReadyNotified && introState.done && slots.some(slot => slot.loaded)) {
+          const px = new Uint8Array(4);
+          gl.readPixels(
+            Math.floor(gl.drawingBufferWidth / 2),
+            Math.floor(gl.drawingBufferHeight / 2),
+            1, 1, gl.RGBA, gl.UNSIGNED_BYTE, px
+          );
+          if (gl.getError() === gl.NO_ERROR && px[3] > 32) {
+            visualReadyNotified = true;
+            callbacksRef.current.onVisualReady?.();
+          }
+        }
       }
 
       let nextHover = '';
