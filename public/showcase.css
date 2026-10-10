@@ -15,3 +15,23 @@
 .musa-carousel-simple span{overflow:hidden;white-space:nowrap;text-overflow:ellipsis}
 @media(max-width:760px){.musa-carousel-frame{height:380px;border-radius:18px}.musa-showcase-head{align-items:start;flex-direction:column;gap:9px}.musa-showcase-tag{text-align:left}.musa-carousel-detail{align-items:start;flex-direction:column;gap:5px}.musa-carousel-simple a{flex-basis:68vw}}
 @media(max-width:420px){.musa-carousel-frame{height:330px}}
+
+/* Real photographs are visible immediately even if WebGL/CORS is unavailable. */
+.musa-carousel-html,.musa-carousel-webgl{position:absolute;inset:0}
+.musa-carousel-html{z-index:1;transition:opacity .4s ease;overflow:hidden}
+.musa-carousel-html[data-hidden="true"]{opacity:0;pointer-events:none}
+.musa-carousel-webgl{z-index:2}
+.musa-carousel-simple{gap:18px;padding:24px;scrollbar-width:thin;scrollbar-color:#d7ff42 transparent;align-items:stretch}
+.musa-carousel-simple a{
+  flex:0 0 clamp(180px,33%,330px);gap:8px;padding:0 0 8px;
+  border-radius:16px;background:#312947;color:#fff;overflow:hidden;
+  transition:transform .2s ease,background .2s ease
+}
+.musa-carousel-simple a:hover{transform:translateY(-4px);background:#453858}
+.musa-carousel-simple a:focus-visible{outline:3px solid #d7ff42;outline-offset:-3px}
+.musa-simple-cover{height:calc(100% - 65px);min-height:160px;overflow:hidden}
+.musa-carousel-simple .musa-simple-cover img{width:100%;height:100%;min-height:0;object-fit:cover;display:block;border-radius:0}
+.musa-carousel-simple .musa-simple-title{font-size:15px;padding:0 13px}
+.musa-carousel-simple small{font-size:11px;font-weight:700;letter-spacing:.07em;text-transform:uppercase;color:#d7ff42;padding:0 13px}
+@media(max-width:760px){.musa-carousel-simple{padding:12px;gap:12px}.musa-carousel-simple a{flex-basis:65%;}.musa-simple-cover{min-height:130px}}
+@media(prefers-reduced-motion:reduce){.musa-carousel-html,.musa-carousel-simple a{transition:none}}
