@@ -1,29 +1,31 @@
 # MUSA Creative Lab
 
-MUSA es una aplicación web de inspiración y exploración creativa personal.
+**MUSA Creative Laboratory** es una aplicación web experimental para explorar la creatividad con ideas, retos, sesiones y referencias visuales.
 
-## Estado actual (MVP 1.0)
+## MVP actual
 
-- Generador de ideas creativas
-- Retos creativos
-- Sesiones con temporizador
-- Galería personal con imágenes
-- Ideas favoritas
-- Historial creativo
-- Búsquedas externas a Pinterest, Behance, Unsplash y archivos de museos
+- Generador de ideas creativas y retos.
+- Sesiones con temporizador.
+- Galería de obras con fotos, reflexiones e historial.
+- Ideas y referencias visuales favoritas.
+- Explorador visual con buscador interno: Unsplash, The Met, Art Institute of Chicago y Wikimedia Commons.
+- Búsquedas externas a Pinterest y Behance (sin integración API oficial todavía).
+- Páginas públicas: [Política de Privacidad](https://musa-creative-lab.vercel.app/politica-de-privacidad/) y [Términos de Uso](https://musa-creative-lab.vercel.app/terminos-de-uso/).
 
-Este repositorio contiene **la versión estática exacta recuperada del despliegue de Vercel** antes de conectar GitHub. La aplicación usa `localStorage`; todavía **no tiene backend, sincronización entre dispositivos ni integración interna con APIs**.
+## Código y despliegue
 
-## Despliegue
+La interfaz actual es HTML, CSS y JavaScript sin framework; la ruta \`api/inspiration.js\` es una función serverless en Vercel. \`main\` despliega automáticamente en [MUSA](https://musa-creative-lab.vercel.app/); las pull requests crean previsualizaciones para probar cambios.
 
-El sitio consiste en `index.html` y `manifest.webmanifest` y no requiere compilación ni instalación de dependencias.
+La búsqueda de Unsplash requiere \`UNSPLASH_ACCESS_KEY\`, configurada en el servidor como variable de entorno de Vercel. **Nunca guardes secretos en el repositorio ni los envíes al navegador.**
 
-Conecta este repositorio en el proyecto de Vercel `musa-creative-lab`, usando rama de producción `main`, framework **Other** y directorio raíz `./`. Cada push a `main` generará un despliegue tras establecer la conexión Git en Vercel.
+## Privacidad
 
-## Seguridad
+El MVP guarda obras, imágenes, favoritos y sesiones mediante \`localStorage\`, en el navegador del usuario, sin registro ni sincronización. Los términos consultados en el explorador pasan por una función de MUSA y los servicios de imágenes seleccionados.
 
-No incluyas claves API en `index.html` ni en Git. Cuando conectemos Unsplash utilizaremos `UNSPLASH_ACCESS_KEY` configurada en variables de entorno de Vercel y una función de servidor que gestione las peticiones y atribuciones requeridas.
+Si se añaden cuentas, guardado en la nube, Pinterest OAuth o analítica, deberán actualizarse la Política de Privacidad, los permisos y las medidas de seguridad antes de desplegar.
 
-## Datos y privacidad
+Contacto de privacidad: **musacreativelaboratory@gmail.com**.
 
-El MVP guarda favoritos, obras, sesiones e imágenes localmente en el navegador, sin sincronización. No se recomienda para almacenamiento definitivo de obras.
+## Pruebas
+
+GitHub Actions ejecuta \`node scripts/check-static.cjs\` para validar JavaScript y comprobar el flujo básico de búsqueda y guardado de referencias. La rama \`main\` debe fusionarse tras pruebas satisfactorias.

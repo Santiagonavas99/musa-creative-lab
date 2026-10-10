@@ -1,0 +1,15 @@
+@import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&display=swap');
+:root{font-family:'DM Sans',system-ui,sans-serif;background:#f5f0e7;color:#211b36;font-synthesis:none}
+*{box-sizing:border-box}body{margin:0}a{color:#3926ce;text-decoration-thickness:1px;text-underline-offset:3px}a:focus-visible{outline:3px solid #ff7049;outline-offset:3px;border-radius:3px}
+header{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;background:#f5f0e7;border-bottom:1px solid #d9d1c9;padding:18px max(22px,calc((100vw - 1080px)/2))}
+header a{text-decoration:none}.brand{font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:30px;letter-spacing:-.055em;color:#211b36}.brand span{color:#ff7049}
+header nav{display:flex;flex-wrap:wrap;gap:10px}header nav a{color:#211b36;font-weight:700;padding:11px 13px;border-radius:10px;font-size:14px}header nav a[aria-current=page]{background:#d7ff42}
+main{max-width:900px;margin:0 auto;padding:34px 22px 70px}
+.hero{background:#3926ce;color:white;border-radius:24px;padding:clamp(26px,6vw,54px);position:relative;overflow:hidden}.hero::after{content:'✳';position:absolute;right:-20px;bottom:-80px;font-size:240px;color:#d7ff42;opacity:.38;pointer-events:none}.hero>*{position:relative;z-index:1}
+.eyebrow{font-size:12px;letter-spacing:.13em;text-transform:uppercase;font-weight:800;color:#d7ff42}h1,h2{font-family:'Space Grotesk',sans-serif;letter-spacing:-.045em}h1{font-size:clamp(32px,6vw,52px);line-height:1.02;margin:12px 0 14px;max-width:650px}h2{font-size:24px;margin:0 0 12px}p,li{line-height:1.68}p{margin:0 0 14px}ul{padding-left:25px}li{margin:0 0 8px}
+.note{background:#d7ff42;color:#211b36;border-radius:16px;padding:20px 22px;margin:20px 0;font-weight:500}
+.article{padding:16px 0}section{border-bottom:1px solid #ddd5cf;padding:25px 0}section:last-of-type{border-bottom:0}
+.meta{margin:18px 0;color:#6c6271;font-size:14px}.contact{display:inline-block;border-radius:12px;background:#211b36;color:white;padding:12px 16px;text-decoration:none;font-weight:700;overflow-wrap:anywhere}
+footer{border-top:1px solid #ddd5cf;padding:24px max(22px,calc((100vw - 1080px)/2));display:flex;gap:15px;flex-wrap:wrap;justify-content:space-between;font-size:13px;color:#655f68}
+footer a{color:#211b36}strong{font-weight:800}
+@media(max-width:580px){header{padding:12px 18px}header nav a{padding:10px 9px;font-size:12px}main{padding:18px 16px 44px}.hero::after{font-size:160px;right:-38px;bottom:-55px}.article section{padding:20px 0}footer{padding:24px 18px}}

@@ -14,6 +14,24 @@ assert.match(html, /renderInspiration\(\)/, "Explore page should embed real sear
 assert.doesNotMatch(html, /Las integraciones visuales dentro de la app llegarán en una próxima versión/);
 console.log("✓ Both JavaScript files parse correctly");
 
+const privacy = fs.readFileSync(path.join(root, "politica-de-privacidad/index.html"), "utf8");
+const terms = fs.readFileSync(path.join(root, "terminos-de-uso/index.html"), "utf8");
+const legalCSS = fs.readFileSync(path.join(root, "legal.css"), "utf8");
+assert.ok(legalCSS.includes(".hero"), "Legal design styles should be available");
+assert.match(privacy, /<title>Política de Privacidad — MUSA Creative Laboratory<\/title>/);
+assert.match(privacy, /musacreativelaboratory@gmail\.com/);
+assert.match(privacy, /localStorage/);
+assert.match(privacy, /Unsplash/);
+assert.match(privacy, /Pinterest/);
+assert.match(terms, /<title>Términos de Uso — MUSA Creative Laboratory<\/title>/);
+assert.match(terms, /musacreativelaboratory@gmail\.com/);
+assert.match(terms, /\/politica-de-privacidad\//);
+assert.match(html, /href="\/politica-de-privacidad\/"/);
+assert.match(html, /href="\/terminos-de-uso\/"/);
+assert.match(html, /aria-label="Información legal"/);
+console.log("✓ Legal pages, contact email, data disclosures and footer links verified");
+
+
 const nodes = new Map();
 const fakeElement = () => ({
   innerHTML: "", value: "", textContent: "", classList:{add(){},remove(){}}
