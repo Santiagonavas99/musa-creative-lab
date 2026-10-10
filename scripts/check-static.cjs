@@ -6,10 +6,14 @@ const path = require("node:path");
 const root = path.resolve(__dirname, "..");
 const html = fs.readFileSync(path.join(root, "index.html"), "utf8");
 const api = fs.readFileSync(path.join(root, "api/inspiration.js"), "utf8");
+const showcaseJS = fs.readFileSync(path.join(root, "public/showcase-controller.js"), "utf8");
 const inline = [...html.matchAll(/<script(?:\s[^>]*)?>([\s\S]*?)<\/script>/g)];
 assert.ok(inline.length > 0, "MUSA must contain client application JavaScript");
 for (const [, source] of inline) new vm.Script(source, {filename: "index.html"});
 new vm.Script(api, {filename: "api/inspiration.js"});
+new vm.Script(showcaseJS, {filename: "showcase-controller.js"});
+assert.match(html, /renderShowcase\(\)/, "Explore must place the carousel under its heading");
+assert.match(html, /\/src\/flex-carousel-entry\.jsx/, "React Bits entry point should be built by Vite");
 assert.match(html, /renderInspiration\(\)/, "Explore page should embed real search interface");
 assert.doesNotMatch(html, /Las integraciones visuales dentro de la app llegarán en una próxima versión/);
 console.log("✓ Both JavaScript files parse correctly");
@@ -39,7 +43,7 @@ const fakeElement = () => ({
 const ctx = vm.createContext({
   document: {getElementById(id){if(!nodes.has(id)){const node=fakeElement();if(id==="query")node.value="collage experimental";nodes.set(id,node)}return nodes.get(id)}},
   localStorage: {getItem(){return null},setItem(){}},
-  window: {scrollTo(){}},
+  window: {scrollTo(){},addEventListener(){}},
   console,
   URL,
   setTimeout(){return 1},clearTimeout(){},
@@ -55,15 +59,21 @@ const ctx = vm.createContext({
   }]})}),
 });
 vm.runInContext(inline[0][1], ctx, {filename:"MUSA.inline.js"});
+vm.runInContext(showcaseJS, ctx, {filename:"showcase-controller.js"});
 assert.match(nodes.get("app").innerHTML,/NO NECESITAS UNA GRAN IDEA/);
 vm.runInContext('page="explorar";render()',ctx);
 assert.match(nodes.get("app").innerHTML,/BUSCA REFERENCIAS/);
 assert.match(nodes.get("app").innerHTML,/⌕ Buscar imágenes/);
+assert.match(nodes.get("app").innerHTML,/UNA CHISPA VISUAL AL AZAR/);
+assert.ok(nodes.get("app").innerHTML.indexOf("UNA CHISPA VISUAL AL AZAR") <
+  nodes.get("app").innerHTML.indexOf("GENERADOR MUSA"), "Carousel must precede Explore cards");
 console.log("✓ MUSA boots and renders Explore with search controls");
 
 (async()=>{
   await vm.runInContext("lookupInspiration()",ctx);
+  await new Promise(resolve => setImmediate(resolve));
   const results=nodes.get("app").innerHTML;
+  assert.match(results, /musa-flex-carousel-root/, "Randomized API references should populate the carousel");
   assert.match(results,/Abstract lines/);
   assert.match(results,/Foto de/);
   assert.match(results,/Jane Doe/);
