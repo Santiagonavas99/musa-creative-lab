@@ -19,7 +19,7 @@ const fakeElement = () => ({
   innerHTML: "", value: "", textContent: "", classList:{add(){},remove(){}}
 });
 const ctx = vm.createContext({
-  document: {getElementById(id){if(!nodes.has(id))nodes.set(id,fakeElement());return nodes.get(id)}},
+  document: {getElementById(id){if(!nodes.has(id)){const node=fakeElement();if(id==="query")node.value="collage experimental";nodes.set(id,node)}return nodes.get(id)}},
   localStorage: {getItem(){return null},setItem(){}},
   window: {scrollTo(){}},
   console,
