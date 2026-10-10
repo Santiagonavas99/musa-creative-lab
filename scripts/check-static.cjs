@@ -23,6 +23,7 @@ const ctx = vm.createContext({
   localStorage: {getItem(){return null},setItem(){}},
   window: {scrollTo(){}},
   console,
+  URL,
   setTimeout(){return 1},clearTimeout(){},
   setInterval(){return 1},clearInterval(){},
   crypto:{randomUUID(){return "test-uuid"}},
