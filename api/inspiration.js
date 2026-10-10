@@ -57,7 +57,7 @@ async function unsplash(query) {
 }
 async function met(query) {
   const result = await timeOutFetch(
-    "https://collectionapi.metmuseum.org/public/collection/v1/search?hasImages=true&q=" + encodeURIComponent(query)
+    "https://collectionapi.metmuseum.org/public/collection/v1.1/search?hasImages=true&limit=24&q=" + encodeURIComponent(query)
   );
   const ids = (result.objectIDs || []).slice(0, 22);
   const pieces = await Promise.allSettled(ids.map(id =>
