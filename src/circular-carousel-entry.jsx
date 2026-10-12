@@ -113,6 +113,9 @@ function mount(items) {
   const container = document.getElementById('musa-circular-carousel-root');
   if (!container || !Array.isArray(items) || items.length < 3) return;
   unmount();
+  // Mobile / coarse pointers run one lightweight native 3D cylinder, rather
+  // than React Bits' multi-tile duplicate DOM which can stall iOS swipes.
+  if (window.matchMedia?.('(max-width: 760px), (pointer: coarse)').matches) return;
   const references = items.filter(item => validHttps(item.image) && validHttps(item.link));
   if (references.length < 3) return;
   updateSelected(references[0]);
