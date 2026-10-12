@@ -41,3 +41,32 @@
  .musa-carousel-simple a{flex-basis:68%}}
 @media(max-width:420px){.musa-carousel-frame{height:340px}}
 @media(prefers-reduced-motion:reduce){.musa-carousel-html,.musa-carousel-css3d,.musa-carousel-simple a{transition:none}}
+
+/* Circular 3D preview is rendered immediately by the vanilla app.
+   It remains in place if React/CSS-3D/image loading fails. */
+.musa-native-cylinder{position:absolute;inset:0;z-index:1;overflow:hidden;display:grid;place-items:center;
+  perspective:1400px;transition:opacity .45s ease;isolation:isolate}
+.musa-native-scene{width:220px;height:220px;position:relative;transform-style:preserve-3d}
+.musa-native-ring{position:relative;width:100%;height:100%;transform-style:preserve-3d;
+ animation:musa-native-orbit 25.714s linear infinite}
+.musa-native-cylinder:hover .musa-native-ring,
+.musa-native-cylinder:focus-within .musa-native-ring{animation-play-state:paused}
+.musa-native-card{position:absolute;inset:0;display:block;width:220px;height:220px;
+ transform:rotateY(var(--angle)) translateZ(var(--ring-radius));
+ backface-visibility:hidden;-webkit-backface-visibility:hidden;
+ border-radius:12px;overflow:hidden;box-shadow:0 16px 32px rgba(8,3,28,.27);
+ background:#5a497e}
+.musa-native-card img{display:block;width:100%;height:100%;object-fit:cover}
+.musa-native-card.failed{visibility:hidden}
+.musa-native-card:focus-visible{outline:3px solid #d7ff42;outline-offset:3px}
+.musa-native-hint{position:absolute;bottom:18px;left:16px;right:16px;text-align:center;
+ font-size:11px;letter-spacing:.12em;color:#e8def5;font-weight:800;pointer-events:none}
+.musa-native-cylinder[data-hidden="true"]{opacity:0;pointer-events:none}
+.musa-react-cylinder{position:absolute;inset:0;z-index:2;pointer-events:none}
+.musa-react-cylinder[data-ready="true"]{pointer-events:auto}
+.musa-react-cylinder .musa-carousel-html{opacity:0!important;pointer-events:none!important}
+.musa-react-cylinder .musa-carousel-css3d{inset:0}
+@keyframes musa-native-orbit{from{transform:rotateY(0deg)}to{transform:rotateY(360deg)}}
+@media(max-width:760px){.musa-native-scene{transform:scale(.68)}.musa-native-hint{font-size:10px}}
+@media(max-width:420px){.musa-native-scene{transform:scale(.55)}}
+@media(prefers-reduced-motion:reduce){.musa-native-ring{animation:none}}
