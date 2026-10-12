@@ -7,11 +7,17 @@ const root = path.resolve(__dirname, "..");
 const html = fs.readFileSync(path.join(root, "index.html"), "utf8");
 const api = fs.readFileSync(path.join(root, "api/inspiration.js"), "utf8");
 const showcaseJS = fs.readFileSync(path.join(root, "public/showcase-controller.js"), "utf8");
-const inline = [...html.matchAll(/<script(?:\s[^>]*)?>([\s\S]*?)<\/script>/g)];
+const boardsJS = fs.readFileSync(path.join(root, "public/boards.js"), "utf8");
+const boardsCSS = fs.readFileSync(path.join(root, "public/boards.css"), "utf8");
+const inline = [...html.matchAll(/<script(?:\s[^>]*)?>([\s\S]*?)<\/script>/g)].filter(([,source])=>source.trim());
 assert.ok(inline.length > 0, "MUSA must contain client application JavaScript");
 for (const [, source] of inline) new vm.Script(source, {filename: "index.html"});
 new vm.Script(api, {filename: "api/inspiration.js"});
 new vm.Script(showcaseJS, {filename: "showcase-controller.js"});
+new vm.Script(boardsJS, {filename: "boards.js"});
+assert.match(html, /src="\/boards\.js"/, "Board organizer must load before MUSA inline app");
+assert.match(html, /href="\/boards\.css"/, "Board styling must ship with the site");
+assert.match(boardsCSS, /@media\(max-width:480px\)/, "Boards must adapt to narrow mobile screens");
 const reactIsland = fs.readFileSync(path.join(root, "src/circular-carousel-entry.jsx"), "utf8");
 const bitsComponent = fs.readFileSync(path.join(root, "src/components/CircularCarousel/CircularCarousel.jsx"), "utf8");
 const showcaseCSS = fs.readFileSync(path.join(root, "public/showcase.css"), "utf8");
@@ -146,6 +152,7 @@ const ctx = vm.createContext({
     link:"https://example.com/art/"+id
   }))]})}),
 });
+vm.runInContext(boardsJS, ctx, {filename:"boards.js"});
 vm.runInContext(inline[0][1], ctx, {filename:"MUSA.inline.js"});
 vm.runInContext(showcaseJS, ctx, {filename:"showcase-controller.js"});
 assert.match(nodes.get("app").innerHTML,/NO NECESITAS UNA GRAN IDEA/);
@@ -195,9 +202,12 @@ console.log("✓ MUSA boots and renders Explore with search controls");
   assert.match(results,/Abstract lines/);
   assert.match(results,/Foto de/);
   assert.match(results,/Jane Doe/);
-  vm.runInContext("saveVisualReference(0)",ctx);
-  assert.match(nodes.get("app").innerHTML,/REFERENCIAS GUARDADAS/);
-  console.log("✓ Results, photographer credits and saved references work");
+  vm.runInContext("openBoardEditor('',0)",ctx);
+  assert.match(nodes.get("app").innerHTML,/CREAR UN TABLERO/);
+  vm.runInContext("closeBoardEditor()",ctx);
+  assert.match(nodes.get("app").innerHTML,/TUS TABLEROS DE INSPIRACIÓN/);
+  assert.match(results,/GUARDAR EN TABLERO/);
+  console.log("✓ Search results, board picker, credits and board creation dialog work");
   console.log("All checks passed.");
 })().catch(err=>{console.error(err);process.exitCode=1});
 
