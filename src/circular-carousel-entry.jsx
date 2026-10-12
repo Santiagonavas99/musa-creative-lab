@@ -74,6 +74,7 @@ function CarouselStage({ items }) {
 
   // The component exposes data-ready after loading the photographs.
   // Continue showing the HTML gallery until the animated stage is prepared.
+  useEffect(() => { updateSelected(items[0]); }, [items]);
   useEffect(() => {
     setReady(false);
     const node = container.current?.querySelector('.circular-carousel');
@@ -128,9 +129,17 @@ function CarouselIsland({ items }) {
     return () => { cancelled = true; };
   }, [items]);
 
-  if (!renderable || renderable.length < 3) {
-    return <HtmlGallery items={renderable?.length ? renderable : items} />;
+  if (renderable === null) return <HtmlGallery items={items} />;
+  if (renderable.length === 0) {
+    return (
+      <div className="musa-carousel-empty" role="alert">
+        <strong>LAS IMÁGENES NO RESPONDIERON.</strong>
+        <span>Prueba otras referencias para continuar explorando.</span>
+        <button className="btn" onClick={() => window.retryShowcase?.()}>Volver a intentar ↻</button>
+      </div>
+    );
   }
+  if (renderable.length < 3) return <HtmlGallery items={renderable} />;
   return <CarouselStage items={renderable} />;
 }
 
