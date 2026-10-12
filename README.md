@@ -9,12 +9,13 @@
 - Galería de obras con fotos, reflexiones e historial.
 - Ideas y referencias visuales favoritas.
 - Explorador visual con buscador interno: Unsplash, The Met, Art Institute of Chicago y Wikimedia Commons.
+- Carrusel **CircularCarousel** de React Bits en Explorar, justo después de “¿Y si probamos algo raro?”, alimentado por las mismas fuentes, con referencias aleatorias en cada recarga y enlaces a las obras originales.
 - Búsquedas externas a Pinterest y Behance (sin integración API oficial todavía).
 - Páginas públicas: [Política de Privacidad](https://musa-creative-lab.vercel.app/politica-de-privacidad/) y [Términos de Uso](https://musa-creative-lab.vercel.app/terminos-de-uso/).
 
 ## Código y despliegue
 
-La interfaz actual es HTML, CSS y JavaScript sin framework; la ruta \`api/inspiration.js\` es una función serverless en Vercel. \`main\` despliega automáticamente en [MUSA](https://musa-creative-lab.vercel.app/); las pull requests crean previsualizaciones para probar cambios.
+La interfaz principal utiliza HTML, CSS y JavaScript; el carrusel se monta en una isla React con Vite, sin migrar el resto de la aplicación. La ruta \`api/inspiration.js\` es una función serverless en Vercel. \`main\` despliega automáticamente en [MUSA](https://musa-creative-lab.vercel.app/); las pull requests crean previsualizaciones para probar cambios.
 
 La búsqueda de Unsplash requiere \`UNSPLASH_ACCESS_KEY\`, configurada en el servidor como variable de entorno de Vercel. **Nunca guardes secretos en el repositorio ni los envíes al navegador.**
 
