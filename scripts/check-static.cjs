@@ -6,10 +6,16 @@ const path = require("node:path");
 const root = path.resolve(__dirname, "..");
 const html = fs.readFileSync(path.join(root, "index.html"), "utf8");
 const api = fs.readFileSync(path.join(root, "api/inspiration.js"), "utf8");
+const auth = fs.readFileSync(path.join(root,"auth.js"),"utf8");
+const authConfig = fs.readFileSync(path.join(root,"api/auth-config.js"),"utf8");
 const inline = [...html.matchAll(/<script(?:\s[^>]*)?>([\s\S]*?)<\/script>/g)];
 assert.ok(inline.length > 0, "MUSA must contain client application JavaScript");
 for (const [, source] of inline) new vm.Script(source, {filename: "index.html"});
 new vm.Script(api, {filename: "api/inspiration.js"});
+new vm.Script(auth, {filename: "auth.js"});
+new vm.Script(authConfig, {filename:"api/auth-config.js"});
+assert.match(html, /src="\/auth\.js"/);
+assert.match(html, /supabase-js@2/);
 assert.match(html, /renderInspiration\(\)/, "Explore page should embed real search interface");
 assert.doesNotMatch(html, /Las integraciones visuales dentro de la app llegarán en una próxima versión/);
 console.log("✓ Both JavaScript files parse correctly");
@@ -39,7 +45,7 @@ const fakeElement = () => ({
 const ctx = vm.createContext({
   document: {getElementById(id){if(!nodes.has(id)){const node=fakeElement();if(id==="query")node.value="collage experimental";nodes.set(id,node)}return nodes.get(id)}},
   localStorage: {getItem(){return null},setItem(){}},
-  window: {scrollTo(){}},
+  window: {scrollTo(){},MusaAuth:{isAuthenticated:()=>true,queueSave(){},renderAccount(){},importBanner:()=>"",artworkImage:a=>a.image||""}},
   console,
   URL,
   setTimeout(){return 1},clearTimeout(){},
@@ -55,6 +61,7 @@ const ctx = vm.createContext({
   }]})}),
 });
 vm.runInContext(inline[0][1], ctx, {filename:"MUSA.inline.js"});
+vm.runInContext("render()",ctx);
 assert.match(nodes.get("app").innerHTML,/NO NECESITAS UNA GRAN IDEA/);
 vm.runInContext('page="explorar";render()',ctx);
 assert.match(nodes.get("app").innerHTML,/BUSCA REFERENCIAS/);
@@ -67,8 +74,9 @@ console.log("✓ MUSA boots and renders Explore with search controls");
   assert.match(results,/Abstract lines/);
   assert.match(results,/Foto de/);
   assert.match(results,/Jane Doe/);
+  assert.match(results,/Mis búsquedas anteriores/);
   vm.runInContext("saveVisualReference(0)",ctx);
   assert.match(nodes.get("app").innerHTML,/REFERENCIAS GUARDADAS/);
-  console.log("✓ Results, photographer credits and saved references work");
+  console.log("✓ Results, photographer credits, private search history and saved references work");
   console.log("All checks passed.");
 })().catch(err=>{console.error(err);process.exitCode=1});
