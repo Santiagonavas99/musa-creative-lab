@@ -32,4 +32,4 @@ jobs:
       - name: Check client and API syntax, interface and saved references
         run: node scripts/check-static.cjs
       - name: Validate app metadata, manifest and legal routes
-        run: node --test tests/site.test.cjs
+        run: node --test tests/site.test.cjs tests/boards.test.cjs
