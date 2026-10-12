@@ -27,9 +27,11 @@
 .board-view>.muted{margin:4px 0 20px;font-size:13px}
 .board-view .ref-grid{margin-top:16px}
 .ref-save-menu{position:relative;max-width:100%}
-.ref-save-menu>summary{list-style:none;display:inline-flex;align-items:center;gap:6px;cursor:pointer}
+.ref-save-menu>summary{list-style:none;display:inline-flex;align-items:center;justify-content:center;flex-wrap:nowrap;white-space:nowrap;gap:9px;line-height:1.25;min-height:36px;cursor:pointer}
 .ref-save-menu>summary::-webkit-details-marker{display:none}
-.ref-save-menu>summary:after{content:'⌄';font-size:15px}
+.ref-save-menu>summary::marker{content:""}
+.ref-save-menu>summary::after{content:"";display:block;width:7px;height:7px;flex:0 0 7px;box-sizing:border-box;border-right:2px solid currentColor;border-bottom:2px solid currentColor;transform:translateY(-2px) rotate(45deg);transform-origin:center}
+.ref-save-menu[open]>summary::after{transform:translateY(2px) rotate(225deg)}
 .ref-save-options{background:#f6f2ec;padding:11px;border-radius:13px;display:flex;flex-direction:column;gap:6px;margin-top:8px;width:min(240px,100%);box-shadow:inset 0 0 0 1px #d9d2cb}
 .ref-save-caption{font-size:11px;font-weight:800;letter-spacing:.06em;color:#554c67;padding:4px}
 .ref-save-option{border:0;border-radius:9px;background:#fff;padding:11px 9px;display:flex;align-items:center;justify-content:space-between;gap:10px;text-align:left;color:#211b36;font-size:13px;font-weight:700;min-height:43px;overflow-wrap:anywhere}
