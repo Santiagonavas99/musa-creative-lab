@@ -5,6 +5,13 @@ const path = require("node:path");
 
 const root = path.resolve(__dirname, "..");
 const html = fs.readFileSync(path.join(root, "index.html"), "utf8");
+const favoriteCSS = fs.readFileSync(path.join(root, "public/favorite-ideas.css"), "utf8");
+assert.match(html, /\.swatch\{[^}]*border:1px solid rgba\(255,255,255,\.92\)/,
+ "Suggested idea colors should have a thin white border");
+assert.match(favoriteCSS, /\.idea-glass-palette \.swatch\{[^}]*border:1px solid rgba\(255,255,255,\.92\)/,
+ "Saved idea colors should have the same white border");
+assert.match(html, /palette\(f\.colors,'favorite'\)/, "Favorites must reuse the original palette renderer");
+
 const claimTag = '<meta name="p:domain_verify" content="2f5d9a91026ee62077c40f6bd9da04c7">';
 assert.equal(html.split(claimTag).length-1,1,"Pinterest verification token must be present exactly once");
 assert.ok(html.indexOf(claimTag)>html.indexOf('<head>') && html.indexOf(claimTag)<html.indexOf('</head>'),
@@ -162,6 +169,25 @@ vm.runInContext(inline[0][1], ctx, {filename:"MUSA.inline.js"});
 vm.runInContext(showcaseJS, ctx, {filename:"showcase-controller.js"});
 assert.match(nodes.get("app").innerHTML,/NO NECESITAS UNA GRAN IDEA/);
 vm.runInContext('page="explorar";render()',ctx);
+vm.runInContext("currentIdea={id:'test-palette',title:'Dibuja una ciudad que respira',emotion:'Asombro',technique:'Dibujo',theme:'Arquitectura',colors:['#F4B633','#9D53BB','#373578'],type:'idea'};render()",ctx);
+const suggestedPalette = nodes.get("app").innerHTML;
+assert.match(suggestedPalette,/aria-label="Paleta de colores sugerida"/);
+assert.ok(suggestedPalette.includes('background-color:#F4B633'),"Suggested card must render its first swatch");
+assert.equal((suggestedPalette.match(/class="swatch"/g)||[]).length,3,"Suggested palette displays three colors");
+vm.runInContext("fav()",ctx);
+const savedPalette = nodes.get("app").innerHTML;
+assert.match(savedPalette,/class="palette idea-glass-palette"/,"Saved favorites reuse the palette markup");
+assert.match(savedPalette,/background-color:#F4B633/);
+assert.match(savedPalette,/background-color:#9D53BB/);
+assert.match(savedPalette,/background-color:#373578/);
+assert.deepEqual(Array.from(vm.runInContext("data.favorites[0].colors",ctx)),['#F4B633','#9D53BB','#373578'],
+ "All three colors must be stored with the saved idea");
+vm.runInContext("data.favorites.push({id:'legacy-fav',title:'Una idea antigua'});render()",ctx);
+assert.match(nodes.get("app").innerHTML,/Una idea antigua/,"Older saved ideas without palette still render");
+assert.equal((nodes.get("app").innerHTML.match(/idea-glass-palette/g)||[]).length,1,
+ "Legacy saved ideas without colors should not display invented palettes");
+vm.runInContext("data.favorites=[];currentIdea=null;render()",ctx);
+console.log("✓ Suggested and saved ideas reuse the same accessible, white-bordered palette");
 assert.match(nodes.get("app").innerHTML,/BUSCA REFERENCIAS/);
 assert.match(nodes.get("app").innerHTML,/⌕ Buscar imágenes/);
 assert.match(nodes.get("app").innerHTML,/UNA CHISPA VISUAL AL AZAR/);
