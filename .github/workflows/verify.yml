@@ -31,5 +31,7 @@ jobs:
           node-version: "22"
       - name: Check client and API syntax, interface and saved references
         run: node scripts/check-static.cjs
+      - name: Verify two user accounts and Remember me
+        run: node --test tests/auth.test.cjs
       - name: Validate app metadata, manifest and legal routes
         run: node --test tests/site.test.cjs
