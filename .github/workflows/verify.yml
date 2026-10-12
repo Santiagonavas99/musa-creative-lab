@@ -33,5 +33,15 @@ jobs:
         run: node scripts/check-static.cjs
       - name: Verify two user accounts and Remember me
         run: node --test tests/auth.test.cjs
+      - name: Install Vite and React dependencies
+        run: npm install --no-audit --no-fund
+      - name: Build MUSA and verify auth + carousel assets
+        run: |
+          npm run build
+          test -s dist/index.html
+          test -s dist/auth.js
+          test -s dist/native-carousel.js
+          test -s dist/showcase-controller.js
+          grep -q '/auth.js' dist/index.html
       - name: Validate app metadata, manifest and legal routes
         run: node --test tests/site.test.cjs
