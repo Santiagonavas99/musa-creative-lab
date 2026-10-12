@@ -14,7 +14,7 @@ function chooseShowcaseItems(results){
  const primary=shuffled([...groups.values()].map(group=>shuffled(group)[0]));
  const selected=new Set(primary.map(r=>r.source+':'+r.id));
  const remaining=shuffled(valid.filter(r=>!selected.has(r.source+':'+r.id)));
- return shuffled([...primary,...remaining.slice(0,Math.max(0,16-primary.length))]);
+ return shuffled([...primary,...remaining.slice(0,Math.max(0,10-primary.length))]);
 }
 function renderShowcase(){
  const head='<section class="musa-showcase" aria-label="Inspiración aleatoria de fuentes conectadas">'+
@@ -23,7 +23,20 @@ function renderShowcase(){
  if(showcase.error)return head+'<div class="musa-showcase-status" role="alert"><p>'+esc(showcase.error)+'</p>'+
   '<button class="btn secondary" onclick="retryShowcase()">Volver a intentar ↻</button></div></section>';
  if(!showcase.items.length)return head+'<div class="musa-showcase-status" role="status"><p>Preparando una mezcla inesperada de imágenes...</p></div></section>';
- return head+'<div id="musa-circular-carousel-root" class="musa-carousel-frame"></div>'+
+ const limit=showcase.items.slice(0,10);
+ const n=limit.length;
+ const radius=Math.round((220+25)/(2*Math.sin(Math.PI/Math.max(3,n))));
+ const cards=limit.map((r,i)=>
+   '<a class="musa-native-card" style="--slot:'+i+'" href="'+esc(safeHref(r.link))+
+   '" target="_blank" rel="noopener noreferrer" aria-label="Ver '+esc(r.title)+' en la fuente original">'+
+   '<img src="'+esc(safeHref(r.image))+'" loading="'+(i<5?'eager':'lazy')+'" alt="'+esc(r.title)+
+   '" onerror="this.closest(\'a\').classList.add(\'failed\')"></a>'
+ ).join('');
+ return head+'<div class="musa-carousel-frame">'+
+  '<div id="musa-native-cylinder" class="musa-native-cylinder" style="--card-count:'+n+';--ring-radius:'+radius+'px">'+
+  '<div class="musa-native-scene"><div class="musa-native-ring">'+cards+'</div></div>'+
+  '<span class="musa-native-hint">DESLIZA PARA EXPLORAR · '+n+' REFERENCIAS</span></div>'+
+  '<div id="musa-circular-carousel-root" class="musa-react-cylinder"></div></div>'+
   '<div class="musa-carousel-detail"><span id="musa-carousel-current">Explora, arrastra y descubre.</span>'+
   '<a id="musa-carousel-original" href="#" target="_blank" rel="noopener noreferrer" hidden>Ver obra original ↗</a></div></section>';
 }
