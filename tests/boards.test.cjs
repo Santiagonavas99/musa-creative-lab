@@ -79,11 +79,11 @@ test("a saved reference can belong to multiple boards and is deduplicated by sou
   h.ctx.inspiration.items=[sample(4)];
   h.call("initBoards();saveReferenceToBoard(0,'a');saveReferenceToBoard(0,'b');saveReferenceToBoard(0,'b')");
   assert.equal(h.data.references.length,1);
-  assert.deepEqual(h.data.references[0].boardIds,["a","b"]);
+  assert.deepEqual(Array.from(h.data.references[0].boardIds),["a","b"]);
   assert.equal(h.data.references[0].source,"met");
   h.call("removeReferenceFromBoard(0,'a')");
   assert.equal(h.data.references.length,1);
-  assert.deepEqual(h.data.references[0].boardIds,["b"]);
+  assert.deepEqual(Array.from(h.data.references[0].boardIds),["b"]);
   h.call("removeReferenceFromBoard(0,'b')");
   assert.equal(h.data.references.length,0);
   assert.equal(h.data.boards.length,2,"Removing a pin should not delete its board");
