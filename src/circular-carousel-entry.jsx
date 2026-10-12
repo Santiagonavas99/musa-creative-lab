@@ -72,18 +72,44 @@ function CarouselStage({ items }) {
   const [ready, setReady] = useState(false);
   const container = useRef(null);
 
-  // The component exposes data-ready after loading the photographs.
-  // Continue showing the HTML gallery until the animated stage is prepared.
+  // React Bits sets data-ready once its intro can begin. Only reveal it
+  // when a decoded card actually intersects the frame, so blank 3D
+  // stages never replace MUSA's immediately visible circular backup.
   useEffect(() => { updateSelected(items[0]); }, [items]);
   useEffect(() => {
     setReady(false);
     const node = container.current?.querySelector('.circular-carousel');
-    if (!node) return undefined;
-    const verify = () => { if (node.hasAttribute('data-ready')) setReady(true); };
+    const rootNode = document.getElementById('musa-circular-carousel-root');
+    const native = document.getElementById('musa-native-cylinder');
+    if (!node || !rootNode) return undefined;
+    let finished = false;
+    const verify = () => {
+      if (finished || !node.hasAttribute('data-ready')) return;
+      const bounds = rootNode.getBoundingClientRect();
+      if (!bounds.width || !bounds.height) return;
+      const hasVisiblePhoto = [...node.querySelectorAll('.circular-carousel__photo')].some(image => {
+        if (!image.complete || !image.naturalWidth) return false;
+        const box = image.getBoundingClientRect();
+        return box.width > 25 && box.height > 25 &&
+          box.right > bounds.left + 25 && box.left < bounds.right - 25 &&
+          box.bottom > bounds.top + 25 && box.top < bounds.bottom - 25;
+      });
+      if (!hasVisiblePhoto) return;
+      finished = true;
+      setReady(true);
+      rootNode.dataset.ready = 'true';
+      if (native) native.dataset.hidden = 'true';
+    };
+    const timer = setInterval(verify, 180);
     const observer = new MutationObserver(verify);
     observer.observe(node, { attributes: true, attributeFilter: ['data-ready'] });
     verify();
-    return () => observer.disconnect();
+    return () => {
+      clearInterval(timer);
+      observer.disconnect();
+      if (native) native.dataset.hidden = 'false';
+      rootNode.dataset.ready = 'false';
+    };
   }, [items]);
 
   const carouselItems = items.map(item => ({
@@ -143,6 +169,20 @@ function CarouselIsland({ items }) {
   return <CarouselStage items={renderable} />;
 }
 
+class CircularErrorBoundary extends React.Component {
+  constructor(props) {
+    super(props);
+    this.state = { failed: false };
+  }
+  static getDerivedStateFromError() {
+    return { failed: true };
+  }
+  componentDidCatch(error) {
+    console.error('MUSA CircularCarousel: se conserva el cilindro de respaldo.', error);
+  }
+  render() { return this.state.failed ? null : this.props.children; }
+}
+
 let root = null;
 function unmount() {
   if (root) root.unmount();
@@ -156,7 +196,7 @@ function mount(items) {
   if (!references.length) return;
   updateSelected(references[0]);
   root = createRoot(container);
-  root.render(<CarouselIsland items={references} />);
+  root.render(<CircularErrorBoundary><CarouselIsland items={references} /></CircularErrorBoundary>);
 }
 
 window.musaCircularCarousel = { mount, unmount };
