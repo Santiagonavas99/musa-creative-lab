@@ -22,7 +22,7 @@ header .nav .nav-travel-indicator{
   width:0;
   height:2px;
   border-radius:2px;
-  background:#3926ce;
+  background:#d7ff42;
   pointer-events:none;
   opacity:0;
   z-index:1;
@@ -39,7 +39,7 @@ header .nav:not(.nav-motion-ready) button:not(.active):not([aria-current="page"]
   right:12px;
   bottom:3px;
   border-radius:2px;
-  background:#3926ce;
+  background:#d7ff42;
 }
 @media (max-width:680px){
   /* Do not add any desktop hover underline to the hamburger dropdown. */
