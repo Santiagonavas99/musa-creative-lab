@@ -41,7 +41,39 @@ function fmt(s){return String(Math.floor(s/60)).padStart(2,'0')+':'+String(s%60)
 function toggleTimer(){paused=!paused;if(!interval)interval=setInterval(tick,1000);render()}
 function endSession(){paused=true;clearInterval(interval);interval=null;if(data.active){data.active.elapsed=seconds;save()}go('registrar')}
 function abandon(){if(confirm('¿Descartar esta sesión?')){paused=true;clearInterval(interval);interval=null;data.active=null;save();go('inicio')}}
-function register(){const title=document.getElementById('arttitle').value.trim()||data.active.item.title,notes=document.getElementById('notes').value.trim(),file=document.getElementById('artfile').files[0];const finish=(img)=>{const a={id:crypto.randomUUID(),title,notes,image:img,createdAt:new Date().toISOString(),source:data.active.item};data.artworks.unshift(a);data.sessions.unshift({id:data.active.id,title:data.active.item.title,type:data.active.item.type,elapsed:data.active.elapsed,createdAt:a.createdAt,artworkId:a.id});data.active=null;if(!save()){data.artworks.shift();data.sessions.shift();return}toast('¡Obra guardada!');go('estudio')};if(file){if(file.size>6e6){toast('Elige una imagen menor de 6 MB');return}const img=new Image(),url=URL.createObjectURL(file);img.onload=()=>{let canvas=document.createElement('canvas'),scale=Math.min(1,1100/Math.max(img.width,img.height));canvas.width=Math.round(img.width*scale);canvas.height=Math.round(img.height*scale);canvas.getContext('2d').drawImage(img,0,0,canvas.width,canvas.height);URL.revokeObjectURL(url);finish(canvas.toDataURL('image/jpeg',.7))};img.onerror=()=>toast('No se pudo leer la imagen');img.src=url}else finish('')}
+async function register(){
+ if(!data.active)return;
+ const button=document.getElementById('save-art');
+ if(button)button.disabled=true;
+ const title=document.getElementById('arttitle').value.trim()||data.active.item.title;
+ const notes=document.getElementById('notes').value.trim();
+ const file=document.getElementById('artfile').files[0];
+ const id=crypto.randomUUID();
+ try{
+   let imagePath='';
+   if(file){
+     if(file.size>6e6)throw Error('Elige una imagen menor de 6 MB');
+     const blob=await new Promise((resolve,reject)=>{
+       const img=new Image(),url=URL.createObjectURL(file);
+       img.onload=()=>{
+         const canvas=document.createElement('canvas'),scale=Math.min(1,1100/Math.max(img.width,img.height));
+         canvas.width=Math.max(1,Math.round(img.width*scale));canvas.height=Math.max(1,Math.round(img.height*scale));
+         canvas.getContext('2d').drawImage(img,0,0,canvas.width,canvas.height);
+         URL.revokeObjectURL(url);
+         canvas.toBlob(b=>b?resolve(b):reject(Error('No se pudo comprimir la imagen')),'image/jpeg',.7);
+       };
+       img.onerror=()=>{URL.revokeObjectURL(url);reject(Error('No se pudo leer la imagen'))};
+       img.src=url;
+     });
+     imagePath=await window.MusaAuth.uploadArtwork(id,blob);
+   }
+   const a={id,title,notes,image:'',imagePath,createdAt:new Date().toISOString(),source:data.active.item};
+   data.artworks.unshift(a);
+   data.sessions.unshift({id:data.active.id,title:data.active.item.title,type:data.active.item.type,elapsed:data.active.elapsed,createdAt:a.createdAt,artworkId:a.id});
+   data.active=null;save();toast('¡Obra guardada! Sincronizando…');go('estudio');
+ }catch(e){toast(e.message||'No pudimos guardar tu obra')}
+ finally{if(button)button.disabled=false}
+}
 function deleteArt(id){if(!confirm('¿Eliminar esta obra de tu estudio?'))return;const a=data.artworks.find(x=>x.id===id);data.artworks=data.artworks.filter(x=>x.id!==id);save();if(a?.imagePath)void window.MusaAuth.removeArtworkFile(a.imagePath);render()}
 function openArt(id){window.artId=id;go('obra')}
 
