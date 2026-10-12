@@ -125,6 +125,37 @@ module.exports = async function handler(req, res) {
   if (!ALLOWED.has(source)) return res.status(400).json({error: "Fuente no disponible"});
   try {
     if (source === "all") {
+      // Explore carousel is time-sensitive; the normal search remains exhaustive.
+      // Return fulfilled sources after a short deadline instead of waiting up to
+      // nine seconds for a single slow provider (The Met can make many requests).
+      if (String(req.query.quick || "") === "1") {
+        const completed = [];
+        let finished = 0;
+        const services = Object.entries(SOURCES);
+        const requests = services.map(async ([key, fn]) => {
+          try {
+            const items = await fn(query);
+            completed.push({ key, items: items.slice(0, 8) });
+          } catch (error) {
+            console.warn("MUSA quick inspiration provider unavailable:", key, error?.message);
+          } finally {
+            finished += 1;
+          }
+        });
+        await Promise.race([
+          Promise.allSettled(requests),
+          new Promise(resolve => setTimeout(resolve, 3200))
+        ]);
+        const results = completed.flatMap(entry => entry.items);
+        if (!results.length) {
+          return res.status(503).json({ source, query, results: [],
+            error: "Las fuentes tardan en responder. Prueba de nuevo." });
+        }
+        return res.status(200).json({
+          source, query, results, partial: finished < services.length,
+          quick: true
+        });
+      }
       const entries = await Promise.allSettled(Object.entries(SOURCES).map(
         async ([key,fn]) => ({source:key,items:await fn(query)})
       ));
