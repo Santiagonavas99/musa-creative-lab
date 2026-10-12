@@ -15,6 +15,7 @@ const make = (source, record) => ({
   title: asText(record.title) || "Sin título",
   creator: asText(record.creator) || "Autor no identificado",
   image: img(record.image),
+  backupImage: img(record.backupImage),
   link: validURL(record.link),
   creatorUrl: validURL(record.creatorUrl),
   sourceUrl: validURL(record.sourceUrl),
@@ -47,6 +48,7 @@ async function unsplash(query) {
       title: p.alt_description || p.description || "Fotografía en Unsplash",
       creator: photographer.name || "Fotógrafo de Unsplash",
       image: p.urls?.small || p.urls?.regular,
+      backupImage: p.urls?.regular || p.urls?.thumb,
       link: add(photoLink),
       creatorUrl: add(photographerLink),
       sourceUrl: "https://unsplash.com/?"+track,
@@ -68,7 +70,8 @@ async function met(query) {
       id: p.objectID,
       title: p.title,
       creator: p.artistDisplayName || p.culture || "The Met",
-      image: p.primaryImageSmall,
+      image: p.primaryImageSmall || p.primaryImage,
+      backupImage: p.primaryImage,
       link: p.objectURL || "https://www.metmuseum.org/art/collection",
       creatorUrl: "",
       sourceUrl: "https://www.metmuseum.org",
@@ -77,20 +80,25 @@ async function met(query) {
   ).filter(item => item.image && item.link).slice(0,12);
 }
 async function artic(query) {
-  const fields = "id,title,artist_title,image_id,is_public_domain";
+  const fields = "id,title,artist_title,image_id,alt_image_ids,is_public_domain";
   const data = await timeOutFetch(
     "https://api.artic.edu/api/v1/artworks/search?q=" + encodeURIComponent(query) +
-    "&limit=12&fields=" + fields
+    "&limit=24&fields=" + fields
   );
+  const configuredIIIF = validURL(data.config?.iiif_url);
+  const iiifBase = configuredIIIF && new URL(configuredIIIF).hostname.endsWith(".artic.edu")
+    ? configuredIIIF.replace(/\/$/, "") : "https://www.artic.edu/iiif/2";
+  const artworkImage = id => id ? iiifBase + "/" + encodeURIComponent(id) + "/full/843,/0/default.jpg" : "";
   return (data.data || []).map(p => make("artic", {
     id: p.id,
     title: p.title,
     creator: p.artist_title || "Art Institute of Chicago",
-    image: p.image_id ? "https://www.artic.edu/iiif/2/" + encodeURIComponent(p.image_id) + "/full/600,/0/default.jpg" : "",
+    image: artworkImage(p.image_id),
+    backupImage: artworkImage((p.alt_image_ids || []).find(id => id && id !== p.image_id)),
     link: "https://www.artic.edu/artworks/" + p.id,
     sourceUrl: "https://www.artic.edu/",
     license: p.is_public_domain ? "Dominio público" : "Ver derechos en el museo",
-  })).filter(item => item.image);
+  })).filter(item => item.image).slice(0,12);
 }
 async function wikimedia(query) {
   const url = "https://commons.wikimedia.org/w/api.php?action=query&generator=search&" +
@@ -108,6 +116,7 @@ async function wikimedia(query) {
       title: p.title?.replace(/^File:/, "") || "Archivo Wikimedia",
       creator: author,
       image: details.thumburl || details.url,
+      backupImage: details.url,
       link: details.descriptionurl || "https://commons.wikimedia.org/",
       sourceUrl: "https://commons.wikimedia.org/",
       license,
