@@ -66,5 +66,5 @@ test("glass styles use MUSA brand color, transparent panel and mobile layouts",(
   assert.match(artwork,/#3926ce/);
   assert.match(artwork,/#ff7049/);
   assert.match(artwork,/#d7ff42/);
-  assert.doesNotMatch(artwork,/<image\b|https?:\/\//);
+  assert.doesNotMatch(artwork,/<image\b|<script\b|xlink:href/);
 });
