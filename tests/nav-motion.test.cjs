@@ -106,7 +106,8 @@ test("hover appearance remains light lime, selected stays brand lime and never u
   assert.match(navCSS,/header \.nav button\.active,[\s\S]*?background:#d7ff42/);
   assert.match(navCSS,/header \.nav button:not\(\.active\):not\(\[aria-current="page"\]\):hover,[\s\S]*?background:#efffd0/);
   assert.match(navCSS,/\.nav-travel-indicator\{/);
-  assert.match(navCSS,/background:#3926ce/);
+  assert.doesNotMatch(navCSS,/background:#3926ce/);
+  assert.equal((navCSS.match(/background:#d7ff42;/g)||[]).length,3,"Selected pill, traveling underline and fallback must all use MUSA lime");
   assert.match(navCSS,/@media\(prefers-reduced-motion:reduce\)/);
   assert.doesNotMatch(navCSS,/\.mobile-menu-link\s*[:{]/,"Hamburger styling must stay untouched");
 });
