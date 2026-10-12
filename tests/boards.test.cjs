@@ -121,3 +121,13 @@ test("legacy references with unknown board IDs are recovered in Sin clasificar",
   assert.equal(h.data.references[0].boardIds.length,1);
   assert.equal(h.data.boards.find(b=>b.id===h.data.references[0].boardIds[0]).name,"Sin clasificar");
 });
+
+
+test("save and organize chevrons stay inline across reference cards", () => {
+  const css = fs.readFileSync(path.join(__dirname,"../public/boards.css"),"utf8");
+  const html = fs.readFileSync(path.join(__dirname,"../index.html"),"utf8");
+  assert.match(html,/ref-save-menu/);
+  assert.match(css,/\.ref-save-menu>summary\{[^}]*display:inline-flex;[^}]*align-items:center;[^}]*flex-wrap:nowrap;white-space:nowrap;/);
+  assert.match(css,/\.ref-save-menu>summary::after\{[^}]*border-right:2px solid currentColor;[^}]*border-bottom:2px solid currentColor;/);
+  assert.doesNotMatch(css,/content:'⌄'/,"Typography glyph arrows must not control alignment");
+});
