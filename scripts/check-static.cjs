@@ -19,9 +19,15 @@ assert.match(reactIsland, /<CircularCarousel/, "React Bits CircularCarousel must
 assert.match(reactIsland, /preset="cylinder"/, "Use the supplied cylinder preset");
 assert.match(reactIsland, /intro="rise"/, "Keep the intended rise intro");
 assert.match(reactIsland, /speed=\{14\}/, "Use supplied motion speed");
-assert.match(reactIsland, /testImage\(item\.image\)/, "Broken image URLs must not be placed in 3D cards");
+assert.doesNotMatch(reactIsland, /testImage\(/, "Do not fetch images twice before rendering");
+assert.match(showcaseJS, /usableShowcaseItems/, "Only validated images should be added to the ring");
+assert.match(showcaseJS, /verified\.slice\(0,6\)/, "Compact ring must avoid massive gaps");
+assert.match(showcaseJS, /&quick=1/, "Carousel must use fast source lookup");
+assert.match(api, /Promise\.race\(/, "Fast API must not wait for slow providers");
+assert.match(api, /3200/, "Fast API response has a bounded deadline");
+assert.match(showcaseJS, /repairShowcase\(/, "Broken images must be replaced or removed");
 assert.match(bitsComponent, /circular-carousel__card/, "Use official HTML and CSS3D implementation");
-assert.match(showcaseCSS, /\.musa-carousel-html/, "Show images before the 3D component is ready");
+assert.match(showcaseCSS, /\.musa-native-cylinder/, "Show an instant 3D cylinder");
 assert.match(showcaseCSS, /@keyframes musa-native-orbit/, "CSS3D circular fallback must rotate");
 assert.match(showcaseCSS, /rotateY\(var\(--angle\)\) translateZ\(var\(--ring-radius\)\)/, "Fallback cards must be placed on a 3D ring");
 assert.match(reactIsland, /native\.dataset\.hidden = 'true'/, "Hide the fallback only after photos are visible");
@@ -62,6 +68,14 @@ const ctx = vm.createContext({
   document: {getElementById(id){if(!nodes.has(id)){const node=fakeElement();if(id==="query")node.value="collage experimental";nodes.set(id,node)}return nodes.get(id)}},
   localStorage: {getItem(){return null},setItem(){}},
   window: {scrollTo(){},addEventListener(){}},
+  Image: class {
+    constructor(){this.naturalWidth=0;this.naturalHeight=0;}
+    set src(url){
+      const good=!url.includes("/broken.jpg");
+      this.naturalWidth=good?400:0;this.naturalHeight=good?400:0;
+      if(good)this.onload?.();else this.onerror?.();
+    }
+  },
   console,
   URL,
   setTimeout(){return 1},clearTimeout(){},
@@ -74,7 +88,15 @@ const ctx = vm.createContext({
     creatorUrl:"https://unsplash.com/@jane",
     sourceUrl:"https://unsplash.com",
     license:"Licencia Unsplash"
-  }]})}),
+  },
+  ...[
+    ["met","The Met","2"],["artic","Art Institute of Chicago","3"],
+    ["wikimedia","Wikimedia Commons","4"],["unsplash","Another photo","5"],
+    ["met","Broken image","broken"]
+  ].map(([source,title,id])=>({
+    id,source,title,creator:"Artist",image:"https://example.com/"+id+".jpg",
+    link:"https://example.com/art/"+id
+  }))]})}),
 });
 vm.runInContext(inline[0][1], ctx, {filename:"MUSA.inline.js"});
 vm.runInContext(showcaseJS, ctx, {filename:"showcase-controller.js"});
@@ -92,6 +114,12 @@ console.log("✓ MUSA boots and renders Explore with search controls");
   await new Promise(resolve => setImmediate(resolve));
   const results=nodes.get("app").innerHTML;
   assert.match(results, /musa-circular-carousel-root/, "Randomized API references should populate the carousel");
+  assert.equal(vm.runInContext('showcase.items.length',ctx),5,
+    "Five good photographs should form the ring after one image fails");
+  const cylinder=results.split('id="musa-native-cylinder"')[1].split('id="musa-circular-carousel-root"')[0];
+  assert.doesNotMatch(cylinder, /broken\.jpg/, "Invalid image cannot leave an empty slot");
+  assert.equal((cylinder.match(/class="musa-native-card"/g)||[]).length,5,
+    "Exactly five intact slots, never six positions with one gap");
   assert.match(results, /id="musa-native-cylinder"/, "The immediate cylinder must be present without React");
   assert.match(results, /class="musa-native-ring"/, "The immediate backup must actually be circular");
   assert.match(results, /class="musa-native-card"/, "Source images must exist as 3D cards");
