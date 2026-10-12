@@ -71,7 +71,7 @@ function renderGate(){
       '<button class="btn secondary auth-submit" type="submit" '+(busy?'disabled':'')+'>'+(signup?'Crear mi cuenta ↗':'Entrar a MUSA ↗')+'</button></form>';
     foot=signup?'<span>¿Ya tienes cuenta?</span> <button class="auth-link" onclick="MusaAuth.show(\'login\')">Iniciar sesión</button>':'<span>¿Tu primera vez?</span> <button class="auth-link" onclick="MusaAuth.show(\'signup\')">Crear cuenta</button>';
   }
-  document.getElementById('app').innerHTML='<div class="auth-shell"><div class="auth-art"><div class="eyebrow">MUSA / TU ESPACIO PERSONAL</div><h1>NO NECESITAS UNA GRAN IDEA.<br>SOLO EMPEZAR.</h1><p>Sin likes. Sin presión. Todo lo que creas es tuyo.</p><span class="auth-star" aria-hidden="true">✳</span></div>'+
+  document.getElementById('app').innerHTML='<div class="auth-shell"><div class="auth-art"><div class="eyebrow">MUSA / TU ESPACIO PERSONAL</div><h1>NO NECESITAS UNA GRAN IDEA.<br>SOLO EMPEZAR.</h1><p>Sin likes. Sin presión. Todo lo que creas es tuyo.</p><img src="/musa-asterisk.svg" class="auth-star" alt="" aria-hidden="true"></div>'+
     '<section class="auth-card"><div class="eyebrow">CREATIVE LAB / CUENTAS</div><h2>'+title+'</h2><p class="muted">'+subtitle+'</p>'+
     (problem&&mode!=='error'?'<p class="auth-error" role="alert">'+html(problem)+'</p>':'')+
     (notice?'<p class="auth-message" role="status">'+html(notice)+'</p>':'')+
@@ -132,7 +132,7 @@ function renderAccount(){
   if(!user){el.innerHTML='';return}
   const email=html(user.email||'');
   const alias=html(user.user_metadata?.display_name||user.email?.split('@')[0]||'Mi estudio');
-  el.innerHTML='<div class="account-holder"><span class="account-dot" aria-hidden="true">✳</span><span class="account-info"><strong>'+alias+'</strong><small title="'+email+'">'+email+'</small></span><button class="account-logout" type="button" onclick="MusaAuth.logout()" title="Cerrar sesión">Salir ↗</button></div>';
+  el.innerHTML='<div class="account-holder"><span class="account-dot" aria-hidden="true"><img src="/musa-asterisk.svg" alt=""></span><span class="account-info"><strong>'+alias+'</strong><small title="'+email+'">'+email+'</small></span><button class="account-logout" type="button" onclick="MusaAuth.logout()" title="Cerrar sesión">Salir ↗</button></div>';
 }
 async function loadArtworkImages(){
   images.clear();
