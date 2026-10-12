@@ -7,7 +7,7 @@
 - Generador de ideas creativas y retos.
 - Sesiones con temporizador.
 - Galería de obras con fotos, reflexiones e historial.
-- Ideas y referencias visuales favoritas.
+- Ideas favoritas y **tableros de inspiración** personalizables: crear/renombrar, guardar una referencia en varios tableros y quitarla sin afectar los demás. Las referencias antiguas se migran a «Sin clasificar» en este navegador.
 - Explorador visual con buscador interno: Unsplash, The Met, Art Institute of Chicago y Wikimedia Commons.
 - Carrusel **CircularCarousel** de React Bits en Explorar, justo después de “¿Y si probamos algo raro?”, alimentado por las mismas fuentes, con referencias aleatorias en cada recarga y enlaces a las obras originales.
 - Búsquedas externas a Pinterest y Behance (sin integración API oficial todavía).
