@@ -83,7 +83,7 @@ function CarouselStage({ items }) {
         aspectRatio={1}
         speed={14}
         autoplay="drift"
-        fadeColor="#211b36"
+        fadeColor="#f5f0e7"
         captions
         draggable
         focusOnClick
