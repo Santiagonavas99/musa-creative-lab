@@ -5,6 +5,11 @@ const path = require("node:path");
 
 const root = path.resolve(__dirname, "..");
 const html = fs.readFileSync(path.join(root, "index.html"), "utf8");
+const claimTag = '<meta name="p:domain_verify" content="2f5d9a91026ee62077c40f6bd9da04c7">';
+assert.equal(html.split(claimTag).length-1,1,"Pinterest verification token must be present exactly once");
+assert.ok(html.indexOf(claimTag)>html.indexOf('<head>') && html.indexOf(claimTag)<html.indexOf('</head>'),
+  "Pinterest must find its claim tag in the actual document head");
+
 const api = fs.readFileSync(path.join(root, "api/inspiration.js"), "utf8");
 const showcaseJS = fs.readFileSync(path.join(root, "public/showcase-controller.js"), "utf8");
 const boardsJS = fs.readFileSync(path.join(root, "public/boards.js"), "utf8");
