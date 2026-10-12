@@ -15,6 +15,25 @@ new vm.Script(showcaseJS, {filename: "showcase-controller.js"});
 const reactIsland = fs.readFileSync(path.join(root, "src/circular-carousel-entry.jsx"), "utf8");
 const bitsComponent = fs.readFileSync(path.join(root, "src/components/CircularCarousel/CircularCarousel.jsx"), "utf8");
 const showcaseCSS = fs.readFileSync(path.join(root, "public/showcase.css"), "utf8");
+const nativeCarouselJS = fs.readFileSync(path.join(root, "public/native-carousel.js"), "utf8");
+const vectorStar = fs.readFileSync(path.join(root, "public/musa-asterisk.svg"), "utf8");
+const favicon = fs.readFileSync(path.join(root, "favicon.svg"), "utf8");
+new vm.Script(nativeCarouselJS, {filename:"native-carousel.js"});
+assert.ok(!html.includes("✳"), "Replace every font asterisk in the app with SVG");
+assert.ok(!showcaseJS.includes("✳"), "Replace every font asterisk in the showcase");
+assert.match(html, /<symbol id="musa-mark-icon"/, "MUSA vector asterisk must be declared as an SVG symbol");
+assert.match(html, /<use href="#musa-mark-icon"/, "App mark must use SVG, not text glyphs");
+assert.match(html, /\/native-carousel\.js/, "Native carousel controller must be included");
+assert.match(html, /musaNativeCarousel\?\.unmount/, "Native touch listeners must be released on navigation");
+assert.match(html, /-webkit-mask:url\('\/musa-asterisk\.svg'\)/, "Hero asterisk must be vector, too");
+assert.match(vectorStar, /<svg[^>]*viewBox=/, "SVG icon must have vector geometry");
+const exactStar = favicon.match(/<path fill="#ff7049" d="([^"]+)"/)?.[1];
+assert.ok(exactStar && vectorStar.includes(exactStar), "Keep the EXACT original favicon asterisk silhouette");
+assert.match(reactIsland, /\(max-width: 760px\), \(pointer: coarse\)/, "Touch devices must use the lightweight carousel");
+assert.match(showcaseCSS, /touch-action:pan-y/, "Horizontal swipes must preserve vertical page scrolling");
+assert.match(nativeCarouselJS, /setPointerCapture/, "Horizontal gesture must capture the pointer");
+assert.match(nativeCarouselJS, /stopImmediatePropagation/, "Dragging must not accidentally open an artwork");
+
 assert.match(reactIsland, /<CircularCarousel/, "React Bits CircularCarousel must be mounted");
 assert.match(reactIsland, /preset="cylinder"/, "Use the supplied cylinder preset");
 assert.match(reactIsland, /fadeColor="#f5f0e7"/, "Depth fade must blend with MUSA's cream background");
@@ -175,3 +194,53 @@ console.log("✓ MUSA boots and renders Explore with search controls");
   assert.ok(Date.now()-began<750,"Quick lookup cannot wait for stalled providers");
   console.log("✓ Quick Explore API returns usable imagery without blocking on slow providers");
 })().catch(err=>{console.error(err);process.exitCode=1});
+
+/* Simulate iPhone-style pointer gestures without a browser, including a
+   horizontal swipe and a vertical page-scroll gesture. */
+(() => {
+ const listeners={};
+ const ring={style:{transform:""}};
+ const surface={
+   dataset:{},
+   style:{},
+   querySelector(selector){return selector===".musa-native-ring"?ring:null},
+   querySelectorAll(selector){return selector===".musa-native-card"?Array(6).fill({}):[]},
+   addEventListener(name,handler){listeners[name]=handler},
+   removeEventListener(name){delete listeners[name]},
+   setPointerCapture(){},
+   tabIndex:-1
+ };
+ let timestamp=100;
+ const browser={
+   window:{matchMedia:()=>({matches:false}),dispatchEvent(){}},
+   document:{hidden:false,getElementById:()=>surface,addEventListener(){},removeEventListener(){}},
+   performance:{now:()=>timestamp},
+   requestAnimationFrame:()=>123,
+   cancelAnimationFrame(){},
+   Event:class {constructor(){}},
+   console
+ };
+ vm.runInNewContext(nativeCarouselJS,browser,{filename:"native-carousel.js"});
+ browser.window.musaNativeCarousel.mount();
+ assert.equal(surface.dataset.interactive,"true");
+ const touch=(x,y,kind)=>({pointerType:"touch",pointerId:1,clientX:x,clientY:y,
+   cancelable:true,preventDefault(){this.prevented=true},button:0});
+ listeners.pointerdown(touch(110,150));
+ timestamp+=25;
+ const drag=touch(220,153);
+ listeners.pointermove(drag);
+ assert.ok(drag.prevented,"Horizontal drag should take ownership of pointer events");
+ assert.match(ring.style.transform,/rotateY\(/,"Horizontal touch moves the visible 3D cylinder");
+ const before=ring.style.transform;
+ timestamp+=50;
+ listeners.pointerup(touch(220,153));
+ assert.equal(surface.dataset.dragging,undefined,"Release clears dragging state");
+ timestamp+=400;
+ listeners.pointerdown(touch(110,150));
+ timestamp+=10;
+ listeners.pointermove(touch(112,220));
+ assert.equal(ring.style.transform,before,"Vertical scrolling must not rotate the carousel");
+ browser.window.musaNativeCarousel.unmount();
+ assert.equal(listeners.pointerdown,undefined,"Listeners must be removed on navigation");
+ console.log("✓ Mobile horizontal drag, vertical scrolling and cleanup verified");
+})();

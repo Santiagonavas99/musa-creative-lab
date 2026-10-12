@@ -66,7 +66,7 @@ async function usableShowcaseItems(results){
 }
 function renderShowcase(){
  const head='<section class="musa-showcase" aria-label="Inspiración aleatoria de fuentes conectadas">'+
- '<div class="musa-showcase-head"><div><div class="eyebrow">MUSA / INSPIRACIÓN ALEATORIA ✳</div>'+
+ '<div class="musa-showcase-head"><div><div class="eyebrow">MUSA / INSPIRACIÓN ALEATORIA '+musaMark()+'</div>'+
  '<h2>UNA CHISPA VISUAL AL AZAR.</h2></div><span class="musa-showcase-tag">FUENTES CONECTADAS · REFERENCIAS REALES</span></div>';
  if(showcase.error)return head+'<div class="musa-showcase-status" role="alert"><p>'+esc(showcase.error)+'</p>'+
  '<button class="btn secondary" onclick="retryShowcase()">Volver a intentar ↻</button></div></section>';
@@ -134,7 +134,12 @@ async function loadShowcase(){
 }
 function mountShowcase(){
  if(page!=='explorar')return;
- if(showcase.items.length&&window.musaCircularCarousel?.mount)window.musaCircularCarousel.mount(showcase.items);
- else if(!showcase.loaded&&!showcase.loading)void loadShowcase();
+ if(showcase.items.length){
+  // The lightweight native cylinder handles touch, even without React.
+  window.musaNativeCarousel?.mount();
+  if(window.musaCircularCarousel?.mount)window.musaCircularCarousel.mount(showcase.items);
+ }else if(!showcase.loaded&&!showcase.loading)void loadShowcase();
 }
 window.addEventListener('musa-circular-ready',()=>{if(page==='explorar')mountShowcase()});
+
+window.addEventListener('musa-native-carousel-ready',()=>{if(page==='explorar')mountShowcase()});

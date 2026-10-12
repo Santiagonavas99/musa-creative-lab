@@ -69,4 +69,13 @@
 @keyframes musa-native-orbit{from{transform:rotateY(0deg)}to{transform:rotateY(360deg)}}
 @media(max-width:760px){.musa-native-scene{transform:scale(.68)}.musa-native-hint{font-size:10px}}
 @media(max-width:420px){.musa-native-scene{transform:scale(.55)}}
+/* Swipe horizontally to spin; leave native vertical page scrolling intact on iOS. */
+.musa-native-cylinder{touch-action:pan-y;user-select:none;-webkit-user-select:none;cursor:grab;-webkit-tap-highlight-color:transparent}
+.musa-native-cylinder[data-dragging="true"]{cursor:grabbing}
+.musa-native-cylinder[data-interactive="true"] .musa-native-ring{animation:none;will-change:transform}
+.musa-native-cylinder .musa-native-card,
+.musa-native-cylinder .musa-native-card img{touch-action:pan-y;-webkit-user-drag:none;user-select:none;-webkit-user-select:none}
+.musa-native-cylinder .musa-native-card img{pointer-events:none}
+.musa-native-cylinder:focus-visible{outline:2px solid #3926ce;outline-offset:-4px}
 @media(prefers-reduced-motion:reduce){.musa-native-ring{animation:none}}
+
