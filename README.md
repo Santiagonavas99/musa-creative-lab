@@ -34,6 +34,8 @@ Sin las URL autorizadas los enlaces de confirmación y recuperación podrían re
 
 **SMTP obligatorio antes de abrir registros a usuarios externos:** el correo integrado de Supabase solo envía mensajes a miembros del equipo del proyecto. Para que `loto1998k@gmail.com` y cualquier usuario externo reciban confirmaciones y recuperación, ve a *Authentication → SMTP Settings* y habilita **Custom SMTP** (por ejemplo, con un proveedor como Resend, Brevo o con una cuenta Gmail habilitada para contraseña de aplicación, si está permitida). Configura las credenciales únicamente en Supabase, nunca en GitHub ni en este chat. Ver: https://supabase.com/docs/guides/auth/auth-smtp
 
+**Guía paso a paso, sin compartir contraseñas:** [Configurar Gmail SMTP y verificar correos en MUSA](docs/configurar-correo-musa.md).
+
 ### Primera cuenta
 
 Registro inicial previsto: **loto1998k@gmail.com**. La persona titular deberá completar el formulario de registro y crear su contraseña; no generamos contraseñas en el chat ni las guardamos en GitHub.
