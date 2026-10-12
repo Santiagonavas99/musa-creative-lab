@@ -15,6 +15,20 @@ new vm.Script(showcaseJS, {filename: "showcase-controller.js"});
 const reactIsland = fs.readFileSync(path.join(root, "src/circular-carousel-entry.jsx"), "utf8");
 const bitsComponent = fs.readFileSync(path.join(root, "src/components/CircularCarousel/CircularCarousel.jsx"), "utf8");
 const showcaseCSS = fs.readFileSync(path.join(root, "public/showcase.css"), "utf8");
+const mobileMenuCSS = fs.readFileSync(path.join(root, "public/mobile-menu.css"), "utf8");
+assert.doesNotMatch(html, /CREATIVE LAB \/ 01/, "Desktop and mobile must not display the old header tag");
+assert.doesNotMatch(html, /id="bottom"/, "Mobile bottom navigation must be removed");
+assert.match(html, /id="mobile-menu-toggle"[^>]*aria-controls="mobile-menu"[^>]*aria-expanded="false"/, "Accessible three-line menu toggle must be present");
+assert.match(html, /id="mobile-menu"[^>]*hidden/, "Mobile navigation starts closed");
+assert.match(html, /id="mobile-menu-scrim"[^>]*onclick="closeMobileMenu\(\)"/, "Outside tap closes the menu");
+assert.match(html, /\/mobile-menu\.css/, "Responsive navigation styles are loaded");
+assert.match(mobileMenuCSS, /@media\(max-width:680px\)/, "Hamburger only appears at mobile widths");
+assert.match(mobileMenuCSS, /\.mobile-menu-toggle\s*\{/, "Header includes a mobile-only three-line trigger");
+assert.match(mobileMenuCSS, /position:absolute;left:50%;transform:translateX\(-50%\)/, "Desktop navigation stays centered");
+assert.match(mobileMenuCSS, /\.mobile-menu-link\.active/, "Active section has a distinct visual state");
+assert.match(html, /event\.key==='Escape'/, "Escape closes dropdown");
+assert.match(html, /event\.key!=='Tab'/, "Tab focus must be constrained to open menu");
+
 const nativeCarouselJS = fs.readFileSync(path.join(root, "public/native-carousel.js"), "utf8");
 const vectorStar = fs.readFileSync(path.join(root, "public/musa-asterisk.svg"), "utf8");
 const favicon = fs.readFileSync(path.join(root, "favicon.svg"), "utf8");
@@ -84,10 +98,22 @@ console.log("✓ Legal pages, contact email, data disclosures and footer links v
 
 const nodes = new Map();
 const fakeElement = () => ({
-  innerHTML: "", value: "", textContent: "", classList:{add(){},remove(){}}
+  innerHTML: "", value: "", textContent: "", hidden: false,
+  attributes: {},
+  classList:{add(){},remove(){},toggle(){}},
+  setAttribute(name,value){this.attributes[name]=String(value)},
+  getAttribute(name){return this.attributes[name]??null},
+  focus(){},
+  querySelector(){return {focus(){}}},
+  querySelectorAll(){return []}
 });
+const documentListeners = {};
 const ctx = vm.createContext({
-  document: {getElementById(id){if(!nodes.has(id)){const node=fakeElement();if(id==="query")node.value="collage experimental";nodes.set(id,node)}return nodes.get(id)}},
+  document: {
+    body: {classList:{toggle(){}}},
+    addEventListener(name,handler){documentListeners[name]=handler},
+    getElementById(id){if(!nodes.has(id)){const node=fakeElement();if(id==="query")node.value="collage experimental";nodes.set(id,node)}return nodes.get(id)}
+  },
   localStorage: {getItem(){return null},setItem(){}},
   window: {scrollTo(){},addEventListener(){}},
   Image: class {
@@ -127,6 +153,26 @@ vm.runInContext('page="explorar";render()',ctx);
 assert.match(nodes.get("app").innerHTML,/BUSCA REFERENCIAS/);
 assert.match(nodes.get("app").innerHTML,/⌕ Buscar imágenes/);
 assert.match(nodes.get("app").innerHTML,/UNA CHISPA VISUAL AL AZAR/);
+const mobileNav = nodes.get("mobile-menu").innerHTML;
+for(const section of ["Inicio","Explorar","Mi estudio","Actividad"]) {
+  assert.ok(mobileNav.includes(">"+section+"</button>"), section+" must appear in mobile menu");
+}
+assert.equal((mobileNav.match(/mobile-menu-link/g)||[]).length,4,"Exactly four mobile sections");
+assert.match(mobileNav,/aria-current="page"[^>]*>Explorar<\/button>/, "Explore should be highlighted");
+vm.runInContext("toggleMobileMenu()",ctx);
+assert.equal(nodes.get("mobile-menu").hidden,false,"Hamburger opens navigation");
+assert.equal(nodes.get("mobile-menu-scrim").hidden,false,"Backdrop appears behind open menu");
+assert.equal(nodes.get("mobile-menu-toggle").getAttribute("aria-expanded"),"true");
+let escapePrevented=false;
+documentListeners.keydown({key:"Escape",preventDefault(){escapePrevented=true}});
+assert.ok(escapePrevented,"Escape is handled");
+assert.equal(nodes.get("mobile-menu").hidden,true,"Escape closes the mobile navigation");
+vm.runInContext("toggleMobileMenu();go('estudio')",ctx);
+assert.equal(nodes.get("mobile-menu").hidden,true,"Navigation to a page closes the dropdown");
+assert.match(nodes.get("mobile-menu").innerHTML,/aria-current="page"[^>]*>Mi estudio<\/button>/,"Active page updates");
+vm.runInContext('page="explorar";render()',ctx);
+console.log("✓ Mobile dropdown opens, dismisses with Escape, navigates, and preserves Explore");
+
 assert.ok(nodes.get("app").innerHTML.indexOf("UNA CHISPA VISUAL AL AZAR") <
   nodes.get("app").innerHTML.indexOf("GENERADOR MUSA"), "Carousel must precede Explore cards");
 console.log("✓ MUSA boots and renders Explore with search controls");
