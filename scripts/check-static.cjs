@@ -6,11 +6,17 @@ const path = require("node:path");
 const root = path.resolve(__dirname, "..");
 const html = fs.readFileSync(path.join(root, "index.html"), "utf8");
 const api = fs.readFileSync(path.join(root, "api/inspiration.js"), "utf8");
+const auth = fs.readFileSync(path.join(root, "public/auth.js"), "utf8");
+const authConfig = fs.readFileSync(path.join(root, "api/auth-config.js"), "utf8");
 const showcaseJS = fs.readFileSync(path.join(root, "public/showcase-controller.js"), "utf8");
 const inline = [...html.matchAll(/<script(?:\s[^>]*)?>([\s\S]*?)<\/script>/g)];
 assert.ok(inline.length > 0, "MUSA must contain client application JavaScript");
 for (const [, source] of inline) new vm.Script(source, {filename: "index.html"});
 new vm.Script(api, {filename: "api/inspiration.js"});
+new vm.Script(auth, {filename: "public/auth.js"});
+new vm.Script(authConfig, {filename: "api/auth-config.js"});
+assert.match(html,/src="\/auth\.js"/,"Built page must load auth client");
+assert.match(html,/supabase-js@2/,"Use Supabase JS v2 client");
 new vm.Script(showcaseJS, {filename: "showcase-controller.js"});
 const reactIsland = fs.readFileSync(path.join(root, "src/circular-carousel-entry.jsx"), "utf8");
 const bitsComponent = fs.readFileSync(path.join(root, "src/components/CircularCarousel/CircularCarousel.jsx"), "utf8");
@@ -89,7 +95,7 @@ const fakeElement = () => ({
 const ctx = vm.createContext({
   document: {getElementById(id){if(!nodes.has(id)){const node=fakeElement();if(id==="query")node.value="collage experimental";nodes.set(id,node)}return nodes.get(id)}},
   localStorage: {getItem(){return null},setItem(){}},
-  window: {scrollTo(){},addEventListener(){}},
+  window: {scrollTo(){},addEventListener(){},MusaAuth:{isAuthenticated:()=>true,renderAccount(){},importBanner:()=>"",queueSave(){},artworkImage:a=>a.image||""}},
   Image: class {
     constructor(){this.naturalWidth=0;this.naturalHeight=0;}
     set src(url){
@@ -122,6 +128,7 @@ const ctx = vm.createContext({
 });
 vm.runInContext(inline[0][1], ctx, {filename:"MUSA.inline.js"});
 vm.runInContext(showcaseJS, ctx, {filename:"showcase-controller.js"});
+vm.runInContext("render()",ctx);
 assert.match(nodes.get("app").innerHTML,/NO NECESITAS UNA GRAN IDEA/);
 vm.runInContext('page="explorar";render()',ctx);
 assert.match(nodes.get("app").innerHTML,/BUSCA REFERENCIAS/);
@@ -149,6 +156,7 @@ console.log("✓ MUSA boots and renders Explore with search controls");
   assert.match(results,/Abstract lines/);
   assert.match(results,/Foto de/);
   assert.match(results,/Jane Doe/);
+  assert.match(results,/Mis búsquedas anteriores/,"Persist account-private search history");
   vm.runInContext("saveVisualReference(0)",ctx);
   assert.match(nodes.get("app").innerHTML,/REFERENCIAS GUARDADAS/);
   console.log("✓ Results, photographer credits and saved references work");
