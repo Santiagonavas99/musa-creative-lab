@@ -17,6 +17,9 @@ const bitsComponent = fs.readFileSync(path.join(root, "src/components/CircularCa
 const showcaseCSS = fs.readFileSync(path.join(root, "public/showcase.css"), "utf8");
 assert.match(reactIsland, /<CircularCarousel/, "React Bits CircularCarousel must be mounted");
 assert.match(reactIsland, /preset="cylinder"/, "Use the supplied cylinder preset");
+assert.match(reactIsland, /fadeColor="#f5f0e7"/, "Depth fade must blend with MUSA's cream background");
+assert.match(showcaseCSS, /\.musa-carousel-frame\{[^}]*background:transparent;color:#211b36;border:0;border-radius:0;box-shadow:none\}/, "Carousel panel must be invisible against the page");
+assert.doesNotMatch(showcaseCSS, /background:radial-gradient\(/, "No purple panel gradient may remain");
 assert.match(reactIsland, /intro="rise"/, "Keep the intended rise intro");
 assert.match(reactIsland, /speed=\{14\}/, "Use supplied motion speed");
 assert.doesNotMatch(reactIsland, /testImage\(/, "Do not fetch images twice before rendering");
