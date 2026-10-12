@@ -11,10 +11,12 @@ const html = fs.readFileSync(path.join(root,"index.html"),"utf8");
 const css = fs.readFileSync(path.join(root,"public/favorite-ideas.css"),"utf8");
 const artwork = fs.readFileSync(path.join(root,"public/idea-glass-art.svg"),"utf8");
 const render = html.match(/function renderFavoriteIdeaCard\(f\)\{[\s\S]*?\n\}/)?.[0];
+const paletteRenderer = html.match(/function palette\(colors,variant=''\)\{[\s\S]*?\n\}/)?.[0];
 
 function card(item) {
   assert.ok(render,"Favorite idea card renderer must exist");
-  return vm.runInNewContext(render+";renderFavoriteIdeaCard(f)", {
+  assert.ok(paletteRenderer,"Favorite idea card must reuse the shared palette renderer");
+  return vm.runInNewContext(paletteRenderer+";"+render+";renderFavoriteIdeaCard(f)", {
     f:item,
     esc(value){return String(value??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]))}
   });
@@ -50,6 +52,28 @@ test("favorite idea titles, pills and event IDs remain encoded",()=>{
   assert.match(result,/Collage &amp; más/);
   assert.match(result,/&quot;Inspiración&quot;/);
   assert.doesNotMatch(result,/onclick="alert\(1\)"/);
+});
+
+test("saved idea palette renders the original saved colors with shared accessible markup",()=>{
+  const result=card({id:"palette-favorite",title:"Dibuja una ciudad que respira",
+    technique:"Dibujo",emotion:"Asombro",theme:"Arquitectura",
+    colors:["#F4B633","#9D53BB","#373578"]});
+  assert.match(result,/class="palette idea-glass-palette"/);
+  assert.match(result,/aria-label="Paleta de colores sugerida"/);
+  assert.equal((result.match(/class="swatch"/g)||[]).length,3);
+  assert.match(result,/background-color:#F4B633/);
+  assert.match(result,/background-color:#9D53BB/);
+  assert.match(result,/background-color:#373578/);
+  assert.ok(result.indexOf("idea-glass-palette")<result.indexOf("idea-glass-actions"));
+});
+test("older favorite ideas without saved colors do not invent a palette",()=>{
+  const result=card({id:"old",title:"Idea antigua",technique:"Collage"});
+  assert.doesNotMatch(result,/idea-glass-palette/);
+  assert.match(result,/Idea antigua/);
+});
+test("favorite palette styles include white borders on desktop and mobile",()=>{
+  assert.match(css,/\.idea-glass-palette \.swatch\s*\{[^}]*border:1px solid rgba\(255,255,255,\.92\)/);
+  assert.match(css,/\.idea-glass-palette \.swatch\{height:44px/);
 });
 
 test("glass styles use MUSA brand color, transparent panel and mobile layouts",()=>{
