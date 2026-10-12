@@ -132,3 +132,43 @@ console.log("✓ MUSA boots and renders Explore with search controls");
   console.log("✓ Results, photographer credits and saved references work");
   console.log("All checks passed.");
 })().catch(err=>{console.error(err);process.exitCode=1});
+
+/* The fast Explore gateway must return ready providers without waiting for
+   a stalled museum API. Full search requests are unchanged. */
+(async () => {
+  const moduleMock = { exports: {} };
+  const fakeFetch = async url => {
+    if (String(url).startsWith("https://api.unsplash.com/")) {
+      return {
+        ok: true,
+        json: async () => ({results:[{
+          id:"fast-photo", alt_description:"Verified test photograph",
+          urls:{small:"https://images.unsplash.com/fast-photo.jpg"},
+          links:{html:"https://unsplash.com/photos/fast-photo"},
+          user:{name:"Author",links:{html:"https://unsplash.com/@author"}}
+        }]})
+      };
+    }
+    // Never answer the other providers: simulate upstream timeout.
+    return new Promise(() => {});
+  };
+  const scope = vm.createContext({
+    module:moduleMock, process:{env:{UNSPLASH_ACCESS_KEY:"test"}},
+    fetch:fakeFetch, AbortSignal, URL, console,
+    setTimeout:(fn) => setTimeout(fn, 15)
+  });
+  vm.runInContext(api, scope, {filename:"api/inspiration.js"});
+  const res={
+    code:200, payload:null,
+    setHeader(){},
+    status(code){this.code=code;return this;},
+    json(value){this.payload=value;return this;}
+  };
+  const began=Date.now();
+  await moduleMock.exports({method:"GET",query:{q:"art",source:"all",quick:"1"}},res);
+  assert.equal(res.code,200,"Fast Explore API must return the usable provider");
+  assert.equal(res.payload.results.length,1,"Use only genuine source records");
+  assert.equal(res.payload.partial,true,"Report skipped slow providers");
+  assert.ok(Date.now()-began<750,"Quick lookup cannot wait for stalled providers");
+  console.log("✓ Quick Explore API returns usable imagery without blocking on slow providers");
+})().catch(err=>{console.error(err);process.exitCode=1});
