@@ -113,3 +113,56 @@ test("all-sources mode returns partial status when a provider is unavailable", a
   assert.equal(response.body.partial, true);
   assert.deepEqual(response.body.results, []);
 });
+
+
+test("Art Institute returns an IIIF thumbnail with an alternate image fallback", async (t) => {
+  mockFetch(t, async (url) => {
+    assert.match(String(url), /limit=24/);
+    assert.match(String(url), /alt_image_ids/);
+    return {
+      ok: true,
+      json: async () => ({
+        config: { iiif_url: "https://www.artic.edu/iiif/2" },
+        data: [
+          { id: 18, title: "A portrait", artist_title: "An Artist",
+            image_id: "primary-id", alt_image_ids: ["other-id"], is_public_domain: true },
+          { id: 19, title: "No photo", image_id: null, is_public_domain: true },
+        ],
+      }),
+    };
+  });
+  const response = await request({ q: "portrait", source: "artic" });
+  assert.equal(response.status, 200);
+  assert.equal(response.body.results.length, 1);
+  assert.equal(response.body.results[0].image,
+    "https://www.artic.edu/iiif/2/primary-id/full/843,/0/default.jpg");
+  assert.equal(response.body.results[0].backupImage,
+    "https://www.artic.edu/iiif/2/other-id/full/843,/0/default.jpg");
+});
+
+test("The Met exposes its larger official image when a small thumbnail fails", async (t) => {
+  mockFetch(t, async (url) => {
+    if (String(url).includes("/search?")) return { ok: true, json: async () => ({ objectIDs: [123] }) };
+    return { ok: true, json: async () => ({
+      objectID: 123, title: "Artwork", primaryImageSmall: "https://images.metmuseum.org/small.jpg",
+      primaryImage: "https://images.metmuseum.org/large.jpg",
+      objectURL: "https://www.metmuseum.org/art/collection/search/123", isPublicDomain: true,
+    }) };
+  });
+  const response = await request({ q: "artwork", source: "met" });
+  assert.equal(response.status, 200);
+  assert.equal(response.body.results[0].backupImage, "https://images.metmuseum.org/large.jpg");
+});
+
+test("provider backup image URLs are subject to the same HTTPS-only normalization", async (t) => {
+  mockFetch(t, async () => ({ ok: true, json: async () => ({
+    query: { pages: [{ pageid: 4, title: "File:Sample.jpg", imageinfo: [{
+      thumburl: "https://upload.wikimedia.org/thumb.jpg",
+      url: "javascript:alert('unsafe')",
+      descriptionurl: "https://commons.wikimedia.org/wiki/File:Sample.jpg",
+    }] }] },
+  }) }));
+  const response = await request({ q: "sample", source: "wikimedia" });
+  assert.equal(response.status, 200);
+  assert.equal(response.body.results[0].backupImage, "");
+});
