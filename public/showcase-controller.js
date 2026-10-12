@@ -23,7 +23,7 @@ function renderShowcase(){
  if(showcase.error)return head+'<div class="musa-showcase-status" role="alert"><p>'+esc(showcase.error)+'</p>'+
   '<button class="btn secondary" onclick="retryShowcase()">Volver a intentar ↻</button></div></section>';
  if(!showcase.items.length)return head+'<div class="musa-showcase-status" role="status"><p>Preparando una mezcla inesperada de imágenes...</p></div></section>';
- return head+'<div id="musa-flex-carousel-root" class="musa-carousel-frame"></div>'+
+ return head+'<div id="musa-circular-carousel-root" class="musa-carousel-frame"></div>'+
   '<div class="musa-carousel-detail"><span id="musa-carousel-current">Explora, arrastra y descubre.</span>'+
   '<a id="musa-carousel-original" href="#" target="_blank" rel="noopener noreferrer" hidden>Ver obra original ↗</a></div></section>';
 }
@@ -49,8 +49,8 @@ async function loadShowcase(){
 }
 function mountShowcase(){
  if(page!=='explorar')return;
- if(showcase.items.length && window.musaFlexCarousel?.mount){
-  window.musaFlexCarousel.mount(showcase.items);
+ if(showcase.items.length && window.musaCircularCarousel?.mount){
+  window.musaCircularCarousel.mount(showcase.items);
  }else if(!showcase.loaded&&!showcase.loading){void loadShowcase()}
 }
-window.addEventListener('musa-carousel-ready',()=>{if(page==='explorar')mountShowcase()});
+window.addEventListener('musa-circular-ready',()=>{if(page==='explorar')mountShowcase()});
