@@ -13,6 +13,9 @@
 .inspire-results{margin-top:18px}.ref-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px}
 .ref-card{background:#fff;border-radius:20px;overflow:hidden;min-width:0;display:flex;flex-direction:column}
 .ref-cover{aspect-ratio:4/3;background:#e5dbf1;overflow:hidden}.ref-cover img{width:100%;height:100%;object-fit:cover;display:block}
+.ref-cover--unavailable{display:grid;place-items:center;background:#eee7f5}
+.ref-cover-placeholder{min-height:100%;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:11px;color:#514867;text-align:center;padding:16px;font-size:12px;font-weight:700}
+.ref-cover-placeholder .musa-mark{width:42px;height:42px;color:#3926ce}
 .ref-body{padding:15px;display:flex;flex-direction:column;gap:9px;flex:1}.ref-body h3{font-size:18px;letter-spacing:-.04em;line-height:1.2;margin:0}
 .ref-source{font-size:11px;letter-spacing:.11em;font-weight:800;color:#3926ce;text-transform:uppercase}
 .ref-byline{font-size:12px;line-height:1.45;color:#4b4358;overflow-wrap:anywhere}
@@ -85,6 +88,7 @@ function deleteArt(id){if(!confirm('¿Eliminar esta obra de tu estudio?'))return
 function openArt(id){window.artId=id;go('obra')}
 
 let inspiration={query:"collage experimental",source:"unsplash",items:[],loading:false,error:"",searched:false,partial:false,requestId:0};
+const unavailableReferenceKeys=new Set();
 data.references=Array.isArray(data.references)?data.references:[];
 function safeHref(raw){try{const u=new URL(raw);return u.protocol==="https:"?u.href:""}catch{return""}}
 function inspirationTitle(){return {unsplash:"UNSPLASH",met:"THE MET",artic:"ART INSTITUTE",wikimedia:"WIKIMEDIA",all:"TODAS LAS FUENTES"}[inspiration.source]||"EXPLORAR"}
@@ -125,10 +129,33 @@ function saveVisualReference(i){
  save();render();
 }
 function removeSavedReference(index){data.references.splice(index,1);save();render()}
+function referenceKey(r){return String(r.source||"")+":"+String(r.id||"")}
+function referencePlaceholder(){return '<span class="ref-cover-placeholder">'+musaMark()+'<span>Vista previa no disponible</span></span>';}
+function repairReferenceImage(img){
+ const backup=safeHref(img.dataset.backup);
+ if(backup&&!img.dataset.backupTried&&backup!==img.src){img.dataset.backupTried="true";img.src=backup;return;}
+ img.onerror=null;
+ const card=img.closest(".ref-card");
+ if(!card||!card.isConnected)return;
+ unavailableReferenceKeys.add(card.dataset.refKey);
+ const cover=img.closest(".ref-cover");
+ if(card.dataset.savedMode==="true"){
+  if(cover){cover.classList.add("ref-cover--unavailable");cover.innerHTML=referencePlaceholder();}
+  return;
+ }
+ card.remove();
+ const grid=document.querySelector(".inspire-results .ref-grid");
+ if(!grid)return;
+ const remaining=grid.querySelectorAll(".ref-card").length;
+ const badge=document.querySelector(".inspire-results .badge");
+ if(badge)badge.textContent=remaining+" referencias";
+ if(!remaining)grid.outerHTML='<div class="inspiration-message" role="status"><h3>NO HAY IMÁGENES DISPONIBLES.</h3><p>Las fuentes no entregaron vistas previas que se puedan mostrar. Prueba otra palabra o fuente.</p></div>';
+}
 function refCard(r,i,savedMode=false){
- const url=safeHref(r.link),image=safeHref(r.image);
+ const url=safeHref(r.link),image=safeHref(r.image),backup=safeHref(r.backupImage);
  const photographerURL=safeHref(r.creatorUrl),sourceURL=safeHref(r.sourceUrl);
- if(!url||!image)return"";
+ const key=referenceKey(r),unavailable=unavailableReferenceKeys.has(key);
+ if(!url||(!savedMode&&(!image||unavailable)))return"";
  const sourceNames={unsplash:"Unsplash",met:"The Met",artic:"Art Institute of Chicago",wikimedia:"Wikimedia Commons"};
  const provider=sourceNames[r.source]||"Museo";
  const credit=r.source==="unsplash"?
@@ -139,8 +166,10 @@ function refCard(r,i,savedMode=false){
  const button=savedMode?
    '<button type="button" class="btn outline" onclick="removeSavedReference('+i+')">Quitar ♡</button>':
    '<button type="button" class="btn '+(saved?"orange":"secondary")+'" onclick="saveVisualReference('+i+')">'+(saved?"♥ Guardada":"♡ Guardar")+'</button>';
- return '<article class="ref-card"><a class="ref-cover" href="'+esc(url)+'" target="_blank" rel="noopener noreferrer" aria-label="Ver '+esc(r.title)+' en '+esc(provider)+'">'+
-   '<img loading="lazy" src="'+esc(image)+'" alt="'+esc(r.title)+'"></a>'+
+ const preview=unavailable||!image?referencePlaceholder():
+   '<img loading="lazy" decoding="async" src="'+esc(image)+'" data-backup="'+esc(backup)+'" onerror="repairReferenceImage(this)" alt="">';
+ return '<article class="ref-card" data-ref-key="'+esc(key)+'" data-saved-mode="'+savedMode+'"><a class="ref-cover'+(unavailable||!image?' ref-cover--unavailable':'')+'" href="'+esc(url)+'" target="_blank" rel="noopener noreferrer" aria-label="Ver '+esc(r.title)+' en '+esc(provider)+'">'+
+   preview+'</a>'+
    '<div class="ref-body"><span class="ref-source">'+esc(provider)+'</span><h3>'+esc(r.title)+'</h3>'+
    '<div class="ref-byline">'+credit+'</div><div class="ref-license">'+esc(r.license||"Consultar derechos en la fuente")+'</div>'+
    '<div class="ref-actions">'+button+'<a class="ref-link" href="'+esc(url)+'" target="_blank" rel="noopener noreferrer">Ver original ↗</a></div></div></article>';
@@ -160,16 +189,18 @@ function renderInspiration(){
    '<div class="external-platforms"><a href="#" onclick="externalSearch(event,&#39;pinterest&#39;)">Pinterest ↗</a>'+
    '<a href="#" onclick="externalSearch(event,&#39;behance&#39;)">Behance ↗</a></div>'+
    '<p class="inspiration-hint">Pinterest y Behance se abren en sus plataformas hasta disponer de acceso oficial para búsquedas integradas.</p></div>';
+ const displayItems=inspiration.items.map((r,i)=>({r,i})).filter(({r})=>
+   safeHref(r.link)&&safeHref(r.image)&&!unavailableReferenceKeys.has(referenceKey(r)));
  let content="";
  if(inspiration.loading) content='<div class="inspiration-message" role="status"><h3>BUSCANDO TU PRÓXIMA CHISPA…</h3><p>Consultando '+inspirationTitle()+'.</p></div>';
  else if(inspiration.error) content='<div class="inspiration-message" role="alert"><h3>NO PUDIMOS CARGAR ESTA FUENTE.</h3><p>'+esc(inspiration.error)+'</p><div class="row" style="justify-content:center"><button class="btn secondary" onclick="lookupInspiration()">Reintentar ↻</button><button class="btn outline" onclick="chooseSource(&#39;met&#39;)">Probar The Met ↗</button></div></div>';
- else if(inspiration.searched&&!inspiration.items.length) content='<div class="inspiration-message"><h3>NO APARECIERON REFERENCIAS.</h3><p>Prueba otro concepto, una técnica o una palabra en inglés.</p></div>';
- else if(inspiration.items.length) content='<div class="ref-grid">'+inspiration.items.map((r,i)=>refCard(r,i)).join("")+'</div>';
+ else if(inspiration.searched&&!displayItems.length) content='<div class="inspiration-message"><h3>NO APARECIERON REFERENCIAS.</h3><p>Prueba otro concepto, una técnica o una palabra en inglés.</p></div>';
+ else if(displayItems.length) content='<div class="ref-grid">'+displayItems.map(({r,i})=>refCard(r,i)).join("")+'</div>';
  const saved=data.references.length?
    '<div class="sectionhead"><h2>REFERENCIAS GUARDADAS ('+data.references.length+')</h2></div><div class="ref-grid">'+
    data.references.map((r,i)=>refCard(r,i,true)).join("")+'</div>':"";
  return search+'<section class="inspire-results" aria-live="polite"><div class="sectionhead"><h2>RESULTADOS · '+inspirationTitle()+'</h2>'+
-   (inspiration.items.length?'<span class="badge">'+inspiration.items.length+' referencias</span>':"")+'</div>'+
+   (displayItems.length?'<span class="badge">'+displayItems.length+' referencias</span>':"")+'</div>'+
    (inspiration.partial?'<p class="inspiration-hint">Algunas fuentes no respondieron, pero puedes explorar los resultados disponibles.</p>':"")+
    content+'</section>'+saved;
 }
