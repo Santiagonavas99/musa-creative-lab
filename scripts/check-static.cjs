@@ -23,7 +23,7 @@ assert.match(html, /id="mobile-menu"[^>]*hidden/, "Mobile navigation starts clos
 assert.match(html, /id="mobile-menu-scrim"[^>]*onclick="closeMobileMenu\(\)"/, "Outside tap closes the menu");
 assert.match(html, /\/mobile-menu\.css/, "Responsive navigation styles are loaded");
 assert.match(mobileMenuCSS, /@media\(max-width:680px\)/, "Hamburger only appears at mobile widths");
-assert.match(mobileMenuCSS, /\.mobile-menu-toggle \{?/, "Header includes a mobile-only three-line trigger");
+assert.match(mobileMenuCSS, /\.mobile-menu-toggle\s*\{/, "Header includes a mobile-only three-line trigger");
 assert.match(mobileMenuCSS, /position:absolute;left:50%;transform:translateX\(-50%\)/, "Desktop navigation stays centered");
 assert.match(mobileMenuCSS, /\.mobile-menu-link\.active/, "Active section has a distinct visual state");
 assert.match(html, /event\.key==='Escape'/, "Escape closes dropdown");
