@@ -27,7 +27,7 @@ function renderShowcase(){
  const n=limit.length;
  const radius=Math.round((220+25)/(2*Math.sin(Math.PI/Math.max(3,n))));
  const cards=limit.map((r,i)=>
-   '<a class="musa-native-card" style="--slot:'+i+'" href="'+esc(safeHref(r.link))+
+   '<a class="musa-native-card" style="--angle:'+(360*i/n).toFixed(3)+'deg" href="'+esc(safeHref(r.link))+
    '" target="_blank" rel="noopener noreferrer" aria-label="Ver '+esc(r.title)+' en la fuente original">'+
    '<img src="'+esc(safeHref(r.image))+'" loading="'+(i<5?'eager':'lazy')+'" alt="'+esc(r.title)+
    '" onerror="this.closest(\'a\').classList.add(\'failed\')"></a>'
