@@ -83,17 +83,12 @@ function message(err){
   const msg=String(err?.message||err||'Error desconocido');
   if(/invalid login credentials/i.test(msg))return 'Correo o contraseña incorrectos, o todavía no confirmaste tu correo.';
   if(/email not confirmed/i.test(msg))return 'Debes confirmar tu correo antes de entrar.';
+  if(/email address not authorized/i.test(msg))return 'Todavía no está configurado el correo saliente de MUSA para usuarios externos. Contacta con musacreativelaboratory@gmail.com.';
   if(/user already registered/i.test(msg))return 'Esta dirección ya está registrada. Inicia sesión o recupera tu contraseña.';
   if(/password should be at least|weak password/i.test(msg))return 'Utiliza una contraseña de al menos 8 caracteres y evita claves fáciles de adivinar.';
   if(/rate limit|security purposes/i.test(msg))return 'Demasiados intentos. Espera un momento antes de volver a probar.';
   if(/failed to fetch|network/i.test(msg))return 'No pudimos contactar con Supabase. Comprueba tu conexión a internet.';
   return msg;
-}
-async function submit(event){
-  event.preventDefault();
-  if(busy||!client)return;
-  busy=true;problem='';notice='';renderGate();
-  // Re-render removes the form, so retain the submitted fields first through event.
 }
 async function handle(event){
   event.preventDefault();
