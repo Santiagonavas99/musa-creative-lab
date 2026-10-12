@@ -39,9 +39,30 @@ function preloadShowcaseImage(ref){
 }
 async function usableShowcaseItems(results){
  const candidates=chooseShowcaseItems(results);
- // All image probes run in parallel. Individual failures never hold the ring open.
- const tested=await Promise.all(candidates.map(preloadShowcaseImage));
- return shuffled(tested.filter(Boolean));
+ // Show the first six usable photographs as soon as they are ready.
+ // A broken/slow museum image must NOT delay the whole carousel.
+ return new Promise(resolve=>{
+  if(!candidates.length){resolve([]);return}
+  const valid=[];
+  let completed=0;
+  let finished=false;
+  let deadline=0;
+  const finalize=()=>{
+   if(finished)return;
+   finished=true;
+   clearTimeout(deadline);
+   resolve(shuffled(valid));
+  };
+  deadline=setTimeout(finalize,2500);
+  candidates.forEach(ref=>{
+   preloadShowcaseImage(ref).then(ok=>{
+    if(finished)return;
+    completed++;
+    if(ok)valid.push(ok);
+    if(valid.length>=6||completed===candidates.length)finalize();
+   });
+  });
+ });
 }
 function renderShowcase(){
  const head='<section class="musa-showcase" aria-label="Inspiración aleatoria de fuentes conectadas">'+
