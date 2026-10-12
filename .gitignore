@@ -1,0 +1,9 @@
+# Private local secrets
+.env
+.env.*
+!.env.example
+
+# Local dependencies / generated files
+node_modules/
+dist/
+.vercel/

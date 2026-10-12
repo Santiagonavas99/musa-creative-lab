@@ -1,0 +1,50 @@
+/* MUSA desktop navigation — quiet traveling underline.
+   The active lime pill is never underlined. Mobile navigation is unchanged. */
+header .nav button{
+  position:relative;
+  white-space:nowrap;
+  transition:background-color .2s ease,color .2s ease;
+}
+header .nav button.active,
+header .nav button[aria-current="page"]{
+  background:#d7ff42;
+  color:#211b36;
+}
+header .nav button:not(.active):not([aria-current="page"]):hover,
+header .nav button:not(.active):not([aria-current="page"]):focus-visible{
+  background:#efffd0;
+  color:#211b36;
+}
+header .nav .nav-travel-indicator{
+  position:absolute;
+  left:0;
+  bottom:3px;
+  width:0;
+  height:2px;
+  border-radius:2px;
+  background:#d7ff42;
+  pointer-events:none;
+  opacity:0;
+  z-index:1;
+  transition:left .26s cubic-bezier(.22,1,.36,1),width .26s cubic-bezier(.22,1,.36,1),opacity .16s ease;
+}
+header .nav .nav-travel-indicator.is-visible{opacity:1}
+/* CSS-only fallback if the lightweight motion controller fails to load. */
+header .nav:not(.nav-motion-ready) button:not(.active):not([aria-current="page"]):hover::after,
+header .nav:not(.nav-motion-ready) button:not(.active):not([aria-current="page"]):focus-visible::after{
+  content:"";
+  position:absolute;
+  height:2px;
+  left:12px;
+  right:12px;
+  bottom:3px;
+  border-radius:2px;
+  background:#d7ff42;
+}
+@media (max-width:680px){
+  /* Do not add any desktop hover underline to the hamburger dropdown. */
+  header .nav .nav-travel-indicator{display:none}
+}
+@media(prefers-reduced-motion:reduce){
+  header .nav button,header .nav .nav-travel-indicator{transition:none!important}
+}
