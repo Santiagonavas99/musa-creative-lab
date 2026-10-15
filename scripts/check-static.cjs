@@ -12,6 +12,26 @@ assert.match(favoriteCSS, /\.idea-glass-palette \.swatch\{[^}]*border:1px solid 
  "Saved idea colors should have the same white border");
 assert.match(html, /palette\(f\.colors,'favorite'\)/, "Favorites must reuse the original palette renderer");
 
+// Home onboarding explains MUSA before repeating any specific Explore interaction.
+assert.match(html, /id="musa-intro-title">TU PRÓXIMA IDEA EMPIEZA AQUÍ\./,
+ "Home hero must clearly introduce MUSA");
+assert.match(html, /MUSA es un laboratorio creativo digital donde encuentras ideas/,
+ "Hero should explain what the product actually does");
+assert.match(html, /EMPEZAR A CREAR ↗/,
+ "Home must have an obvious primary action");
+assert.match(html, /href="#como-funciona"/,
+ "Home should link to its own explanatory steps");
+assert.match(html, /id="como-funciona" aria-labelledby="como-funciona-title"/,
+ "How it works section must be accessible from the hero");
+assert.match(html, /DE LA CHISPA A LA CREACIÓN\./,
+ "Home onboarding must carry MUSA's personality");
+assert.equal((html.match(/<li class="how-step">/g)||[]).length, 3,
+ "The explanation must have exactly three clear steps");
+const introHero = html.match(/<section class="hero musa-intro-hero"[\s\S]*?<\/section>/)?.[0] || "";
+assert.ok(introHero, "Intro hero should exist");
+assert.doesNotMatch(introHero, /IDEA PARA CREAR/,
+ "Home hero must not duplicate Explore's generated-idea preview");
+
 const claimTag = '<meta name="p:domain_verify" content="2f5d9a91026ee62077c40f6bd9da04c7">';
 assert.equal(html.split(claimTag).length-1,1,"Pinterest verification token must be present exactly once");
 assert.ok(html.indexOf(claimTag)>html.indexOf('<head>') && html.indexOf(claimTag)<html.indexOf('</head>'),
@@ -167,7 +187,9 @@ const ctx = vm.createContext({
 vm.runInContext(boardsJS, ctx, {filename:"boards.js"});
 vm.runInContext(inline[0][1], ctx, {filename:"MUSA.inline.js"});
 vm.runInContext(showcaseJS, ctx, {filename:"showcase-controller.js"});
-assert.match(nodes.get("app").innerHTML,/NO NECESITAS UNA GRAN IDEA/);
+assert.match(nodes.get("app").innerHTML,/TU PRÓXIMA IDEA EMPIEZA AQUÍ/);
+assert.match(nodes.get("app").innerHTML,/DE LA CHISPA A LA CREACIÓN/);
+assert.match(nodes.get("app").innerHTML,/href="#como-funciona"/);
 vm.runInContext('page="explorar";render()',ctx);
 vm.runInContext("currentIdea={id:'test-palette',title:'Dibuja una ciudad que respira',emotion:'Asombro',technique:'Dibujo',theme:'Arquitectura',colors:['#F4B633','#9D53BB','#373578'],type:'idea'};render()",ctx);
 const suggestedPalette = nodes.get("app").innerHTML;
