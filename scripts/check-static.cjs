@@ -187,7 +187,9 @@ const ctx = vm.createContext({
 vm.runInContext(boardsJS, ctx, {filename:"boards.js"});
 vm.runInContext(inline[0][1], ctx, {filename:"MUSA.inline.js"});
 vm.runInContext(showcaseJS, ctx, {filename:"showcase-controller.js"});
-assert.match(nodes.get("app").innerHTML,/NO NECESITAS UNA GRAN IDEA/);
+assert.match(nodes.get("app").innerHTML,/TU PRÓXIMA IDEA EMPIEZA AQUÍ/);
+assert.match(nodes.get("app").innerHTML,/DE LA CHISPA A LA CREACIÓN/);
+assert.match(nodes.get("app").innerHTML,/href="#como-funciona"/);
 vm.runInContext('page="explorar";render()',ctx);
 vm.runInContext("currentIdea={id:'test-palette',title:'Dibuja una ciudad que respira',emotion:'Asombro',technique:'Dibujo',theme:'Arquitectura',colors:['#F4B633','#9D53BB','#373578'],type:'idea'};render()",ctx);
 const suggestedPalette = nodes.get("app").innerHTML;
