@@ -19,10 +19,10 @@ assert.match(html, /MUSA es un laboratorio creativo digital donde encuentras ide
  "Hero should explain what the product actually does");
 assert.match(html, /EMPEZAR A CREAR ↗/,
  "Home must have an obvious primary action");
-assert.match(html, /href="#como-funciona"/,
- "Home should link to its own explanatory steps");
+assert.doesNotMatch(html, /Descubre cómo funciona|musa-intro-how-link/,
+ "Hero should not show the secondary how-it-works link");
 assert.match(html, /id="como-funciona" aria-labelledby="como-funciona-title"/,
- "How it works section must be accessible from the hero");
+ "How it works section must remain on the homepage");
 assert.match(html, /DE LA CHISPA A LA CREACIÓN\./,
  "Home onboarding must carry MUSA's personality");
 assert.equal((html.match(/<li class="how-step">/g)||[]).length, 3,
@@ -198,7 +198,7 @@ vm.runInContext(inline[0][1], ctx, {filename:"MUSA.inline.js"});
 vm.runInContext(showcaseJS, ctx, {filename:"showcase-controller.js"});
 assert.match(nodes.get("app").innerHTML,/TU PRÓXIMA IDEA EMPIEZA AQUÍ/);
 assert.match(nodes.get("app").innerHTML,/DE LA CHISPA A LA CREACIÓN/);
-assert.match(nodes.get("app").innerHTML,/href="#como-funciona"/);
+assert.doesNotMatch(nodes.get("app").innerHTML,/Descubre cómo funciona|musa-intro-how-link/);
 vm.runInContext('page="explorar";render()',ctx);
 vm.runInContext("currentIdea={id:'test-palette',title:'Dibuja una ciudad que respira',emotion:'Asombro',technique:'Dibujo',theme:'Arquitectura',colors:['#F4B633','#9D53BB','#373578'],type:'idea'};render()",ctx);
 const suggestedPalette = nodes.get("app").innerHTML;
