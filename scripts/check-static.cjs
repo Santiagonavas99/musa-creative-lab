@@ -32,6 +32,17 @@ assert.ok(introHero, "Intro hero should exist");
 assert.doesNotMatch(introHero, /IDEA PARA CREAR/,
  "Home hero must not duplicate Explore's generated-idea preview");
 
+// Experimental moodboards keep the existing app navigation and original palettes intact.
+assert.match(html, /href="\/moodboards\.css"/,"The editorial layouts must be styled");
+assert.match(html, /src="\/moodboards\.js"/,"Moodboard controller must load synchronously before app");
+assert.match(html, /id="musa-moodboard-root"/,"The dialog mounts outside the rerendered page");
+assert.match(moodboardCSS, /\.mb-editorial-grid/,"Moodboards should have an asymmetric collage layout");
+assert.match(moodboardCSS, /\.mb-is-accepted/,"Accepted challenges get an expanded visual state");
+assert.match(html, /window\.MusaMoodboards\.nextIdea\(prompts,null\)/,"Ideas rotate on a new page load");
+assert.match(html, /window\.MusaMoodboards\.initialChallenges\(challenges\)/,"Challenges rotate on each load");
+assert.match(html, /function acceptChallenge\(index,fromModal\)/,"Accepting a challenge should expand its card, not immediately navigate away");
+assert.match(moodboardJS, /\/api\/inspiration\?q=/,"Reference photography should come from connected visual providers");
+assert.doesNotMatch(moodboardJS, /source\.unsplash\.com|images\.pexels\.com/,"Do not invent unrelated photo sources");
 const claimTag = '<meta name="p:domain_verify" content="2f5d9a91026ee62077c40f6bd9da04c7">';
 assert.equal(html.split(claimTag).length-1,1,"Pinterest verification token must be present exactly once");
 assert.ok(html.indexOf(claimTag)>html.indexOf('<head>') && html.indexOf(claimTag)<html.indexOf('</head>'),
@@ -40,6 +51,8 @@ assert.ok(html.indexOf(claimTag)>html.indexOf('<head>') && html.indexOf(claimTag
 const api = fs.readFileSync(path.join(root, "api/inspiration.js"), "utf8");
 const showcaseJS = fs.readFileSync(path.join(root, "public/showcase-controller.js"), "utf8");
 const boardsJS = fs.readFileSync(path.join(root, "public/boards.js"), "utf8");
+const moodboardJS = fs.readFileSync(path.join(root, "public/moodboards.js"), "utf8");
+const moodboardCSS = fs.readFileSync(path.join(root, "public/moodboards.css"), "utf8");
 const boardsCSS = fs.readFileSync(path.join(root, "public/boards.css"), "utf8");
 const inline = [...html.matchAll(/<script(?:\s[^>]*)?>([\s\S]*?)<\/script>/g)].filter(([,source])=>source.trim());
 assert.ok(inline.length > 0, "MUSA must contain client application JavaScript");
@@ -47,6 +60,7 @@ for (const [, source] of inline) new vm.Script(source, {filename: "index.html"})
 new vm.Script(api, {filename: "api/inspiration.js"});
 new vm.Script(showcaseJS, {filename: "showcase-controller.js"});
 new vm.Script(boardsJS, {filename: "boards.js"});
+new vm.Script(moodboardJS, {filename: "moodboards.js"});
 assert.match(html, /src="\/boards\.js"/, "Board organizer must load before MUSA inline app");
 assert.match(html, /href="\/boards\.css"/, "Board styling must ship with the site");
 assert.match(boardsCSS, /@media\(max-width:480px\)/, "Boards must adapt to narrow mobile screens");
@@ -194,6 +208,7 @@ const ctx = vm.createContext({
   }))]})}),
 });
 vm.runInContext(boardsJS, ctx, {filename:"boards.js"});
+vm.runInContext(moodboardJS, ctx, {filename:"moodboards.js"});
 vm.runInContext(inline[0][1], ctx, {filename:"MUSA.inline.js"});
 vm.runInContext(showcaseJS, ctx, {filename:"showcase-controller.js"});
 assert.match(nodes.get("app").innerHTML,/TU PRÓXIMA IDEA EMPIEZA AQUÍ/);
@@ -239,6 +254,23 @@ assert.equal(nodes.get("mobile-menu").hidden,true,"Escape closes the mobile navi
 vm.runInContext("toggleMobileMenu();go('estudio')",ctx);
 assert.equal(nodes.get("mobile-menu").hidden,true,"Navigation to a page closes the dropdown");
 assert.match(nodes.get("mobile-menu").innerHTML,/aria-current="page"[^>]*>Mi estudio<\/button>/,"Active page updates");
+vm.runInContext("go('retos')",ctx);
+assert.match(nodes.get("app").innerHTML,/RETOS PARA EXPLORAR/);
+assert.match(nodes.get("app").innerHTML,/Ver moodboard/);
+vm.runInContext("acceptChallenge(0)",ctx);
+assert.match(nodes.get("app").innerHTML,/Reto aceptado/);
+assert.match(nodes.get("app").innerHTML,/mb-mini-collage/,"Accepted challenges must show a mini moodboard directly in the card");
+assert.match(nodes.get("app").innerHTML,/Continuar reto/);
+vm.runInContext("openMoodboard('challenge',0)",ctx);
+assert.match(nodes.get("musa-moodboard-root").innerHTML,/role="dialog" aria-modal="true"/);
+assert.match(nodes.get("musa-moodboard-root").innerHTML,/mb-editorial-grid/);
+assert.match(nodes.get("musa-moodboard-root").innerHTML,/#D7FF42/);
+vm.runInContext("window.MusaMoodboards.close()",ctx);
+assert.equal(nodes.get("musa-moodboard-root").innerHTML,"","Closing the dialog should preserve the main page");
+vm.runInContext("continueChallenge(0)",ctx);
+assert.match(nodes.get("app").innerHTML,/mb-session-preview/,"Active challenges retain their mini-moodboard");
+vm.runInContext('page="explorar";render()',ctx);
+console.log("✓ Modal, challenge acceptance, embedded moodboard and session continuation work");
 vm.runInContext('page="explorar";render()',ctx);
 console.log("✓ Mobile dropdown opens, dismisses with Escape, navigates, and preserves Explore");
 
