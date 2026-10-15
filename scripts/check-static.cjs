@@ -27,7 +27,9 @@ assert.match(html, /DE LA CHISPA A LA CREACIÓN\./,
  "Home onboarding must carry MUSA's personality");
 assert.equal((html.match(/<li class="how-step">/g)||[]).length, 3,
  "The explanation must have exactly three clear steps");
-assert.doesNotMatch(html, /class="hero[^"]*"[^>]*>[\s\S]*?IDEA PARA CREAR/,
+const introHero = html.match(/<section class="hero musa-intro-hero"[\s\S]*?<\/section>/)?.[0] || "";
+assert.ok(introHero, "Intro hero should exist");
+assert.doesNotMatch(introHero, /IDEA PARA CREAR/,
  "Home hero must not duplicate Explore's generated-idea preview");
 
 const claimTag = '<meta name="p:domain_verify" content="2f5d9a91026ee62077c40f6bd9da04c7">';
