@@ -256,6 +256,84 @@ function renderInspiration(){
    content+'</section>';
 }
 
+
+function enrichedChallenge(index){const c=challenges[index];return c?window.MusaMoodboards.enrichChallenge(c):null}
+function acceptedChallenge(index){const c=enrichedChallenge(index);return c?(data.acceptedChallenges||[]).find(x=>x.title===c.title):null}
+function savedChallenge(index){const c=enrichedChallenge(index);return c?(data.savedChallenges||[]).find(x=>x.title===c.title):null}
+function fetchChallengeRefs(index){
+ const item=enrichedChallenge(index);
+ if(!item)return;
+ window.MusaMoodboards.load(item).then(refs=>{
+  let changed=false;
+  for(const collection of [data.acceptedChallenges||[],data.savedChallenges||[]]){
+   const record=collection.find(x=>x.title===item.title);
+   if(record&&refs.length&&!(record.moodboardRefs||[]).length){record.moodboardRefs=refs;changed=true}
+  }
+  if(changed){save();if(page==='retos'||page==='sesion')render()}
+ }).catch(()=>{});
+}
+function acceptChallenge(index,fromModal){
+ const c=fromModal||enrichedChallenge(index);if(!c)return;
+ if(!Array.isArray(data.acceptedChallenges))data.acceptedChallenges=[];
+ const found=data.acceptedChallenges.find(x=>x.title===c.title);
+ if(!found)data.acceptedChallenges.unshift({...c,moodboardRefs:window.MusaMoodboards.getRefs(c)});
+ else if(window.MusaMoodboards.getRefs(c).length)found.moodboardRefs=window.MusaMoodboards.getRefs(c);
+ save();render();fetchChallengeRefs(index);
+}
+function continueChallenge(index){
+ const c=acceptedChallenge(index)||enrichedChallenge(index);if(!c)return;
+ start({...c,type:'challenge'});
+}
+function saveChallenge(index,itemOverride){
+ const c=itemOverride||enrichedChallenge(index);if(!c)return;
+ if(!Array.isArray(data.savedChallenges))data.savedChallenges=[];
+ const record=data.savedChallenges.find(x=>x.title===c.title);
+ if(!record)data.savedChallenges.unshift({...c,moodboardRefs:window.MusaMoodboards.getRefs(c)});
+ else if(window.MusaMoodboards.getRefs(c).length)record.moodboardRefs=window.MusaMoodboards.getRefs(c);
+ save();toast('Reto guardado');if(page==='retos')render();fetchChallengeRefs(index);
+}
+function freshChallenges(){challengeFeed=window.MusaMoodboards.initialChallenges(challenges);render()}
+function renderChallenges(){
+ const filters=['todos','5','15','20','30','45','60'];
+ const pins=new Set([...(data.acceptedChallenges||[]),...(data.savedChallenges||[])].map(x=>x.title));
+ const visible=filter==='todos'
+  ?challenges.filter(c=>pins.has(c.title)||challengeFeed.includes(c.title))
+  :challenges.filter(c=>c.time===Number(filter));
+ visible.sort((a,b)=>{
+   if(filter!=='todos')return 0;
+   const p=c=>pins.has(c.title)?-1:challengeFeed.indexOf(c.title);
+   return p(a)-p(b);
+ });
+ return '<div class="pills" role="group" aria-label="Filtrar retos por duración">'+filters.map(v=>
+  '<button type="button" class="pill" aria-pressed="'+(filter===v)+'" style="'+(filter===v?'background:#d7ff42;':'')+'" onclick="filter=\''+v+'\';render()">'+(v==='todos'?'Todos':v+' min')+'</button>'
+ ).join('')+'</div><div class="grid mb-challenge-grid">'+visible.map(c=>{
+  const index=challenges.indexOf(c);
+  return window.MusaMoodboards.challengeCard(c,index,acceptedChallenge(index),savedChallenge(index));
+ }).join('')+'</div>';
+}
+function renderIdeaActions(){
+ return '<div class="row mb-idea-tools">'+
+ '<button type="button" class="btn" onclick="randomIdea()">↻ Otra idea</button>'+
+ '<button type="button" class="btn orange" onclick="fav()">♡ Guardar</button>'+
+ '<button type="button" class="mb-outline-button" onclick="openMoodboard(\'idea\')">▧ Ver moodboard</button>'+
+ '<button type="button" class="btn" onclick="start(currentIdea)">Crear ↗</button></div>';
+}
+function openMoodboard(type,index){
+ const item=type==='challenge'?enrichedChallenge(index):
+  type==='favorite'?(data.favorites||[]).find(x=>x.id===index):
+  type==='active'?data.active?.item:currentIdea;
+ if(!item)return;
+ window.MusaMoodboards.open(item,{
+  accept:c=>{
+   if(type==='challenge')acceptChallenge(index,c);
+   else start(c);
+  },
+  save:c=>{
+   if(type==='challenge')saveChallenge(index,c);
+   else fav(c);
+  }
+ });
+}
 function render(){window.musaNativeCarousel?.unmount();window.musaCircularCarousel?.unmount();nav();const app=document.getElementById('app');let out='';if(page==='inicio'){out='<section class="hero musa-intro-hero" aria-labelledby="musa-intro-title"><div class="eyebrow musa-intro-kicker">'+musaMark()+' MUSA / CREATIVE LAB</div><h1 id="musa-intro-title">TU PRÓXIMA IDEA EMPIEZA AQUÍ.</h1><p class="musa-intro-lead">MUSA es un laboratorio creativo digital donde encuentras ideas, exploras inspiración visual y descubres retos para crear algo nuevo.</p><p class="musa-intro-support">Experimenta, crea y guarda tus proyectos. A tu ritmo, sin presión.</p><div class="musa-intro-actions"><button type="button" class="btn" onclick="go(\'explorar\')">EMPEZAR A CREAR ↗</button></div></section><section class="how-it-works" id="como-funciona" aria-labelledby="como-funciona-title"><div class="how-it-works-heading"><div class="eyebrow">MUSA / ASÍ FUNCIONA</div><h2 id="como-funciona-title">DE LA CHISPA A LA CREACIÓN.</h2><p>De una primera inspiración a una creación propia, a tu manera.</p></div><ol class="how-steps"><li class="how-step"><span class="how-step-number" aria-hidden="true">01</span><h3>Inspírate</h3><p>Descubre ideas, retos y referencias visuales que despiertan tu curiosidad.</p></li><li class="how-step"><span class="how-step-number" aria-hidden="true">02</span><h3>Crea</h3><p>Elige lo que te inspira y experimenta a tu ritmo, sin presión.</p></li><li class="how-step"><span class="how-step-number" aria-hidden="true">03</span><h3>Guarda</h3><p>Registra tus creaciones en tu estudio y vuelve a ellas cuando quieras.</p></li></ol></section><div class="grid"><div class="card lime"><div class="eyebrow">TUS CREACIONES</div><div class="stat">'+data.artworks.length+'</div><p>Obras en tu estudio</p><button class="btn secondary" onclick="go(\'estudio\')">Ver mi estudio →</button></div><div class="card orange"><div class="eyebrow">TU EXPLORACIÓN</div><div class="stat">'+data.sessions.length+'</div><p>Sesiones completadas</p><button class="btn secondary" onclick="go(\'actividad\')">Ver actividad →</button></div></div>'+(data.active?'<div class="card ink"><h3>TIENES UNA SESIÓN PENDIENTE</h3><p>'+esc(data.active.item.title)+'</p><button class="btn" onclick="resume()">Continuar →</button></div>':'')+'<div class="sectionhead"><h2>¿QUÉ HACEMOS HOY?</h2></div><div class="grid"><div class="card"><div class="eyebrow">01 / IDEAS</div><h3>UNA IDEA INESPERADA</h3><p>Mezcla conceptos, emociones y técnicas.</p><button class="btn secondary" onclick="go(\'explorar\')">Generar idea ↗</button></div><div class="card"><div class="eyebrow">02 / RETOS</div><h3>ROMPE LA RUTINA</h3><p>Pequeños desafíos para pensar distinto.</p><button class="btn secondary" onclick="go(\'retos\')">Ver retos ↗</button></div></div>'}
 else if(page==='explorar'){out='<div class="eyebrow">EXPLORAR / IDEAS</div><h1>¿Y SI PROBAMOS ALGO RARO?</h1>'+renderShowcase()+'<div class="grid"><div class="card purple"><div class="eyebrow">GENERADOR MUSA '+musaMark()+'</div>'+(currentIdea?'<h2 class="idea-title">'+esc(currentIdea.title)+'</h2><div class="pills"><span class="pill">'+esc(currentIdea.emotion)+'</span><span class="pill">'+esc(currentIdea.technique)+'</span><span class="pill">'+esc(currentIdea.theme)+'</span></div>'+palette(currentIdea.colors)+'<div class="row"><button class="btn" onclick="randomIdea()">↻ Otra idea</button><button class="btn orange" onclick="fav()">♡ Guardar</button><button class="btn" onclick="start(currentIdea)">Crear ↗</button></div>':'<h2>¿LISTA PARA UNA IDEA?</h2><p>Te propondremos una mezcla inesperada de emoción, técnica y concepto.</p><button class="btn" onclick="randomIdea()">'+musaMark()+' Sorpréndeme</button>')+'</div><div class="card lime"><div class="eyebrow">DESAFÍOS CREATIVOS</div><h2>HAZ ALGO DIFERENTE.</h2><p>Retos cortos o largos para salir de tu zona cómoda.</p><button class="btn secondary" onclick="go(\'retos\')">Explorar retos →</button></div></div>'+renderBoards()+(data.favorites.length?'<div class="sectionhead"><h2>TUS IDEAS FAVORITAS</h2></div><div class="grid idea-favorites-grid">'+data.favorites.map(renderFavoriteIdeaCard).join('')+'</div>':'')+renderInspiration()}
 else if(page==='retos'){out='<div class="eyebrow">EXPLORAR / RETOS</div><h1>HAZLO A TU MANERA.</h1><p>Sin competir. Sin resultados perfectos. Solo el placer de experimentar.</p><div class="pills">'+['todos','5','15','30','60'].map(v=>'<button class="pill" style="'+(filter===v?'background:#d7ff42;':'')+'" onclick="filter=\''+v+'\';render()">'+(v==='todos'?'Todos':v+' min')+'</button>').join('')+'</div><div class="grid">'+challenges.filter(c=>filter==='todos'||c.time===Number(filter)).map((c,i)=>'<div class="card '+(['lime','orange','purple','ink'][i%4])+'"><div class="eyebrow">'+c.time+' MIN · '+c.level+'</div><h3>'+esc(c.title)+'</h3><p>'+esc(c.text)+'</p><button class="btn '+(i%4<2?'secondary':'')+'" onclick="startChallenge(\''+esc(c.title)+'\')">Aceptar reto ↗</button></div>').join('')+'</div>'}
