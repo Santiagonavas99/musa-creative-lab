@@ -32,17 +32,6 @@ assert.ok(introHero, "Intro hero should exist");
 assert.doesNotMatch(introHero, /IDEA PARA CREAR/,
  "Home hero must not duplicate Explore's generated-idea preview");
 
-// Experimental moodboards keep the existing app navigation and original palettes intact.
-assert.match(html, /href="\/moodboards\.css"/,"The editorial layouts must be styled");
-assert.match(html, /src="\/moodboards\.js"/,"Moodboard controller must load synchronously before app");
-assert.match(html, /id="musa-moodboard-root"/,"The dialog mounts outside the rerendered page");
-assert.match(moodboardCSS, /\.mb-editorial-grid/,"Moodboards should have an asymmetric collage layout");
-assert.match(moodboardCSS, /\.mb-is-accepted/,"Accepted challenges get an expanded visual state");
-assert.match(html, /window\.MusaMoodboards\.nextIdea\(prompts,null\)/,"Ideas rotate on a new page load");
-assert.match(html, /window\.MusaMoodboards\.initialChallenges\(challenges\)/,"Challenges rotate on each load");
-assert.match(html, /function acceptChallenge\(index,fromModal\)/,"Accepting a challenge should expand its card, not immediately navigate away");
-assert.match(moodboardJS, /\/api\/inspiration\?q=/,"Reference photography should come from connected visual providers");
-assert.doesNotMatch(moodboardJS, /source\.unsplash\.com|images\.pexels\.com/,"Do not invent unrelated photo sources");
 const claimTag = '<meta name="p:domain_verify" content="2f5d9a91026ee62077c40f6bd9da04c7">';
 assert.equal(html.split(claimTag).length-1,1,"Pinterest verification token must be present exactly once");
 assert.ok(html.indexOf(claimTag)>html.indexOf('<head>') && html.indexOf(claimTag)<html.indexOf('</head>'),
@@ -61,6 +50,18 @@ new vm.Script(api, {filename: "api/inspiration.js"});
 new vm.Script(showcaseJS, {filename: "showcase-controller.js"});
 new vm.Script(boardsJS, {filename: "boards.js"});
 new vm.Script(moodboardJS, {filename: "moodboards.js"});
+// Experimental moodboards keep the existing app navigation and original palettes intact.
+assert.match(html, /href="\/moodboards\.css"/,"The editorial layouts must be styled");
+assert.match(html, /src="\/moodboards\.js"/,"Moodboard controller must load synchronously before app");
+assert.match(html, /id="musa-moodboard-root"/,"The dialog mounts outside the rerendered page");
+assert.match(moodboardCSS, /\.mb-editorial-grid/,"Moodboards should have an asymmetric collage layout");
+assert.match(moodboardCSS, /\.mb-is-accepted/,"Accepted challenges get an expanded visual state");
+assert.match(html, /window\.MusaMoodboards\.nextIdea\(prompts,null\)/,"Ideas rotate on a new page load");
+assert.match(html, /window\.MusaMoodboards\.initialChallenges\(challenges\)/,"Challenges rotate on each load");
+assert.match(html, /function acceptChallenge\(index,fromModal\)/,"Accepting a challenge should expand its card, not immediately navigate away");
+assert.match(moodboardJS, /\/api\/inspiration\?q=/,"Reference photography should come from connected visual providers");
+assert.doesNotMatch(moodboardJS, /source\.unsplash\.com|images\.pexels\.com/,"Do not invent unrelated photo sources");
+
 assert.match(html, /src="\/boards\.js"/, "Board organizer must load before MUSA inline app");
 assert.match(html, /href="\/boards\.css"/, "Board styling must ship with the site");
 assert.match(boardsCSS, /@media\(max-width:480px\)/, "Boards must adapt to narrow mobile screens");
