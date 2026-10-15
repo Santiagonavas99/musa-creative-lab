@@ -19,10 +19,10 @@ assert.match(html, /MUSA es un laboratorio creativo digital donde encuentras ide
  "Hero should explain what the product actually does");
 assert.match(html, /EMPEZAR A CREAR ↗/,
  "Home must have an obvious primary action");
-assert.match(html, /href="#como-funciona"/,
- "Home should link to its own explanatory steps");
+assert.doesNotMatch(html, /Descubre cómo funciona|musa-intro-how-link/,
+ "Hero should not show the secondary how-it-works link");
 assert.match(html, /id="como-funciona" aria-labelledby="como-funciona-title"/,
- "How it works section must be accessible from the hero");
+ "How it works section must remain on the homepage");
 assert.match(html, /DE LA CHISPA A LA CREACIÓN\./,
  "Home onboarding must carry MUSA's personality");
 assert.equal((html.match(/<li class="how-step">/g)||[]).length, 3,
@@ -79,8 +79,17 @@ assert.match(html, /\/native-carousel\.js/, "Native carousel controller must be 
 assert.match(html, /musaNativeCarousel\?\.unmount/, "Native touch listeners must be released on navigation");
 assert.match(html, /-webkit-mask:url\('\/musa-asterisk\.svg'\)/, "Hero asterisk must be vector, too");
 assert.match(vectorStar, /<svg[^>]*viewBox=/, "SVG icon must have vector geometry");
-const exactStar = favicon.match(/<path fill="#ff7049" d="([^"]+)"/)?.[1];
-assert.ok(exactStar && vectorStar.includes(exactStar), "Keep the EXACT original favicon asterisk silhouette");
+const inlineStar = html.match(/<symbol id="musa-mark-icon"[^>]*><path fill="currentColor" d="([^"]+)"/)?.[1];
+const maskStar = vectorStar.match(/<path id="mark" fill="#000" d="([^"]+)"/)?.[1];
+const faviconStar = favicon.match(/<g transform="[^"]+"><path fill="#ff7049" d="([^"]+)"/)?.[1];
+assert.ok(inlineStar && maskStar && faviconStar, "New MUSA asterisk must appear as shared symbol, mask and favicon");
+assert.equal(inlineStar, maskStar, "Hero and UI must use identical asterisk silhouettes");
+assert.equal(maskStar, faviconStar, "Favicon should use the same original user-provided asterisk shape");
+assert.ok(inlineStar.startsWith("M421.833,285.36c-2.573-9.801"), "All stars should use the new Illustrator geometry");
+assert.ok(inlineStar.endsWith("C423.212,304.438,424.4,295.161,421.833,285.36z"), "The icon outline should be complete");
+assert.match(favicon, /<path fill="#d7ff42"/, "Keep the existing lime M in the favicon");
+assert.match(html, /\.brand \.musa-mark-brand\{[^}]*color:#ff7049/, "Keep the header mark orange");
+assert.ok(html.includes("background-color:#d7ff42;-webkit-mask:url('/musa-asterisk.svg')"), "Keep the hero asterisk lime");
 assert.match(reactIsland, /\(max-width: 760px\), \(pointer: coarse\)/, "Touch devices must use the lightweight carousel");
 assert.match(showcaseCSS, /touch-action:pan-y/, "Horizontal swipes must preserve vertical page scrolling");
 assert.match(nativeCarouselJS, /setPointerCapture/, "Horizontal gesture must capture the pointer");
@@ -189,7 +198,7 @@ vm.runInContext(inline[0][1], ctx, {filename:"MUSA.inline.js"});
 vm.runInContext(showcaseJS, ctx, {filename:"showcase-controller.js"});
 assert.match(nodes.get("app").innerHTML,/TU PRÓXIMA IDEA EMPIEZA AQUÍ/);
 assert.match(nodes.get("app").innerHTML,/DE LA CHISPA A LA CREACIÓN/);
-assert.match(nodes.get("app").innerHTML,/href="#como-funciona"/);
+assert.doesNotMatch(nodes.get("app").innerHTML,/Descubre cómo funciona|musa-intro-how-link/);
 vm.runInContext('page="explorar";render()',ctx);
 vm.runInContext("currentIdea={id:'test-palette',title:'Dibuja una ciudad que respira',emotion:'Asombro',technique:'Dibujo',theme:'Arquitectura',colors:['#F4B633','#9D53BB','#373578'],type:'idea'};render()",ctx);
 const suggestedPalette = nodes.get("app").innerHTML;
