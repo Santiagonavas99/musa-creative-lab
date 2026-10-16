@@ -28,7 +28,7 @@ assert.match(html, /id="como-funciona" aria-labelledby="como-funciona-title"/,
  "How it works section must remain on the homepage");
 assert.match(html, /DE LA CHISPA A LA CREACIÓN\./,
  "Home onboarding must carry MUSA's personality");
-assert.equal((html.match(/<li class="how-step">/g)||[]).length, 3,
+assert.equal((html.match(/<li class="how-step how-step--/g)||[]).length, 3,
  "The explanation must have exactly three clear steps");
 const introHero = html.match(/<section class="hero musa-intro-hero"[\s\S]*?<\/section>/)?.[0] || "";
 assert.ok(introHero, "Intro hero should exist");
