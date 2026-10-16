@@ -19,6 +19,7 @@ test('private account data does not leak across sign-in, sign-out and Remember m
   const sessionStorage=makeStorage();
   const workspaces=new Map();
   let current=null,listener=null,options=null;
+  let signupCount=0,signupResolve=null;
   const accounts={
     a:{id:'00000000-0000-4000-8000-000000000001',email:'loto1998k@gmail.com',user_metadata:{display_name:'MUSA Uno'}},
     b:{id:'00000000-0000-4000-8000-000000000002',email:'dos@example.com',user_metadata:{}}
@@ -26,6 +27,7 @@ test('private account data does not leak across sign-in, sign-out and Remember m
   const client={
     auth:{
       onAuthStateChange(fn){listener=fn;return{data:{subscription:{unsubscribe(){}}}}},
+      signUp({email,password}){signupCount++;assert.equal(email,'loto1998k@gmail.com');assert.ok(password.length>=8);return new Promise(resolve=>{signupResolve=resolve})},
       async getSession(){return{data:{session:current?{user:current}:null},error:null}},
       async getUser(){return{data:{user:current},error:null}},
       async signInWithPassword({email}){
@@ -55,6 +57,24 @@ test('private account data does not leak across sign-in, sign-out and Remember m
   await sleep(30);
   assert.match(getNode('app').innerHTML,/TU MUNDO CREATIVO TE ESPERA/);
   assert.doesNotMatch(getNode('app').innerHTML,/Legacy work/);
+  ctx.window.MusaAuth.show('signup');
+  assert.match(getNode('app').innerHTML,/Crear mi cuenta/);
+  const submitButton={disabled:false,textContent:''};
+  const signupForm={querySelector(selector){
+    return ({'#auth-email':{value:'loto1998k@gmail.com'},'#auth-password':{value:'password-segura-123'},'#auth-name':{value:'MUSA Tester'},'button[type="submit"]':submitButton})[selector]||null;
+  }};
+  const submitSignup=()=>ctx.window.MusaAuth.submit({preventDefault(){},currentTarget:signupForm});
+  const submitPromise=submitSignup();
+  assert.equal(signupCount,1,'Signup must invoke Supabase once');
+  assert.equal(submitButton.disabled,true,'Signup button must disable during SMTP delay');
+  assert.match(submitButton.textContent,/Creando tu cuenta/,'Signup must visibly announce progress');
+  await submitSignup();
+  assert.equal(signupCount,1,'Repeated clicks must not register duplicate accounts');
+  signupResolve({data:{user:accounts.a,session:null},error:null});
+  await submitPromise;
+  assert.match(getNode('app').innerHTML,/REVISA TU CORREO/,'Successful signup shows email verification screen');
+  ctx.window.MusaAuth.show('login');
+
   const signIn=async(email,remember)=>ctx.window.MusaAuth.handle({
     preventDefault(){},
     currentTarget:{querySelector(selector){
