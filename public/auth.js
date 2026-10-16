@@ -46,12 +46,14 @@ function legacyData(){
     const raw=JSON.parse(localStorage.getItem(LEGACY_KEY)||'null');
     if(!raw||typeof raw!=='object')return null;
     const doc=clean(raw);
-    return doc.favorites.length||doc.artworks.length||doc.sessions.length||doc.references.length||doc.active?doc:null;
+    return doc.favorites.length||doc.artworks.length||doc.sessions.length||doc.references.length||doc.savedChallenges.length||doc.acceptedChallenges.length||doc.boards.length||doc.active?doc:null;
   }catch{return null}
 }
 function renderGate(){
-  document.getElementById('nav').innerHTML='';
-  document.getElementById('bottom').innerHTML='';
+  document.body?.classList?.add?.('auth-locked');
+  const nav=document.getElementById('nav');if(nav)nav.innerHTML='';
+  const mobile=document.getElementById('mobile-menu');if(mobile){mobile.innerHTML='';mobile.hidden=true;}
+  const toggle=document.getElementById('mobile-menu-toggle');if(toggle)toggle.setAttribute('aria-expanded','false');
   const account=document.getElementById('account-menu');
   if(account)account.innerHTML='';
   let title='',subtitle='',form='',foot='';
@@ -200,6 +202,7 @@ async function handle(event){
   finally{clearTimeout(delayMessage);busy=false;if(!loaded)renderGate();else render();}
 }
 function renderAccount(){
+  document.body?.classList?.remove?.('auth-locked');
   const el=document.getElementById('account-menu');
   if(!el)return;
   if(!user){el.innerHTML='';return}
@@ -266,6 +269,7 @@ async function logout(){
 }
 function reset(){
   clearTimeout(saveTimer);loadToken++;user=null;loaded=false;data=blank();currentIdea=null;
+  selectedBoardId='';boardEditor=null;window.MusaMoodboards?.close?.();
   images.clear();inspiration.items=[];inspiration.query='collage experimental';inspiration.searched=false;inspiration.requestId++;
   page='inicio';mode='login';renderGate();
 }
@@ -288,7 +292,7 @@ async function removeArtworkFile(path){
   if(error)toast('La obra se eliminó, pero la foto pendiente no se pudo limpiar.');
   images.delete(path);
 }
-function importAvailable(){return Boolean(loaded&&legacyData()&&!data.artworks.length&&!data.sessions.length&&!data.favorites.length&&!data.references.length)}
+function importAvailable(){return Boolean(loaded&&legacyData()&&!data.artworks.length&&!data.sessions.length&&!data.favorites.length&&!data.references.length&&!data.savedChallenges.length&&!data.acceptedChallenges.length&&!data.boards.length)}
 function importBanner(){
   if(!importAvailable())return'';
   return '<div class="legacy-banner"><strong>¿TENÍAS CREACIONES EN ESTE NAVEGADOR?</strong><p>Encontramos trabajos antiguos guardados aquí. Impórtalos <strong>solo si son tuyos</strong>. No se copiarán automáticamente a ninguna cuenta.</p><button class="btn secondary" type="button" onclick="MusaAuth.importLegacy()">Importar mis trabajos →</button><button class="auth-link" type="button" onclick="MusaAuth.dismissImport()">Ahora no</button></div>';
