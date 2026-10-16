@@ -31,8 +31,8 @@ jobs:
           node-version: "22"
       - name: Check client and API syntax, interface and saved references
         run: node scripts/check-static.cjs
-      - name: Verify two user accounts and Remember me
-        run: node --test tests/auth.test.cjs
+      - name: Verify private accounts, email confirmation and password recovery
+        run: node --test tests/auth.test.cjs tests/auth-routes.test.cjs
       - name: Install Vite and React dependencies
         run: npm install --no-audit --no-fund
       - name: Build MUSA and verify auth + carousel assets
