@@ -270,7 +270,7 @@ async function logout(){
 }
 function reset(){
   clearTimeout(saveTimer);loadToken++;user=null;loaded=false;data=blank();currentIdea=null;
-  selectedBoardId='';boardEditor=null;window.MusaMoodboards?.close?.();
+  selectedBoardId='';boardEditor=null;boardDeleteId='';window.MusaMoodboards?.close?.();
   images.clear();inspiration.items=[];inspiration.query='collage experimental';inspiration.searched=false;inspiration.requestId++;
   page='inicio';mode='login';renderGate();
 }
