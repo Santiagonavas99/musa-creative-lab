@@ -1,0 +1,83 @@
+/* MUSA / Two distinct creative activities: writing and drawing, visually balanced. */
+.musa-activity-grid{align-items:stretch;grid-template-columns:repeat(2,minmax(0,1fr));gap:18px;margin-top:18px}
+.musa-activity-grid>.card{display:flex;flex-direction:column;min-width:0;min-height:650px;padding:clamp(22px,3vw,34px)}
+.ma-writing-card{background:#3926ce;color:white}
+.ma-drawing-card{background:#d7ff42;color:#211b36}
+.ma-overline{display:flex;align-items:center;gap:9px;font-size:11px;font-weight:800;letter-spacing:.13em;text-transform:uppercase;line-height:1.4}
+.ma-writing-card .ma-overline{color:#d7ff42}
+.ma-drawing-card .ma-overline{color:#211b36}
+.ma-overline .musa-mark{width:15px;height:15px}
+.ma-activity-title{font-size:clamp(29px,3vw,41px);letter-spacing:-.06em;line-height:1.04;margin:12px 0}
+.ma-activity-intro{font-size:14px;line-height:1.5;opacity:.89;max-width:440px;margin:0 0 18px!important}
+.ma-content{display:flex;flex-direction:column;flex:1;min-height:0}
+.ma-content-divider{border:0;border-top:1px solid currentColor;opacity:.20;width:100%;margin:1px 0 18px}
+.ma-exercise-label{display:block;font-size:11px;font-weight:800;letter-spacing:.11em;margin-bottom:8px;text-transform:uppercase}
+.ma-exercise-title{font-size:clamp(24px,2.7vw,31px);line-height:1.1;margin:0 0 14px;max-width:470px}
+.ma-writing-switch{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:13px}
+.ma-writing-switch button{border:1px solid #ffffff79;background:transparent;color:#fff;border-radius:999px;font-size:12px;padding:9px 14px;font-weight:800;line-height:1.3}
+.ma-writing-switch button[aria-pressed="true"]{background:#eee9ff;color:#211b36;border-color:#eee9ff}
+.ma-writing-quote,.ma-writing-reference,.ma-writing-photo{margin:0 0 13px;border-radius:15px;min-height:160px;overflow:hidden}
+.ma-writing-quote{position:relative;display:flex;flex-direction:column;justify-content:center;gap:8px;background:#261a8a;padding:18px 22px;border:1px solid #ffffff22}
+.ma-writing-quote p{font:600 clamp(19px,2vw,25px)/1.29 'Space Grotesk',sans-serif!important;letter-spacing:-.045em;margin:0!important;position:relative;z-index:1}
+.ma-quote-symbol{color:#d7ff42;font:700 43px/.7 Georgia,serif;opacity:.9}
+.ma-writing-reference{display:flex;align-items:center;justify-content:center;flex-direction:column;gap:10px;background:#261a8a;padding:18px;color:#fff;text-align:center;font-size:14px}
+.ma-writing-reference .ma-link-retry{border:1px solid #ffffff8f;color:#fff;padding:8px 12px;border-radius:8px;background:transparent;font-size:12px;font-weight:800}
+.ma-writing-photo{position:relative;height:180px;background:#261a8a}
+.ma-writing-photo img{width:100%;height:100%;object-fit:cover;display:block}
+.ma-writing-photo a{position:absolute;bottom:0;right:0;left:0;display:block;padding:24px 11px 9px;background:linear-gradient(transparent,#171023dc);color:#fff;text-decoration:underline;text-underline-offset:2px;font-size:11px;line-height:1.35}
+.ma-writing-photo.ma-photo-failed img{display:none}
+.ma-writing-photo.ma-photo-failed:before{content:'Esta fotografía no está disponible. Puedes elegir otra idea o usar la pregunta.';display:grid;place-items:center;position:absolute;inset:0;padding:20px;text-align:center;font-size:12px}
+.ma-exercise-brief{padding:13px 15px;border-radius:13px;line-height:1.5;font-size:13px;margin:0 0 16px;background:#ffffff14;border:1px solid #ffffff24}
+.ma-exercise-brief strong{display:block;font-size:10px;letter-spacing:.12em;margin-bottom:5px}
+.ma-exercise-brief p{margin:0!important;line-height:1.45!important}
+.ma-drawing-card .ma-exercise-brief{background:#ffffff96;border-color:#211b3614}
+.ma-drawing-card .ma-keyword{background:#fff8;border:1px solid #211b3617;font-size:12px;max-width:max-content}
+.ma-drawing-card .ma-exercise-title{margin-top:12px}
+.ma-drawing-card .musa-challenge-banner{margin-top:4px;min-height:150px;flex:1}
+.ma-drawing-card .mcb-mosaic{min-height:150px;max-height:210px;grid-template-rows:repeat(4,minmax(0,1fr))}
+.ma-drawing-card .mcb-caption strong{font-size:clamp(14px,1.55vw,21px)}
+.ma-drawing-card .mcb-micro-label{font-size:11px}
+.ma-drawing-card .mcb-brand-mark{width:28px;height:28px}
+.ma-drawing-card .mcb-mosaic>div{border-radius:11px}
+.ma-activity-actions{display:flex;gap:9px;align-items:stretch;flex-wrap:wrap;margin-top:auto;padding-top:18px}
+.ma-activity-actions .btn,.ma-activity-actions .mb-outline-button{font-size:12px;padding:12px 15px;min-height:46px}
+.ma-writing-card .mb-outline-button{color:#fff;border-color:#ffffffbf;background:transparent}
+.ma-writing-card .mb-outline-button:hover{background:#ffffff1b}
+.ma-drawing-card .mb-outline-button{color:#211b36;border-color:#211b36;background:#ffffff8c}
+.ma-activity-actions .ma-action-primary{background:#d7ff42;color:#211b36}
+.ma-drawing-card .ma-action-primary{background:#211b36;color:#fff}
+.ma-activity-actions button{flex:1 1 auto}
+.ma-challenge-entry{display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap;padding:16px 21px;border:1px solid #e2d9d3;border-radius:18px;background:#fff;margin:13px 0 26px}
+.ma-challenge-entry p{margin:0;font-size:13px;color:#625b6b}
+.ma-challenge-entry strong{font-size:13px}
+.ma-challenge-entry .btn{font-size:12px;padding:10px 13px}
+.ma-saved-writing{background:#3926ce!important;color:#fff;display:flex;flex-direction:column;gap:10px}
+.ma-saved-writing h3{color:#fff;margin:0}
+.ma-saved-writing .ma-exercise-brief{margin:0}
+.ma-saved-writing .ma-writing-photo{height:115px}
+.ma-saved-writing .ma-writing-quote{min-height:100px}
+.ma-saved-writing .ma-writing-quote p{font-size:17px!important}
+.ma-saved-writing-actions{display:flex;flex-wrap:wrap;gap:8px;margin-top:auto}
+.ma-saved-writing-actions .btn{font-size:12px}
+.ma-writing-session{margin:22px 0;max-width:760px}
+.ma-writing-session label{display:block;color:#d7ff42;font-size:12px;font-weight:800;letter-spacing:.08em;margin-bottom:9px}
+.ma-writing-session textarea{display:block;width:100%;min-height:240px;padding:18px;color:#211b36;border:2px solid #d7ff42;border-radius:15px;background:#fffdf9;resize:vertical;font:400 16px/1.65 'DM Sans',sans-serif}
+.ma-writing-session p{font-size:12px;color:#d7d4e0}
+.ma-written-source{background:#eee8ff;color:#211b36;padding:16px;border-radius:14px;margin:13px 0;white-space:pre-wrap;overflow-wrap:anywhere}
+@media(max-width:900px){
+ .musa-activity-grid{gap:12px}
+ .musa-activity-grid>.card{padding:20px}
+ .ma-activity-title{font-size:clamp(27px,3.7vw,36px)}
+ .ma-activity-actions .btn,.ma-activity-actions .mb-outline-button{font-size:12px}
+}
+@media(max-width:680px){
+ .musa-activity-grid{grid-template-columns:1fr;align-items:initial;gap:13px}
+ .musa-activity-grid>.card{min-height:0;padding:22px}
+ .ma-activity-title{font-size:34px}
+ .ma-activity-intro{max-width:none}
+ .ma-writing-quote,.ma-writing-reference{min-height:148px}
+ .ma-drawing-card .musa-challenge-banner{min-height:210px}
+ .ma-drawing-card .mcb-mosaic{min-height:210px;max-height:none}
+ .ma-activity-actions{margin-top:10px;padding-top:10px}
+ .ma-challenge-entry{align-items:flex-start}
+}
