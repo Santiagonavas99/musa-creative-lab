@@ -1,0 +1,375 @@
+/* MUSA / Inicio: editorial three-step cards.
+   Art on the right, legible content on the left and gentle hover lift. */
+.how-it-works{margin:40px 0 30px}
+.how-steps{
+  display:grid;
+  grid-template-columns:repeat(3,minmax(0,1fr));
+  gap:18px;
+  padding:2px 4px 12px;
+  margin:0 -4px;
+  list-style:none;
+  overflow:visible
+}
+.how-step{
+  position:relative;
+  isolation:isolate;
+  overflow:hidden;
+  box-sizing:border-box;
+  min-width:0;
+  min-height:340px;
+  padding:26px;
+  border-radius:26px;
+  border:1px solid #e8e1d9;
+  background:#fffdf9;
+  box-shadow:0 8px 23px rgba(33,27,54,.045);
+  transform:translateZ(0) scale(1);
+  transform-origin:center center;
+  transition:transform 320ms cubic-bezier(.2,.75,.22,1),box-shadow 320ms ease,border-color 320ms ease;
+  will-change:transform
+}
+.how-step:nth-child(2){background:#fffcf7}
+.how-step:nth-child(3){background:#fffdf9}
+.how-step-number{
+  position:relative;
+  z-index:4;
+  display:inline-flex;
+  justify-content:center;
+  align-items:center;
+  width:55px;
+  height:55px;
+  border:0;
+  border-radius:16px 13px 15px 14px;
+  background:#d7ff42;
+  color:#211b36;
+  font:700 21px/1 'Space Grotesk',sans-serif;
+  letter-spacing:-.065em;
+  box-shadow:0 5px 9px rgba(33,27,54,.055);
+  transform:rotate(-5deg);
+}
+.how-step:nth-child(2) .how-step-number{background:#3926ce;color:#fff;transform:rotate(4deg)}
+.how-step:nth-child(3) .how-step-number{background:#ff7049;color:#211b36;transform:rotate(-4deg)}
+.how-step-copy{
+  position:relative;
+  z-index:3;
+  margin-top:38px;
+  max-width:58%;
+  pointer-events:none;
+}
+.how-step h3{
+  font-size:clamp(24px,2.7vw,35px);
+  line-height:1;
+  font-weight:800;
+  letter-spacing:-.052em;
+  margin:0 0 16px;
+  color:#211b36;
+}
+.how-step p{
+  font-size:clamp(13px,1.25vw,15px);
+  line-height:1.5;
+  font-weight:400;
+  color:#514b5b;
+  margin:0;
+}
+.how-step-art{
+  position:absolute;
+  inset:0;
+  z-index:1;
+  pointer-events:none;
+}
+.how-step-art:before,
+.how-step-art:after{
+  content:'';
+  position:absolute;
+  display:block;
+  border-radius:50%;
+}
+.how-step--inspire .how-step-art:before{
+  top:-65px;right:-60px;
+  width:225px;height:225px;background:#d7ff42
+}
+.how-step--inspire .how-step-art:after{
+  width:190px;height:190px;bottom:-132px;right:17px;
+  background:#e4dff0;
+  box-shadow:inset 0 0 0 52px #e4dff0;
+}
+.how-step--create .how-step-art:before{
+  top:64px;right:-68px;width:217px;height:217px;background:#3926ce;
+  border-radius:48% 48% 5% 5%;
+}
+.how-step--create .how-step-art:after{
+  top:30px;right:36px;width:84px;height:84px;background:#ff7049;
+}
+.how-step--save .how-step-art:before{
+  top:17px;right:14px;width:198px;height:198px;background:#ff7049;
+  border-radius:50% 50% 2% 2%;
+}
+.how-step--save .how-step-art:after{
+  right:15px;bottom:24px;width:83px;height:83px;background:#d7ff42;
+}
+.how-step-photo{
+  position:absolute;
+  z-index:2;
+  display:block;
+  width:42%;
+  height:195px;
+  right:18px;
+  top:104px;
+  padding:7px;
+  box-sizing:border-box;
+  border-radius:6px;
+  background:#fff;
+  box-shadow:0 11px 20px rgba(33,27,54,.20);
+  transform:rotate(7deg);
+  overflow:hidden;
+  pointer-events:none;
+}
+.how-step--create .how-step-photo{
+  right:-11px;
+  top:150px;
+  width:48%;
+  height:166px;
+  padding:0;
+  border-radius:22px 0 0 0;
+  transform:rotate(-7deg);
+  background:#ede6df;
+  box-shadow:0 9px 15px rgba(33,27,54,.08)
+}
+.how-step--save .how-step-photo{
+  top:88px;
+  right:23px;
+  width:43%;
+  height:205px;
+  transform:rotate(-8deg);
+}
+.how-step-placeholder,
+.how-step-photograph{
+  display:block;
+  position:absolute;
+  inset:7px;
+  width:calc(100% - 14px);
+  height:calc(100% - 14px);
+  object-fit:cover;
+  border-radius:3px;
+}
+.how-step--create .how-step-placeholder,
+.how-step--create .how-step-photograph{
+  inset:0;width:100%;height:100%;border-radius:19px 0 0 0;
+}
+.how-step-photograph{
+  opacity:0;
+  transition:opacity 340ms ease,transform 440ms ease;
+}
+.how-step-photo.is-loaded .how-step-photograph{opacity:1}
+.how-step-placeholder svg{
+  width:100%;
+  height:100%;
+  display:block
+}
+.how-step-source{
+  display:none;
+  position:absolute;
+  bottom:15px;
+  right:17px;
+  z-index:5;
+  color:#fff;
+  background:#211b36e3;
+  border-radius:5px;
+  font:600 9px/1.25 'DM Sans',sans-serif;
+  text-decoration:none;
+  padding:5px 7px;
+  max-width:106px;
+  overflow:hidden;
+  white-space:nowrap;
+  text-overflow:ellipsis;
+  pointer-events:auto;
+}
+.how-step--create .how-step-source{bottom:9px;right:6px}
+.how-step-photo.is-loaded .how-step-source{display:block}
+.how-step-source:focus-visible{
+  outline:3px solid #d7ff42;
+  outline-offset:3px;
+}
+.how-step-spark{
+  position:absolute;
+  z-index:3;
+  width:9px;height:30px;
+  right:32%;
+  top:24px;
+  border-radius:10px;
+  background:#211b36;
+  transform:rotate(-26deg);
+}
+.how-step-spark:before,.how-step-spark:after{
+  content:'';
+  position:absolute;
+  background:#211b36;
+  border-radius:10px;
+  width:8px;
+  height:29px;
+}
+.how-step-spark:before{transform:translate(-24px,13px) rotate(-39deg)}
+.how-step-spark:after{transform:translate(22px,17px) rotate(35deg)}
+.how-step--create .how-step-spark{right:12%;top:21px}
+.how-step--save .how-step-spark{top:auto;bottom:14px;right:15px}
+.how-step--inspire .how-step-accent{
+  position:absolute;z-index:3;right:6px;bottom:66px;
+  width:38px;height:38px;border-radius:50%;
+  background:#3926ce;
+}
+.how-step--create .how-step-accent{
+  position:absolute;z-index:3;right:17%;bottom:28px;
+  border-bottom:3px solid #211b36;
+  border-radius:50%;width:100px;height:38px;
+  transform:rotate(-12deg)
+}
+.how-step--save .how-step-accent{
+  position:absolute;z-index:3;right:9px;top:35%;
+  width:31px;height:31px;border-radius:10px;
+  background:#211b36;
+}
+@media (hover:hover) and (pointer:fine){
+ .how-step:hover{
+  z-index:5;
+  transform:translateY(-7px) scale(1.025);
+  border-color:#d7d0c9;
+  box-shadow:0 22px 38px rgba(33,27,54,.15);
+ }
+ .how-step:hover .how-step-photograph{
+  transform:scale(1.045)
+ }
+ .how-step:focus-within{
+  z-index:5;
+  transform:translateY(-4px) scale(1.015);
+ }
+}
+@media (max-width:1050px) and (min-width:771px){
+ .how-step{padding:21px;min-height:328px}
+ .how-step-copy{max-width:59%;margin-top:37px}
+ .how-step h3{font-size:26px}
+ .how-step p{font-size:12px}
+ .how-step-photo{width:40%;right:11px}
+}
+@media (max-width:770px){
+ .how-steps{grid-template-columns:1fr;gap:14px;margin:0;padding:3px 2px 12px}
+ .how-step{min-height:244px;padding:20px 22px;border-radius:22px}
+ .how-step-number{width:49px;height:49px;font-size:19px}
+ .how-step-copy{margin-top:19px;max-width:58%}
+ .how-step h3{font-size:31px;margin-bottom:9px}
+ .how-step p{font-size:14px;line-height:1.43}
+ .how-step-photo{top:28px;right:28px;width:32%;height:185px}
+ .how-step--create .how-step-photo{top:43px;right:10px;height:175px;width:36%}
+ .how-step--save .how-step-photo{top:28px;right:23px;height:185px;width:34%}
+ .how-step--inspire .how-step-art:after{bottom:-163px}
+ .how-step-spark{right:32%;top:19px;transform:scale(.7) rotate(-26deg)}
+}
+@media (max-width:390px){
+ .how-step{padding:18px;min-height:255px}
+ .how-step-copy{max-width:60%;margin-top:17px}
+ .how-step h3{font-size:27px}
+ .how-step p{font-size:12px}
+ .how-step-photo{right:12px;width:34%;height:170px}
+}
+@media (prefers-reduced-motion:reduce){
+ .how-step,.how-step-photograph{
+  transition:none!important;
+  transform:none!important;
+ }
+ .how-step-photo{transform:none!important}
+}
+
+/* Content-safe editorial layout: reserve separate grid tracks so photos can never cover text. */
+.how-step{
+  display:grid;
+  grid-template-columns:minmax(0,56%) minmax(0,44%);
+  grid-template-rows:auto minmax(0,1fr);
+  min-height:330px;
+  padding:24px;
+}
+.how-step-number{grid-column:1;grid-row:1}
+.how-step-copy{
+  grid-column:1;
+  grid-row:2;
+  min-width:0;
+  max-width:none;
+  width:auto;
+  margin-top:29px;
+  padding-right:12px;
+}
+.how-step h3{
+  font-size:clamp(24px,2.3vw,29px);
+  line-height:1.08;
+  margin-bottom:11px;
+  overflow-wrap:break-word;
+}
+.how-step p{
+  font-size:clamp(12px,1.06vw,14px);
+  line-height:1.48;
+  overflow-wrap:break-word;
+}
+.how-step-art{
+  position:relative;
+  grid-column:2;
+  grid-row:1 / span 2;
+  align-self:stretch;
+  min-width:0;
+  min-height:0;
+  inset:auto;
+  margin:-24px -24px -24px 0;
+  overflow:hidden;
+  pointer-events:none;
+}
+.how-step-photo,
+.how-step--create .how-step-photo,
+.how-step--save .how-step-photo{
+  width:calc(100% - 21px);
+  height:195px;
+  top:98px;
+  right:12px;
+  transform:rotate(2deg);
+}
+.how-step--create .how-step-photo{
+  top:125px;
+  height:170px;
+  right:8px;
+  transform:rotate(-2deg);
+}
+.how-step--save .how-step-photo{
+  top:93px;
+  height:197px;
+  transform:rotate(-2deg);
+}
+@media (max-width:1050px) and (min-width:771px){
+  .how-step{min-height:330px;padding:20px}
+  .how-step-copy{max-width:none;margin-top:25px;padding-right:9px}
+  .how-step h3{font-size:25px}
+  .how-step p{font-size:12px;line-height:1.45}
+  .how-step-art{margin:-20px -20px -20px 0}
+  .how-step-photo,.how-step--create .how-step-photo,.how-step--save .how-step-photo{
+    width:calc(100% - 12px);right:6px;height:182px
+  }
+}
+@media (max-width:770px){
+  .how-step{
+    grid-template-columns:minmax(0,57%) minmax(0,43%);
+    min-height:255px;
+    padding:20px 22px;
+  }
+  .how-step-copy{max-width:none;margin-top:14px;padding-right:10px}
+  .how-step h3{font-size:clamp(25px,5.3vw,30px);margin-bottom:9px}
+  .how-step p{font-size:13px;line-height:1.43}
+  .how-step-art{margin:-20px -22px -20px 0}
+  .how-step-photo,.how-step--create .how-step-photo,.how-step--save .how-step-photo{
+    top:36px;right:12px;width:calc(100% - 18px);height:185px
+  }
+  .how-step--create .how-step-photo{top:57px;height:164px}
+}
+@media (max-width:390px){
+  .how-step{min-height:265px;padding:18px}
+  .how-step-copy{max-width:none;margin-top:15px;padding-right:8px}
+  .how-step h3{font-size:25px}
+  .how-step p{font-size:12px;line-height:1.4}
+  .how-step-art{margin:-18px -18px -18px 0}
+  .how-step-photo,.how-step--create .how-step-photo,.how-step--save .how-step-photo{
+    top:45px;right:7px;width:calc(100% - 10px);height:171px
+  }
+}
