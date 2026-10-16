@@ -181,6 +181,7 @@
   overflow:hidden;
   white-space:nowrap;
   text-overflow:ellipsis;
+  pointer-events:auto;
 }
 .how-step--create .how-step-source{bottom:9px;right:6px}
 .how-step-photo.is-loaded .how-step-source{display:block}
