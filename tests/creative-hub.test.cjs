@@ -30,7 +30,7 @@ function createHarness(){
       return name?{value:values[name]||''}:null;
     },
     querySelectorAll(sel){
-      const name=sel.match(/^\[name="([^"]+)":checked\]$/)?.[1];
+      const name=sel.match(/^\[name="([^"]+)"\]:checked$/)?.[1];
       return (checkboxes[name]||[]).map(value=>({value}));
     }
   });
@@ -45,9 +45,7 @@ function createHarness(){
 test('three functions load from the current MUSA application and stay within protected account document',()=>{
   assert.match(index,/creative-hub\.js/);
   assert.match(index,/creative-hub\.css/);
-  assert.match(index,/page==='proyectos'/);
-  assert.match(index,/page==='diario'/);
-  assert.match(index,/page==='calendario'/);
+  assert.match(index,/\['proyectos','diario','calendario'\]\.includes\(page\)/);
   assert.match(auth,/projects:\[\],journalEntries:\[\],calendarEvents:\[\]/);
   assert.match(auth,/'projects','journalEntries','calendarEvents'/);
   assert.match(css,/@media\(max-width:600px\)/);
