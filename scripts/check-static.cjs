@@ -359,7 +359,7 @@ vm.runInContext('page="explorar";render()',ctx);
 console.log("✓ Mobile dropdown opens, dismisses with Escape, navigates, and preserves Explore");
 
 assert.ok(nodes.get("app").innerHTML.indexOf("UNA CHISPA VISUAL AL AZAR") <
-  nodes.get("app").innerHTML.indexOf("GENERADOR MUSA"), "Carousel must precede Explore cards");
+  nodes.get("app").innerHTML.indexOf("ESCRITURA CREATIVA"), "Carousel must precede the writing and illustration cards");
 console.log("✓ MUSA boots and renders Explore with search controls");
 
 (async()=>{
