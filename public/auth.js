@@ -76,14 +76,14 @@ function renderGate(){
     form='<p class="auth-error" role="alert">'+html(problem)+'</p><button class="btn secondary" onclick="MusaAuth.retry()">Reintentar conexión ↻</button>';
   } else if(mode==='verify'){
     title='REVISA TU CORREO.';subtitle='Te enviamos un enlace para verificar tu dirección y activar tu cuenta.';
-    form='<p class="auth-message">Abre el mensaje de Supabase, confirma tu correo y vuelve a MUSA. Si no aparece, revisa Spam.</p><button class="btn secondary" onclick="MusaAuth.show(\'login\')">Volver a iniciar sesión →</button>';
+    form='<p class="auth-message">Abre el mensaje de MUSA, confirma tu correo y vuelve aquí. Si no lo ves, revisa Spam o Promociones.</p><form onsubmit="MusaAuth.resend(event)"><div class="field"><label for="auth-email">¿No llegó el mensaje? Introduce tu correo</label><input id="auth-email" type="email" autocomplete="email" required value="'+html(sessionStorage.getItem('musa-pending-email')||'')+'" placeholder="tu@email.com"></div><button class="btn secondary auth-submit" type="submit">Reenviar confirmación ↗</button></form><button class="auth-link" type="button" onclick="MusaAuth.show(\'login\')">Volver a iniciar sesión →</button>';
   } else if(mode==='recover'){
     title='RECUPERA TU CHISPA.';subtitle='Te enviaremos un enlace seguro para establecer una nueva contraseña.';
     form='<form onsubmit="MusaAuth.submit(event)"><div class="field"><label for="auth-email">Correo electrónico</label><input type="email" id="auth-email" autocomplete="email" required placeholder="tu@email.com"></div><button class="btn secondary auth-submit" type="submit" '+(busy?'disabled':'')+'>Enviar enlace →</button><p id="auth-submit-status" class="auth-small" role="status" aria-live="polite"></p></form>';
     foot='<button class="auth-link" onclick="MusaAuth.show(\'login\')">← Volver a entrar</button>';
   } else if(mode==='reset'){
     title='CREA TU NUEVA CLAVE.';subtitle='Elige una contraseña segura para recuperar tu acceso.';
-    form='<form onsubmit="MusaAuth.submit(event)"><div class="field"><label for="auth-password">Nueva contraseña</label><input type="password" id="auth-password" autocomplete="new-password" minlength="8" required></div><button class="btn secondary auth-submit" type="submit" '+(busy?'disabled':'')+'>Guardar nueva contraseña →</button><p id="auth-submit-status" class="auth-small" role="status" aria-live="polite"></p></form>';
+    form='<form onsubmit="MusaAuth.submit(event)"><div class="field"><label for="auth-password">Nueva contraseña</label><input type="password" id="auth-password" autocomplete="new-password" minlength="8" required></div><div class="field"><label for="auth-password-confirm">Confirmar contraseña</label><input type="password" id="auth-password-confirm" autocomplete="new-password" minlength="8" required></div><button class="btn secondary auth-submit" type="submit" '+(busy?'disabled':'')+'>Guardar nueva contraseña →</button><p id="auth-submit-status" class="auth-small" role="status" aria-live="polite"></p></form>';
   } else {
     const signup=mode==='signup';
     title=signup?'TU HISTORIA CREATIVA EMPIEZA AQUÍ.':'TU MUNDO CREATIVO TE ESPERA.';
@@ -111,6 +111,7 @@ async function enter(target){
     if(error||!session?.user)return show('login');
     user=session.user;
   }
+  window.history?.replaceState?.({},'','/');
   if(!loaded)await loadWorkspace(user);
   if(loaded&&target==='explorar')go('explorar');
 }
@@ -149,6 +150,7 @@ async function handle(event){
   const form=event.currentTarget;
   const email=form.querySelector('#auth-email')?.value.trim().toLowerCase();
   const password=form.querySelector('#auth-password')?.value;
+  const passwordConfirmation=form.querySelector('#auth-password-confirm')?.value;
   const displayName=form.querySelector('#auth-name')?.value.trim();
   const choice=form.querySelector('#auth-remember')?.checked;
   const currentMode=mode;
@@ -188,6 +190,7 @@ async function handle(event){
       mode='verify';updateRoute('verify');notice='Si existe una cuenta con ese correo, llegará un enlace de recuperación.';
     }else if(currentMode==='reset'){
       if(password.length<8)throw Error('La contraseña debe tener al menos 8 caracteres.');
+      if(password!==passwordConfirmation)throw Error('Las contraseñas no coinciden.');
       const {error}=await waitForReply(client.auth.updateUser({password}));
       if(error)throw error;
       await client.auth.signOut();
@@ -341,8 +344,8 @@ async function init(){
         user=session?.user||null;mode='reset';loaded=false;updateRoute('reset',true);renderGate();return;
       }
       if(event==='SIGNED_OUT'){reset();return}
-      if(event==='SIGNED_IN'&&session?.user&&!loaded&&requested!=='callback'&&mode!=='reset'){
-        setTimeout(()=>{if(!loaded&&mode!=='reset')void loadWorkspace(session.user)},0);
+      if(event==='SIGNED_IN'&&session?.user&&!loaded&&!['callback','success','reset','reset-success'].includes(requested)&&!['reset','success'].includes(mode)){
+        setTimeout(()=>{if(!loaded&&!['reset','success','callback','reset-success'].includes(mode))void loadWorkspace(session.user)},0);
       }
     });
     if(requested==='callback'&&callbackError){
