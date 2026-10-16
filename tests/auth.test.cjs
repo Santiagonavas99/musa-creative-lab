@@ -5,7 +5,7 @@ const vm=require('node:vm');
 const path=require('node:path');
 const root=path.resolve(__dirname,'..');
 const html=fs.readFileSync(path.join(root,'index.html'),'utf8');
-const inline=[...html.matchAll(/<script(?:\s[^>]*)?>([\s\S]*?)<\/script>/g)][0][1];
+const inline=[...html.matchAll(/<script(?:\s[^>]*)?>([\s\S]*?)<\/script>/g)].map(m=>m[1]).find(Boolean);
 const auth=fs.readFileSync(path.join(root,'public/auth.js'),'utf8');
 const boards=fs.readFileSync(path.join(root,'public/boards.js'),'utf8');
 const moodboards=fs.readFileSync(path.join(root,'public/moodboards.js'),'utf8');
