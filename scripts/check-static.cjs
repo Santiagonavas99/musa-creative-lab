@@ -46,6 +46,8 @@ assert.ok(html.indexOf(claimTag)>html.indexOf('<head>') && html.indexOf(claimTag
   "Pinterest must find its claim tag in the actual document head");
 
 const api = fs.readFileSync(path.join(root, "api/inspiration.js"), "utf8");
+const authScript = fs.readFileSync(path.join(root, "public/auth.js"), "utf8");
+const authConfig = fs.readFileSync(path.join(root, "api/auth-config.js"), "utf8");
 const showcaseJS = fs.readFileSync(path.join(root, "public/showcase-controller.js"), "utf8");
 const boardsJS = fs.readFileSync(path.join(root, "public/boards.js"), "utf8");
 const moodboardJS = fs.readFileSync(path.join(root, "public/moodboards.js"), "utf8");
@@ -59,6 +61,9 @@ const inline = [...html.matchAll(/<script(?:\s[^>]*)?>([\s\S]*?)<\/script>/g)].f
 assert.ok(inline.length > 0, "MUSA must contain client application JavaScript");
 for (const [, source] of inline) new vm.Script(source, {filename: "index.html"});
 new vm.Script(api, {filename: "api/inspiration.js"});
+new vm.Script(authScript,{filename:"public/auth.js"});
+new vm.Script(authConfig,{filename:"api/auth-config.js"});
+assert.match(html,/src="\/auth\.js"/,"MUSA must load the private account manager");
 new vm.Script(showcaseJS, {filename: "showcase-controller.js"});
 new vm.Script(boardsJS, {filename: "boards.js"});
 new vm.Script(moodboardJS, {filename: "moodboards.js"});
@@ -240,7 +245,7 @@ const ctx = vm.createContext({
     getElementById(id){if(!nodes.has(id)){const node=fakeElement();if(id==="query")node.value="collage experimental";nodes.set(id,node)}return nodes.get(id)}
   },
   localStorage: {getItem(){return null},setItem(){}},
-  window: {scrollTo(){},addEventListener(){}},
+  window: {scrollTo(){},addEventListener(){},MusaAuth:{isAuthenticated:()=>true,queueSave(){},renderAccount(){},importBanner(){return ""},artworkImage:a=>a?.image||""}},
   Image: class {
     constructor(){this.naturalWidth=0;this.naturalHeight=0;}
     set src(url){
@@ -277,6 +282,7 @@ vm.runInContext(bannerJS, ctx, {filename:"challenge-banner.js"});
 vm.runInContext(writingJS, ctx, {filename:"creative-writing.js"});
 vm.runInContext(inline[0][1], ctx, {filename:"MUSA.inline.js"});
 vm.runInContext(showcaseJS, ctx, {filename:"showcase-controller.js"});
+vm.runInContext("render()",ctx);
 assert.match(nodes.get("app").innerHTML,/TU PRÓXIMA IDEA EMPIEZA AQUÍ/);
 assert.match(nodes.get("app").innerHTML,/DE LA CHISPA A LA CREACIÓN/);
 assert.doesNotMatch(nodes.get("app").innerHTML,/Descubre cómo funciona|musa-intro-how-link/);
@@ -407,6 +413,7 @@ console.log("✓ MUSA boots and renders Explore with search controls");
   assert.match(results,/Abstract lines/);
   assert.match(results,/Foto de/);
   assert.match(results,/Jane Doe/);
+  assert.match(results,/Mis búsquedas anteriores/,'Private search history is shown after a query');
   vm.runInContext("openBoardEditor('',0)",ctx);
   assert.match(nodes.get("app").innerHTML,/CREAR UN TABLERO/);
   vm.runInContext("closeBoardEditor()",ctx);
