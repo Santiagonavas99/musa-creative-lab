@@ -47,10 +47,6 @@
 .ma-activity-actions .ma-action-primary{background:#d7ff42;color:#211b36}
 .ma-drawing-card .ma-action-primary{background:#211b36;color:#fff}
 .ma-activity-actions button{flex:1 1 auto}
-.ma-challenge-entry{display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap;padding:16px 21px;border:1px solid #e2d9d3;border-radius:18px;background:#fff;margin:13px 0 26px}
-.ma-challenge-entry p{margin:0;font-size:13px;color:#625b6b}
-.ma-challenge-entry strong{font-size:13px}
-.ma-challenge-entry .btn{font-size:12px;padding:10px 13px}
 .ma-saved-writing{background:#3926ce!important;color:#fff;display:flex;flex-direction:column;gap:10px}
 .ma-saved-writing h3{color:#fff;margin:0}
 .ma-saved-writing .ma-exercise-brief{margin:0}
@@ -79,5 +75,4 @@
  .ma-drawing-card .musa-challenge-banner{min-height:210px}
  .ma-drawing-card .mcb-mosaic{min-height:210px;max-height:none}
  .ma-activity-actions{margin-top:10px;padding-top:10px}
- .ma-challenge-entry{align-items:flex-start}
 }
