@@ -7,6 +7,8 @@ const root = path.resolve(__dirname, "..");
 const html = fs.readFileSync(path.join(root, "index.html"), "utf8");
 const favoriteCSS = fs.readFileSync(path.join(root, "public/favorite-ideas.css"), "utf8");
 const homeActivitiesCSS = fs.readFileSync(path.join(root, "public/home-activities.css"), "utf8");
+const stepsCSS = fs.readFileSync(path.join(root, "public/steps-editorial.css"), "utf8");
+const stepsJS = fs.readFileSync(path.join(root, "public/steps-editorial.js"), "utf8");
 assert.match(html, /\.swatch\{[^}]*border:1px solid rgba\(255,255,255,\.92\)/,
  "Suggested idea colors should have a thin white border");
 assert.match(favoriteCSS, /\.idea-glass-palette \.swatch\{[^}]*border:1px solid rgba\(255,255,255,\.92\)/,
@@ -26,12 +28,49 @@ assert.match(html, /id="como-funciona" aria-labelledby="como-funciona-title"/,
  "How it works section must remain on the homepage");
 assert.match(html, /DE LA CHISPA A LA CREACIÓN\./,
  "Home onboarding must carry MUSA's personality");
-assert.equal((html.match(/<li class="how-step">/g)||[]).length, 3,
+assert.equal((html.match(/<li class="how-step how-step--/g)||[]).length, 3,
  "The explanation must have exactly three clear steps");
 const introHero = html.match(/<section class="hero musa-intro-hero"[\s\S]*?<\/section>/)?.[0] || "";
 assert.ok(introHero, "Intro hero should exist");
 assert.doesNotMatch(introHero, /IDEA PARA CREAR/,
  "Home hero must not duplicate Explore's generated-idea preview");
+// The three steps are compact editorial cards with animated pointer hover.
+assert.match(html,/href="\/steps-editorial\.css"/,"Editorial card styles load on home");
+assert.match(html,/src="\/steps-editorial\.js"/,"Visual references controller loads on home");
+assert.match(html,/window\.MusaStepCards\?\.hydrate\?\.\(\)/,"Home cards hydrate photos after render");
+assert.equal((html.match(/<li class="how-step how-step--/g)||[]).length,3,"Home contains exactly three designed step cards");
+for(const step of ["inspire","create","save"]){
+ assert.match(html,new RegExp('data-musa-step-photo="'+step+'"'),"Each step has independent photo matching");
+}
+assert.match(stepsCSS,/\.how-step:hover\{/,"Card hover enlarges on desktop");
+assert.match(stepsCSS,/transform:translateY\(-7px\) scale\(1\.025\)/,"Card grows smoothly by 2.5 percent");
+assert.match(stepsCSS,/transition:transform 320ms/,"Card settles back smoothly when pointer leaves");
+assert.match(stepsCSS,/@media \(hover:hover\) and \(pointer:fine\)/,"Hover only animates with a real pointer");
+assert.match(stepsCSS,/prefers-reduced-motion:reduce/,"Respect reduced-motion preference");
+
+assert.match(stepsCSS,/Content-safe editorial layout/,"Text and imagery must have dedicated lanes");
+assert.match(stepsCSS,/grid-template-columns:minmax\(0,56%\) minmax\(0,44%\)/,"Desktop reserves independent columns for copy and imagery");
+assert.match(stepsCSS,/\.how-step-number\{grid-column:1;grid-row:1\}/,"Step numbers stay in the text lane");
+assert.match(stepsCSS,/\.how-step-copy\{[\s\S]*?grid-column:1;[\s\S]*?grid-row:2;[\s\S]*?max-width:none;/,"The copy stays in column one without artificial width clipping");
+assert.match(stepsCSS,/\.how-step-art\{[\s\S]*?grid-column:2;[\s\S]*?grid-row:1 \/ span 2;[\s\S]*?overflow:hidden;/,"The artwork stays entirely in a clipped second column");
+assert.match(stepsCSS,/grid-template-columns:minmax\(0,57%\) minmax\(0,43%\)/,"Mobile reserves separate photo space too");
+
+assert.match(stepsCSS,/@media \(max-width:770px\)/,"Three cards stack on mobile");
+assert.match(stepsJS,/\/api\/inspiration\?source=all&quick=1/,"Step images come from MUSA image repository");
+const pastTopics=new Map();
+function refreshSteps(){
+ const scope={window:{sessionStorage:{
+  getItem:key=>pastTopics.has(key)?pastTopics.get(key):null,
+  setItem:(key,value)=>pastTopics.set(key,String(value))
+ }},URL,Math:Object.assign(Object.create(Math),{random:()=>0})};
+ vm.runInNewContext(stepsJS,scope,{filename:"steps-editorial.js"});
+ return scope.window.MusaStepCards.selected;
+}
+const stepsFirst=refreshSteps(),stepsSecond=refreshSteps();
+for(const step of ["inspire","create","save"]){
+ assert.notEqual(stepsFirst[step],stepsSecond[step],"Every refresh should rotate the "+step+" photographic reference query");
+}
+
 assert.match(html, /href="\/home-activities\.css"/,"The home banner must load its responsive styles");
 assert.match(html, /DOS FORMAS DE CREAR, UN MISMO LABORATORIO\./,"The banner uses the approved option 2 copy");
 assert.match(html, /Explora propuestas para escribir, imaginar, dibujar y experimentar visualmente, todo dentro de MUSA\./,"The banner explains the two types of creation");
@@ -69,6 +108,7 @@ new vm.Script(boardsJS, {filename: "boards.js"});
 new vm.Script(moodboardJS, {filename: "moodboards.js"});
 new vm.Script(bannerJS, {filename: "challenge-banner.js"});
 new vm.Script(writingJS, {filename:"creative-writing.js"});
+new vm.Script(stepsJS, {filename:"steps-editorial.js"});
 // The Explore challenge banner is decorative, responsive and refresh-driven.
 assert.match(html, /src="\/challenge-banner\.js"/, "The random artwork controller must load before the app");
 assert.match(html, /href="\/challenge-banner\.css"/, "The challenge collage stylesheet must load");
@@ -280,11 +320,19 @@ vm.runInContext(boardsJS, ctx, {filename:"boards.js"});
 vm.runInContext(moodboardJS, ctx, {filename:"moodboards.js"});
 vm.runInContext(bannerJS, ctx, {filename:"challenge-banner.js"});
 vm.runInContext(writingJS, ctx, {filename:"creative-writing.js"});
+vm.runInContext(stepsJS, ctx, {filename:"steps-editorial.js"});
 vm.runInContext(inline[0][1], ctx, {filename:"MUSA.inline.js"});
 vm.runInContext(showcaseJS, ctx, {filename:"showcase-controller.js"});
 vm.runInContext("render()",ctx);
 assert.match(nodes.get("app").innerHTML,/TU PRÓXIMA IDEA EMPIEZA AQUÍ/);
 assert.match(nodes.get("app").innerHTML,/DE LA CHISPA A LA CREACIÓN/);
+
+for(const step of ["inspire","create","save"]){
+ assert.match(nodes.get("app").innerHTML,new RegExp('how-step--'+step),"The "+step+" card renders");
+ assert.match(nodes.get("app").innerHTML,new RegExp('data-musa-step-photo="'+step+'"'),"The "+step+" image can hydrate");
+}
+assert.equal((nodes.get("app").innerHTML.match(/how-step-number/g)||[]).length,3,"All three steps have their numbers");
+
 assert.doesNotMatch(nodes.get("app").innerHTML,/Descubre cómo funciona|musa-intro-how-link/);
 const homeScreen = nodes.get("app").innerHTML;
 assert.match(homeScreen,/DOS FORMAS DE CREAR, UN MISMO LABORATORIO\./);
