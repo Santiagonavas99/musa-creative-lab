@@ -37,9 +37,9 @@ async function loadImage(prompt,force=false){
   if(!prompt)return null;
   if(!force&&cache.has(prompt.id))return cache.get(prompt.id);
   const promise=(async()=>{
-    for(const query of [prompt.imageQuery,prompt.keyword+' art photography']){
+    for(const [query,quick] of [[prompt.imageQuery,true],[prompt.imageQuery,false],[prompt.keyword+' art photography',false]]){
       try{
-        const response=await fetch('/api/inspiration?q='+encodeURIComponent(query)+'&source=all&quick=1',{headers:{Accept:'application/json'}});
+        const response=await fetch('/api/inspiration?q='+encodeURIComponent(query)+'&source=all'+(quick?'&quick=1':''),{headers:{Accept:'application/json'}});
         if(!response.ok)continue;
         const payload=await response.json();
         const candidate=pickImage(payload.results);
