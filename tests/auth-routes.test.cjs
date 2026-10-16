@@ -25,6 +25,8 @@ async function runCallback({hash,withSession}){
   }};
   const window={
     addEventListener(){},scrollTo(){},
+    MusaMoodboards:{extraIdeas:[],extraChallenges:[],initialChallenges:()=>[],nextIdea:()=>null,close(){}},
+    MusaWriting:{next:()=>null},
     history:{
       replaceState(_state,_title,to){location.pathname=to;location.hash='';location.search=''},
       pushState(_state,_title,to){location.pathname=to}
@@ -32,7 +34,7 @@ async function runCallback({hash,withSession}){
     supabase:{createClient(){return client}}
   };
   const context=vm.createContext({
-    window,document,location,URLSearchParams,
+    window,document,location,URLSearchParams,initBoards(){},
     localStorage:makeStore(),sessionStorage:makeStore(),
     fetch:async()=>({ok:true,json:async()=>({url:'https://example.supabase.co',publishableKey:'sb_publishable_test'})}),
     crypto:{randomUUID:()=>'sample-id'},
