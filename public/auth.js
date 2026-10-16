@@ -19,11 +19,11 @@ function updateRoute(next,replace=false){
 let remember=localStorage.getItem(REMEMBER_KEY)!=='0';
 let client=null,user=null,loaded=false,mode='login',notice='',problem='',busy=false,loadToken=0,saveTimer=null,saveChain=Promise.resolve(),saveError='';
 const images=new Map();
-const blank=()=>({favorites:[],artworks:[],sessions:[],references:[],searches:[],savedChallenges:[],acceptedChallenges:[],boards:[],active:null});
+const blank=()=>({favorites:[],artworks:[],sessions:[],references:[],searches:[],savedChallenges:[],acceptedChallenges:[],boards:[],projects:[],journalEntries:[],calendarEvents:[],active:null});
 const clean=raw=>{
   const source=raw&&typeof raw==='object'?raw:{};
   const result=blank();
-  for(const key of ['favorites','artworks','sessions','references','searches','savedChallenges','acceptedChallenges','boards'])
+  for(const key of ['favorites','artworks','sessions','references','searches','savedChallenges','acceptedChallenges','boards','projects','journalEntries','calendarEvents'])
     result[key]=Array.isArray(source[key])?source[key]:[];
   result.active=source.active&&typeof source.active==='object'?source.active:null;
   return result;
@@ -46,7 +46,7 @@ function legacyData(){
     const raw=JSON.parse(localStorage.getItem(LEGACY_KEY)||'null');
     if(!raw||typeof raw!=='object')return null;
     const doc=clean(raw);
-    return doc.favorites.length||doc.artworks.length||doc.sessions.length||doc.references.length||doc.savedChallenges.length||doc.acceptedChallenges.length||doc.boards.length||doc.active?doc:null;
+    return doc.favorites.length||doc.artworks.length||doc.sessions.length||doc.references.length||doc.savedChallenges.length||doc.acceptedChallenges.length||doc.boards.length||doc.projects.length||doc.journalEntries.length||doc.calendarEvents.length||doc.active?doc:null;
   }catch{return null}
 }
 function renderGate(){
@@ -230,6 +230,7 @@ async function loadWorkspace(identity){
     if(error)throw error;
     if(token!==loadToken)return;
     user=identity;data=clean(row?.document);loaded=true;
+    window.MusaCreativeHub?.reset?.();
     initBoards(); // Restore each user's board memberships after fetching their private workspace.
     currentIdea=null;seconds=data.active?.elapsed||0;paused=true;page='inicio';
     inspiration={query:'collage experimental',source:'unsplash',items:[],loading:false,error:'',searched:false,partial:false,requestId:0};
@@ -270,7 +271,7 @@ async function logout(){
 }
 function reset(){
   clearTimeout(saveTimer);loadToken++;user=null;loaded=false;data=blank();currentIdea=null;
-  selectedBoardId='';boardEditor=null;boardDeleteId='';window.MusaMoodboards?.close?.();
+  selectedBoardId='';boardEditor=null;boardDeleteId='';window.MusaMoodboards?.close?.();window.MusaCreativeHub?.reset?.();
   images.clear();inspiration.items=[];inspiration.query='collage experimental';inspiration.searched=false;inspiration.requestId++;
   page='inicio';mode='login';renderGate();
 }
@@ -293,7 +294,7 @@ async function removeArtworkFile(path){
   if(error)toast('La obra se eliminó, pero la foto pendiente no se pudo limpiar.');
   images.delete(path);
 }
-function importAvailable(){return Boolean(loaded&&legacyData()&&!data.artworks.length&&!data.sessions.length&&!data.favorites.length&&!data.references.length&&!data.savedChallenges.length&&!data.acceptedChallenges.length&&!data.boards.length)}
+function importAvailable(){return Boolean(loaded&&legacyData()&&!data.artworks.length&&!data.sessions.length&&!data.favorites.length&&!data.references.length&&!data.savedChallenges.length&&!data.acceptedChallenges.length&&!data.boards.length&&!data.projects.length&&!data.journalEntries.length&&!data.calendarEvents.length)}
 function importBanner(){
   if(!importAvailable())return'';
   return '<div class="legacy-banner"><strong>¿TENÍAS CREACIONES EN ESTE NAVEGADOR?</strong><p>Encontramos trabajos antiguos guardados aquí. Impórtalos <strong>solo si son tuyos</strong>. No se copiarán automáticamente a ninguna cuenta.</p><button class="btn secondary" type="button" onclick="MusaAuth.importLegacy()">Importar mis trabajos →</button><button class="auth-link" type="button" onclick="MusaAuth.dismissImport()">Ahora no</button></div>';
