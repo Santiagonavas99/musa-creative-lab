@@ -7,6 +7,10 @@ const root=path.resolve(__dirname,'..');
 const html=fs.readFileSync(path.join(root,'index.html'),'utf8');
 const inline=[...html.matchAll(/<script(?:\s[^>]*)?>([\s\S]*?)<\/script>/g)][0][1];
 const auth=fs.readFileSync(path.join(root,'public/auth.js'),'utf8');
+const boards=fs.readFileSync(path.join(root,'public/boards.js'),'utf8');
+const moodboards=fs.readFileSync(path.join(root,'public/moodboards.js'),'utf8');
+const writing=fs.readFileSync(path.join(root,'public/creative-writing.js'),'utf8');
+const challengeBanner=fs.readFileSync(path.join(root,'public/challenge-banner.js'),'utf8');
 function makeStorage(initial={}){
   const m=new Map(Object.entries(initial));
   return {getItem:k=>m.get(k)||null,setItem:(k,v)=>m.set(k,String(v)),removeItem:k=>m.delete(k),has:k=>m.has(k)};
@@ -14,7 +18,7 @@ function makeStorage(initial={}){
 const sleep=ms=>new Promise(resolve=>setTimeout(resolve,ms));
 test('private account data does not leak across sign-in, sign-out and Remember me',async()=>{
   const nodes=new Map();
-  const getNode=id=>{if(!nodes.has(id))nodes.set(id,{innerHTML:'',value:id==='query'?'collage experimental':'',textContent:'',classList:{add(){},remove(){}}});return nodes.get(id)};
+  const getNode=id=>{if(!nodes.has(id))nodes.set(id,{innerHTML:'',value:id==='query'?'collage experimental':'',textContent:'',hidden:false,attrs:{},setAttribute(k,v){this.attrs[k]=v},getAttribute(k){return this.attrs[k]||null},classList:{add(){},remove(){},toggle(){}},querySelector(){return null},querySelectorAll(){return[]}});return nodes.get(id)};
   const local=makeStorage({'musa-v1':JSON.stringify({favorites:[{id:'OLD',title:'Legacy work'}],artworks:[],sessions:[],references:[]})});
   const sessionStorage=makeStorage();
   const workspaces=new Map();
@@ -48,10 +52,11 @@ test('private account data does not leak across sign-in, sign-out and Remember m
     },
     storage:{from(){return{async createSignedUrl(){return{data:{signedUrl:'https://example.com/image'},error:null}}}}}
   };
-  const window={scrollTo(){},supabase:{createClient(url,key,opts){assert.match(url,/supabase\.co/);assert.match(key,/sb_publishable_/);options=opts;return client}}};
-  const ctx=vm.createContext({console,window,URLSearchParams,document:{getElementById:getNode},localStorage:local,sessionStorage,location:{origin:'https://musa-creative-lab.vercel.app',pathname:'/',hash:'',search:''},URL,crypto:{randomUUID:()=>String(Math.random())},Image:class{},setTimeout,clearTimeout,setInterval,clearInterval,confirm:()=>true,
+  const window={scrollTo(){},addEventListener(){},supabase:{createClient(url,key,opts){assert.match(url,/supabase\.co/);assert.match(key,/sb_publishable_/);options=opts;return client}}};
+  const ctx=vm.createContext({console,window,URLSearchParams,document:{getElementById:getNode,addEventListener(){},body:{classList:{add(){},remove(){},toggle(){}}}},localStorage:local,sessionStorage,location:{origin:'https://musa-creative-lab.vercel.app',pathname:'/',hash:'',search:''},URL,crypto:{randomUUID:()=>String(Math.random())},Image:class{},setTimeout,clearTimeout,setInterval,clearInterval,confirm:()=>true,
     fetch:async(url)=>{assert.equal(url,'/api/auth-config');return{ok:true,json:async()=>({url:'https://musa.supabase.co',publishableKey:'sb_publishable_testing'})}}
   });
+  for(const [name,source] of [['boards',boards],['moodboards',moodboards],['writing',writing],['banner',challengeBanner]])vm.runInContext(source,ctx,{filename:name+'.js'});
   vm.runInContext(inline,ctx);
   vm.runInContext(auth,ctx);
   await sleep(30);
