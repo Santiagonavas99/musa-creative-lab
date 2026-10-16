@@ -230,6 +230,7 @@ async function loadWorkspace(identity){
     if(error)throw error;
     if(token!==loadToken)return;
     user=identity;data=clean(row?.document);loaded=true;
+    initBoards(); // Restore each user's board memberships after fetching their private workspace.
     currentIdea=null;seconds=data.active?.elapsed||0;paused=true;page='inicio';
     inspiration={query:'collage experimental',source:'unsplash',items:[],loading:false,error:'',searched:false,partial:false,requestId:0};
     await loadArtworkImages();
@@ -321,6 +322,7 @@ async function importLegacy(){
       }
     }
     data=legacy;
+    initBoards();
     const saved=await flush();
     if(!saved)throw Error('No pudimos sincronizar los datos importados.');
     localStorage.removeItem(LEGACY_KEY);
