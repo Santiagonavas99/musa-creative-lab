@@ -47,6 +47,14 @@ assert.match(stepsCSS,/transform:translateY\(-7px\) scale\(1\.025\)/,"Card grows
 assert.match(stepsCSS,/transition:transform 320ms/,"Card settles back smoothly when pointer leaves");
 assert.match(stepsCSS,/@media \(hover:hover\) and \(pointer:fine\)/,"Hover only animates with a real pointer");
 assert.match(stepsCSS,/prefers-reduced-motion:reduce/,"Respect reduced-motion preference");
+
+assert.match(stepsCSS,/Content-safe editorial layout/,"Text and imagery must have dedicated lanes");
+assert.match(stepsCSS,/grid-template-columns:minmax\(0,56%\) minmax\(0,44%\)/,"Desktop reserves independent columns for copy and imagery");
+assert.match(stepsCSS,/\.how-step-number\{grid-column:1;grid-row:1\}/,"Step numbers stay in the text lane");
+assert.match(stepsCSS,/\.how-step-copy\{[\s\S]*?grid-column:1;[\s\S]*?grid-row:2;[\s\S]*?max-width:none;/,"The copy stays in column one without artificial width clipping");
+assert.match(stepsCSS,/\.how-step-art\{[\s\S]*?grid-column:2;[\s\S]*?grid-row:1 \/ span 2;[\s\S]*?overflow:hidden;/,"The artwork stays entirely in a clipped second column");
+assert.match(stepsCSS,/grid-template-columns:minmax\(0,57%\) minmax\(0,43%\)/,"Mobile reserves separate photo space too");
+
 assert.match(stepsCSS,/@media \(max-width:770px\)/,"Three cards stack on mobile");
 assert.match(stepsJS,/\/api\/inspiration\?source=all&quick=1/,"Step images come from MUSA image repository");
 const pastTopics=new Map();
