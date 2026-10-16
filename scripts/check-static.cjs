@@ -6,6 +6,7 @@ const path = require("node:path");
 const root = path.resolve(__dirname, "..");
 const html = fs.readFileSync(path.join(root, "index.html"), "utf8");
 const favoriteCSS = fs.readFileSync(path.join(root, "public/favorite-ideas.css"), "utf8");
+const homeActivitiesCSS = fs.readFileSync(path.join(root, "public/home-activities.css"), "utf8");
 assert.match(html, /\.swatch\{[^}]*border:1px solid rgba\(255,255,255,\.92\)/,
  "Suggested idea colors should have a thin white border");
 assert.match(favoriteCSS, /\.idea-glass-palette \.swatch\{[^}]*border:1px solid rgba\(255,255,255,\.92\)/,
@@ -31,6 +32,13 @@ const introHero = html.match(/<section class="hero musa-intro-hero"[\s\S]*?<\/se
 assert.ok(introHero, "Intro hero should exist");
 assert.doesNotMatch(introHero, /IDEA PARA CREAR/,
  "Home hero must not duplicate Explore's generated-idea preview");
+assert.match(html, /href="\/home-activities\.css"/,"The home banner must load its responsive styles");
+assert.match(html, /DOS FORMAS DE CREAR, UN MISMO LABORATORIO\./,"The banner uses the approved option 2 copy");
+assert.match(html, /Explora propuestas para escribir, imaginar, dibujar y experimentar visualmente, todo dentro de MUSA\./,"The banner explains the two types of creation");
+assert.match(html, /class="musa-home-activities-art" aria-hidden="true"/,"Home must include the dynamic editorial illustration");
+assert.match(homeActivitiesCSS, /@media\(max-width:480px\)/,"Home artwork stacks on mobile");
+assert.doesNotMatch(html, /¿QUÉ HACEMOS HOY\?|01 \/ IDEAS|02 \/ RETOS|UNA IDEA INESPERADA|ROMPE LA RUTINA/,"Remove the redundant home card pair");
+
 
 const claimTag = '<meta name="p:domain_verify" content="2f5d9a91026ee62077c40f6bd9da04c7">';
 assert.equal(html.split(claimTag).length-1,1,"Pinterest verification token must be present exactly once");
@@ -40,6 +48,12 @@ assert.ok(html.indexOf(claimTag)>html.indexOf('<head>') && html.indexOf(claimTag
 const api = fs.readFileSync(path.join(root, "api/inspiration.js"), "utf8");
 const showcaseJS = fs.readFileSync(path.join(root, "public/showcase-controller.js"), "utf8");
 const boardsJS = fs.readFileSync(path.join(root, "public/boards.js"), "utf8");
+const moodboardJS = fs.readFileSync(path.join(root, "public/moodboards.js"), "utf8");
+const moodboardCSS = fs.readFileSync(path.join(root, "public/moodboards.css"), "utf8");
+const bannerJS = fs.readFileSync(path.join(root, "public/challenge-banner.js"), "utf8");
+const bannerCSS = fs.readFileSync(path.join(root, "public/challenge-banner.css"), "utf8");
+const writingJS = fs.readFileSync(path.join(root, "public/creative-writing.js"), "utf8");
+const activitiesCSS = fs.readFileSync(path.join(root, "public/creative-activities.css"), "utf8");
 const boardsCSS = fs.readFileSync(path.join(root, "public/boards.css"), "utf8");
 const inline = [...html.matchAll(/<script(?:\s[^>]*)?>([\s\S]*?)<\/script>/g)].filter(([,source])=>source.trim());
 assert.ok(inline.length > 0, "MUSA must contain client application JavaScript");
@@ -47,6 +61,70 @@ for (const [, source] of inline) new vm.Script(source, {filename: "index.html"})
 new vm.Script(api, {filename: "api/inspiration.js"});
 new vm.Script(showcaseJS, {filename: "showcase-controller.js"});
 new vm.Script(boardsJS, {filename: "boards.js"});
+new vm.Script(moodboardJS, {filename: "moodboards.js"});
+new vm.Script(bannerJS, {filename: "challenge-banner.js"});
+new vm.Script(writingJS, {filename:"creative-writing.js"});
+// The Explore challenge banner is decorative, responsive and refresh-driven.
+assert.match(html, /src="\/challenge-banner\.js"/, "The random artwork controller must load before the app");
+assert.match(html, /href="\/challenge-banner\.css"/, "The challenge collage stylesheet must load");
+assert.match(html, /class="card ma-drawing-card"/, "The lime drawing card hosts the editorial artwork");
+assert.match(html, /window\.MusaChallengeBanner\.render\(\)/, "Banner is rendered with drawing activity without replacing the CTA");
+assert.match(bannerCSS, /\.mcb-mosaic\{/, "Banner has its own responsive mosaic layout");
+assert.match(bannerCSS, /@media\(max-width:480px\)/, "Editorial banner remains compact on mobile");
+assert.match(bannerJS, /sessionStorage\.setItem\('musa-explore-art-last'/, "Consecutive refreshes track the last composition");
+const artStorage={
+  value:null,
+  getItem(){return this.value;},
+  setItem(_key,value){this.value=String(value)}
+};
+const fixedRandom=Object.create(Math);
+fixedRandom.random=()=>0;
+function renderFreshBanner(){
+  const pageWindow={};
+  vm.runInNewContext(bannerJS,{window:pageWindow,sessionStorage:artStorage,Math:fixedRandom});
+  return pageWindow.MusaChallengeBanner.render();
+}
+const firstBanner=renderFreshBanner();
+const secondBanner=renderFreshBanner();
+assert.notEqual(firstBanner,secondBanner,"Consecutive refreshes must not immediately repeat the same banner");
+for(const markup of [firstBanner,secondBanner]){
+  assert.match(markup, /musa-challenge-banner/, "Rendered banner keeps its layout");
+  assert.match(markup, /mcb-caption/, "Each visual has an editorial title");
+  assert.match(markup, /<svg/, "Banner is self-contained SVG geometry");
+  assert.match(markup, /#musa-mark-icon/, "Banner reuses the user's official MUSA asterisk");
+}
+
+
+// Independent writing and illustration activities are aligned without duplicated palettes.
+assert.match(html,/src="\/creative-writing\.js"/,"Writing activities controller must load");
+assert.match(html,/href="\/creative-activities\.css"/,"Two-activity styles must load");
+assert.match(html,/function renderWritingActivity\(\)/,"Explore includes a distinct writing activity");
+assert.match(html,/function renderDrawingActivity\(\)/,"Explore includes a drawing activity");
+assert.match(html,/function renderExploreActivities\(\)/,"Two activities share one grid");
+assert.doesNotMatch(html,/ma-challenge-entry|¿TE APETECE UN RETO CREATIVO\?|Explora desafíos con tiempo y moodboards de referencia/,"Remove duplicate challenges banner from Explore");
+assert.doesNotMatch(activitiesCSS,/\.ma-challenge-entry/,"Remove obsolete banner styling");
+assert.match(activitiesCSS,/\.musa-activity-grid\{align-items:stretch/,"Both cards should align to equal height");
+assert.match(activitiesCSS,/\.musa-activity-grid>.card\{display:flex;flex-direction:column/,"Both activities stretch naturally");
+assert.match(activitiesCSS,/grid-auto-rows:1fr/,"Both card heights must remain equal even when stacked");
+assert.match(html, /class="btn ma-drawing-refresh" onclick="randomIdea\(\)"/,"Drawing another idea has a distinctive primary style");
+assert.match(activitiesCSS, /\.ma-drawing-card \.ma-drawing-refresh\{[\s\S]*?background:#3926ce;[\s\S]*?color:#fff;/,"The drawing refresh button contrasts in MUSA purple");
+
+assert.match(writingJS,/\/api\/inspiration\?q=/,"Image writing prompts use existing visual repository API");
+assert.match(html,/function saveWriting\(\)/,"Writing ideas can be saved independently");
+assert.match(html,/function updateWritingDraft\(text\)/,"The writing editor persists its text");
+
+// Experimental moodboards keep the existing app navigation and original palettes intact.
+assert.match(html, /href="\/moodboards\.css"/,"The editorial layouts must be styled");
+assert.match(html, /src="\/moodboards\.js"/,"Moodboard controller must load synchronously before app");
+assert.match(html, /id="musa-moodboard-root"/,"The dialog mounts outside the rerendered page");
+assert.match(moodboardCSS, /\.mb-editorial-grid/,"Moodboards should have an asymmetric collage layout");
+assert.match(moodboardCSS, /\.mb-is-accepted/,"Accepted challenges get an expanded visual state");
+assert.match(html, /window\.MusaMoodboards\.nextIdea\(prompts,null\)/,"Ideas rotate on a new page load");
+assert.match(html, /window\.MusaMoodboards\.initialChallenges\(challenges\)/,"Challenges rotate on each load");
+assert.match(html, /function acceptChallenge\(index,fromModal\)/,"Accepting a challenge should expand its card, not immediately navigate away");
+assert.match(moodboardJS, /\/api\/inspiration\?q=/,"Reference photography should come from connected visual providers");
+assert.doesNotMatch(moodboardJS, /source\.unsplash\.com|images\.pexels\.com/,"Do not invent unrelated photo sources");
+
 assert.match(html, /src="\/boards\.js"/, "Board organizer must load before MUSA inline app");
 assert.match(html, /href="\/boards\.css"/, "Board styling must ship with the site");
 assert.match(boardsCSS, /@media\(max-width:480px\)/, "Boards must adapt to narrow mobile screens");
@@ -194,17 +272,37 @@ const ctx = vm.createContext({
   }))]})}),
 });
 vm.runInContext(boardsJS, ctx, {filename:"boards.js"});
+vm.runInContext(moodboardJS, ctx, {filename:"moodboards.js"});
+vm.runInContext(bannerJS, ctx, {filename:"challenge-banner.js"});
+vm.runInContext(writingJS, ctx, {filename:"creative-writing.js"});
 vm.runInContext(inline[0][1], ctx, {filename:"MUSA.inline.js"});
 vm.runInContext(showcaseJS, ctx, {filename:"showcase-controller.js"});
 assert.match(nodes.get("app").innerHTML,/TU PRÓXIMA IDEA EMPIEZA AQUÍ/);
 assert.match(nodes.get("app").innerHTML,/DE LA CHISPA A LA CREACIÓN/);
 assert.doesNotMatch(nodes.get("app").innerHTML,/Descubre cómo funciona|musa-intro-how-link/);
+const homeScreen = nodes.get("app").innerHTML;
+assert.match(homeScreen,/DOS FORMAS DE CREAR, UN MISMO LABORATORIO\./);
+assert.match(homeScreen,/Ver ejercicios ↗/);
+assert.match(homeScreen,/musa-home-activities-art/);
+assert.equal((homeScreen.match(/musa-home-activities-art/g)||[]).length,1,"Exactly one editorial banner on home");
+assert.ok(homeScreen.includes(vm.runInContext("window.MusaChallengeBanner.render()",ctx)),"The home banner must show the selected rotating composition");
+assert.match(homeScreen,/onclick="go\('explorar'\)">Ver ejercicios/,"Home CTA must open the actual Explore section");
+
 vm.runInContext('page="explorar";render()',ctx);
 vm.runInContext("currentIdea={id:'test-palette',title:'Dibuja una ciudad que respira',emotion:'Asombro',technique:'Dibujo',theme:'Arquitectura',colors:['#F4B633','#9D53BB','#373578'],type:'idea'};render()",ctx);
-const suggestedPalette = nodes.get("app").innerHTML;
-assert.match(suggestedPalette,/aria-label="Paleta de colores sugerida"/);
-assert.ok(suggestedPalette.includes('background-color:#F4B633'),"Suggested card must render its first swatch");
-assert.equal((suggestedPalette.match(/class="swatch"/g)||[]).length,3,"Suggested palette displays three colors");
+const initialActivities=nodes.get("app").innerHTML;
+assert.match(initialActivities,/ESCRITURA CREATIVA/);
+assert.match(initialActivities,/ILUSTRACIÓN Y DIBUJO/);
+assert.match(initialActivities,/class="btn ma-drawing-refresh" onclick="randomIdea\(\)"/,"The refresh button has the purple treatment");
+assert.doesNotMatch(initialActivities,/musa-home-activities/,"The home banner is not duplicated in Explore");
+
+assert.doesNotMatch(initialActivities,/¿TE APETECE UN RETO CREATIVO\?|ma-challenge-entry/,"Explore must display only the two creative activity cards");
+assert.match(initialActivities,/Frase o pregunta/);
+assert.match(initialActivities,/Con una imagen/);
+assert.match(initialActivities,/EL EJERCICIO/);
+assert.match(initialActivities,/Ver moodboard/);
+assert.doesNotMatch(initialActivities,/class="swatch"/,"The palette should no longer appear inside the generated illustration card");
+assert.match(initialActivities,/musa-challenge-banner/);
 vm.runInContext("fav()",ctx);
 const savedPalette = nodes.get("app").innerHTML;
 assert.match(savedPalette,/class="palette idea-glass-palette"/,"Saved favorites reuse the palette markup");
@@ -218,10 +316,38 @@ assert.match(nodes.get("app").innerHTML,/Una idea antigua/,"Older saved ideas wi
 assert.equal((nodes.get("app").innerHTML.match(/idea-glass-palette/g)||[]).length,1,
  "Legacy saved ideas without colors should not display invented palettes");
 vm.runInContext("data.favorites=[];currentIdea=null;render()",ctx);
-console.log("✓ Suggested and saved ideas reuse the same accessible, white-bordered palette");
+console.log("✓ The illustration card hides its palette while saved ideas keep original swatches");
+// Writing prompts can switch between question/image without affecting the illustration.
+vm.runInContext("randomWriting()",ctx);
+const firstWriting=vm.runInContext("currentWriting.id",ctx);
+vm.runInContext("randomWriting()",ctx);
+const secondWriting=vm.runInContext("currentWriting.id",ctx);
+assert.notEqual(firstWriting,secondWriting,"Another writing idea must differ from the last");
+assert.match(nodes.get("app").innerHTML,/ma-writing-quote/);
+vm.runInContext("changeWritingMode('image')",ctx);
+assert.match(nodes.get("app").innerHTML,/ma-writing-reference|ma-writing-photo/);
+assert.match(nodes.get("app").innerHTML,/aria-pressed="true"/);
+vm.runInContext("changeWritingMode('question');saveWriting()",ctx);
+assert.equal(vm.runInContext("data.favorites[0].type",ctx),"writing");
+assert.match(nodes.get("app").innerHTML,/ESCRITURA GUARDADA/);
+const writingId=vm.runInContext("data.favorites[0].id",ctx);
+vm.runInContext("startFavorite("+JSON.stringify(writingId)+")",ctx);
+assert.match(nodes.get("app").innerHTML,/ma-writing-editor/);
+assert.doesNotMatch(nodes.get("app").innerHTML,/mb-session-preview/,"Writing sessions should never display the drawing moodboard");
+vm.runInContext("updateWritingDraft('Texto creativo de prueba que debe conservarse.')",ctx);
+assert.equal(vm.runInContext("data.active.item.draft",ctx),"Texto creativo de prueba que debe conservarse.");
+vm.runInContext("endSession()",ctx);
+assert.match(nodes.get("app").innerHTML,/Texto creativo de prueba que debe conservarse/,"Written text should carry into the saving screen");
+vm.runInContext("data.active=null;data.favorites=[];page='explorar';render()",ctx);
+
 assert.match(nodes.get("app").innerHTML,/BUSCA REFERENCIAS/);
 assert.match(nodes.get("app").innerHTML,/⌕ Buscar imágenes/);
 assert.match(nodes.get("app").innerHTML,/UNA CHISPA VISUAL AL AZAR/);
+assert.match(nodes.get("app").innerHTML,/musa-challenge-banner/);
+const currentBanner=vm.runInContext("window.MusaChallengeBanner.render()",ctx);
+assert.ok(nodes.get("app").innerHTML.includes(currentBanner),"Explore displays the selected banner");
+vm.runInContext("randomIdea()",ctx);
+assert.ok(nodes.get("app").innerHTML.includes(currentBanner),"Generating a new idea should not swap the banner until refresh");
 const mobileNav = nodes.get("mobile-menu").innerHTML;
 for(const section of ["Inicio","Explorar","Mi estudio","Actividad"]) {
   assert.ok(mobileNav.includes(">"+section+"</button>"), section+" must appear in mobile menu");
@@ -239,11 +365,28 @@ assert.equal(nodes.get("mobile-menu").hidden,true,"Escape closes the mobile navi
 vm.runInContext("toggleMobileMenu();go('estudio')",ctx);
 assert.equal(nodes.get("mobile-menu").hidden,true,"Navigation to a page closes the dropdown");
 assert.match(nodes.get("mobile-menu").innerHTML,/aria-current="page"[^>]*>Mi estudio<\/button>/,"Active page updates");
+vm.runInContext("go('retos')",ctx);
+assert.match(nodes.get("app").innerHTML,/RETOS PARA EXPLORAR/);
+assert.match(nodes.get("app").innerHTML,/Ver moodboard/);
+vm.runInContext("acceptChallenge(0)",ctx);
+assert.match(nodes.get("app").innerHTML,/Reto aceptado/);
+assert.match(nodes.get("app").innerHTML,/mb-mini-collage/,"Accepted challenges must show a mini moodboard directly in the card");
+assert.match(nodes.get("app").innerHTML,/Continuar reto/);
+vm.runInContext("openMoodboard('challenge',0)",ctx);
+assert.match(nodes.get("musa-moodboard-root").innerHTML,/role="dialog" aria-modal="true"/);
+assert.match(nodes.get("musa-moodboard-root").innerHTML,/mb-editorial-grid/);
+assert.match(nodes.get("musa-moodboard-root").innerHTML,/#D7FF42/);
+vm.runInContext("window.MusaMoodboards.close()",ctx);
+assert.equal(nodes.get("musa-moodboard-root").innerHTML,"","Closing the dialog should preserve the main page");
+vm.runInContext("continueChallenge(0)",ctx);
+assert.match(nodes.get("app").innerHTML,/mb-session-preview/,"Active challenges retain their mini-moodboard");
+vm.runInContext('page="explorar";render()',ctx);
+console.log("✓ Modal, challenge acceptance, embedded moodboard and session continuation work");
 vm.runInContext('page="explorar";render()',ctx);
 console.log("✓ Mobile dropdown opens, dismisses with Escape, navigates, and preserves Explore");
 
 assert.ok(nodes.get("app").innerHTML.indexOf("UNA CHISPA VISUAL AL AZAR") <
-  nodes.get("app").innerHTML.indexOf("GENERADOR MUSA"), "Carousel must precede Explore cards");
+  nodes.get("app").innerHTML.indexOf("ESCRITURA CREATIVA"), "Carousel must precede the writing and illustration cards");
 console.log("✓ MUSA boots and renders Explore with search controls");
 
 (async()=>{
