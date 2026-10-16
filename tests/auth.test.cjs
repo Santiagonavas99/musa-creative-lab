@@ -27,7 +27,7 @@ test('private account data does not leak across sign-in, sign-out and Remember m
   const client={
     auth:{
       onAuthStateChange(fn){listener=fn;return{data:{subscription:{unsubscribe(){}}}}},
-      signUp({email,password}){signupCount++;assert.equal(email,'loto1998k@gmail.com');assert.ok(password.length>=8);return new Promise(resolve=>{signupResolve=resolve})},
+      signUp({email,password,options}){signupCount++;assert.equal(email,'loto1998k@gmail.com');assert.equal(options.emailRedirectTo,'https://musa-creative-lab.vercel.app/auth/callback');assert.ok(password.length>=8);return new Promise(resolve=>{signupResolve=resolve})},
       async getSession(){return{data:{session:current?{user:current}:null},error:null}},
       async getUser(){return{data:{user:current},error:null}},
       async signInWithPassword({email}){
@@ -49,7 +49,7 @@ test('private account data does not leak across sign-in, sign-out and Remember m
     storage:{from(){return{async createSignedUrl(){return{data:{signedUrl:'https://example.com/image'},error:null}}}}}
   };
   const window={scrollTo(){},supabase:{createClient(url,key,opts){assert.match(url,/supabase\.co/);assert.match(key,/sb_publishable_/);options=opts;return client}}};
-  const ctx=vm.createContext({console,window,document:{getElementById:getNode},localStorage:local,sessionStorage,location:{origin:'https://musa-creative-lab.vercel.app'},URL,crypto:{randomUUID:()=>String(Math.random())},Image:class{},setTimeout,clearTimeout,setInterval,clearInterval,confirm:()=>true,
+  const ctx=vm.createContext({console,window,URLSearchParams,document:{getElementById:getNode},localStorage:local,sessionStorage,location:{origin:'https://musa-creative-lab.vercel.app',pathname:'/',hash:'',search:''},URL,crypto:{randomUUID:()=>String(Math.random())},Image:class{},setTimeout,clearTimeout,setInterval,clearInterval,confirm:()=>true,
     fetch:async(url)=>{assert.equal(url,'/api/auth-config');return{ok:true,json:async()=>({url:'https://musa.supabase.co',publishableKey:'sb_publishable_testing'})}}
   });
   vm.runInContext(inline,ctx);
