@@ -456,24 +456,23 @@ function renderWritingActivity(){
   '</div></div></article>';
 }
 function renderDrawingActivity(){
- const d=currentIdea;
+ // Always start with a full proposal, including after login or a session reset.
+ const d=currentIdea||(currentIdea=window.MusaMoodboards.nextIdea(prompts,null));
  return '<article class="card ma-drawing-card" aria-labelledby="ma-drawing-title">'+
   '<div class="ma-overline">'+musaMark()+' 02 / IMÁGENES</div>'+
   '<h2 class="ma-activity-title" id="ma-drawing-title">ILUSTRACIÓN Y DIBUJO.</h2>'+
   '<p class="ma-activity-intro">Prueba técnicas, imagina formas y convierte una idea en algo visual.</p>'+
   '<hr class="ma-content-divider"><div class="ma-content">'+
-  (d?'<span class="ma-exercise-label">PROPUESTA PARA DIBUJAR</span><h3 class="ma-exercise-title">'+esc(d.title)+'</h3>'+
+  '<span class="ma-exercise-label">PROPUESTA PARA DIBUJAR</span><h3 class="ma-exercise-title">'+esc(d.title)+'</h3>'+
     '<span class="mb-keyword ma-keyword">'+esc(d.keyword||d.theme||'Creatividad')+'</span>'+
     '<div class="ma-exercise-brief" style="margin-top:13px"><strong>EL EJERCICIO</strong><p>'+
-    esc(drawingBriefs[d.title]||'Crea una ilustración a partir de esta idea. Experimenta con técnica, composición y materiales.')+'</p></div>':
-    '<h3 class="ma-exercise-title">Tu próxima idea visual te espera.</h3>')+
+    esc(drawingBriefs[d.title]||'Crea una ilustración a partir de esta idea. Experimenta con técnica, composición y materiales.')+'</p></div>'+
   window.MusaChallengeBanner.render()+
   '<div class="ma-activity-actions">'+
   '<button type="button" class="btn ma-drawing-refresh" onclick="randomIdea()">↻ Otra idea</button>'+
-  (d?'<button type="button" class="btn orange" onclick="fav()">♡ Guardar</button>'+
-      '<button type="button" class="mb-outline-button" onclick="openMoodboard(\'idea\')">▧ Ver moodboard</button>'+
-      '<button type="button" class="btn ma-action-primary" onclick="start(currentIdea)">Crear ↗</button>':
-      '<button type="button" class="btn ma-action-primary" onclick="randomIdea()">Generar idea ↗</button>')+
+  '<button type="button" class="btn orange" onclick="fav()">♡ Guardar</button>'+
+  '<button type="button" class="mb-outline-button" onclick="openMoodboard(\'idea\')">▧ Ver moodboard</button>'+
+  '<button type="button" class="btn ma-action-primary" onclick="start(currentIdea)">Crear ↗</button>'+
   '</div></div></article>';
 }
 function renderExploreActivities(){
