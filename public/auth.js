@@ -322,7 +322,12 @@ async function importLegacy(){
   finally{importBusy=false}
 }
 async function init(){
-  mode='loading';renderGate();
+  const requested=routeMode();
+  const urlParams=new URLSearchParams((location.hash||'').replace(/^#/,''));
+  const queryParams=new URLSearchParams((location.search||'').replace(/^\?/,''));
+  const callbackError=urlParams.get('error_description')||queryParams.get('error_description')||urlParams.get('error')||queryParams.get('error');
+  const recoveryLink=urlParams.get('type')==='recovery'||queryParams.get('type')==='recovery';
+  mode=requested==='callback'?'callback':'loading';renderGate();
   try{
     if(!window.supabase?.createClient)throw Error('No se pudo cargar el sistema de cuentas. Comprueba tu conexión.');
     const response=await fetch('/api/auth-config',{headers:{Accept:'application/json'}});
@@ -332,23 +337,49 @@ async function init(){
       auth:{storage,storageKey:AUTH_KEY,persistSession:true,autoRefreshToken:true,detectSessionInUrl:true}
     });
     client.auth.onAuthStateChange((event,session)=>{
-      if(event==='PASSWORD_RECOVERY'){mode='reset';loaded=false;renderGate();return}
+      if(event==='PASSWORD_RECOVERY'){
+        user=session?.user||null;mode='reset';loaded=false;updateRoute('reset',true);renderGate();return;
+      }
       if(event==='SIGNED_OUT'){reset();return}
-      if(event==='SIGNED_IN'&&session?.user&&!loaded){
-        // Avoid re-entering Supabase methods from the auth callback.
-        setTimeout(()=>{if(!loaded)void loadWorkspace(session.user)},0);
+      if(event==='SIGNED_IN'&&session?.user&&!loaded&&requested!=='callback'&&mode!=='reset'){
+        setTimeout(()=>{if(!loaded&&mode!=='reset')void loadWorkspace(session.user)},0);
       }
     });
+    if(requested==='callback'&&callbackError){
+      mode='confirmation-error';problem='Este enlace de confirmación ha expirado o no es válido. Solicita uno nuevo.';
+      updateRoute(mode,true);renderGate();return;
+    }
     const {data:result,error}=await client.auth.getSession();
     if(error)throw error;
     if(mode==='reset')return;
+    if(requested==='callback'){
+      if(!result?.session?.user){
+        mode='confirmation-error';problem='No encontramos una sesión válida para ese enlace. Solicita una nueva confirmación.';
+        updateRoute(mode,true);renderGate();return;
+      }
+      const verified=await client.auth.getUser();
+      if(verified.error||!verified.data?.user)throw verified.error||Error('No pudimos verificar el acceso.');
+      user=verified.data.user;
+      sessionStorage.removeItem('musa-pending-email');
+      mode=recoveryLink?'reset':'success';
+      updateRoute(mode,true);renderGate();return;
+    }
     if(result?.session?.user){
       const verified=await client.auth.getUser();
-      if(verified.error||!verified.data.user)throw verified.error||Error('La sesión ha caducado.');
-      await loadWorkspace(verified.data.user);
-    } else {mode='login';renderGate()}
-  }catch(e){mode='error';problem=message(e);renderGate()}
+      if(verified.error||!verified.data?.user)throw verified.error||Error('La sesión ha caducado.');
+      if(requested==='success'){user=verified.data.user;mode='success';renderGate()}
+      else if(requested==='reset'){user=verified.data.user;mode='reset';renderGate()}
+      else await loadWorkspace(verified.data.user);
+    } else{
+      mode=['signup','login','recover','verify','confirmation-error'].includes(requested)?requested:'login';
+      renderGate();
+    }
+  }catch(e){
+    mode=requested==='callback'?'confirmation-error':'error';
+    problem=message(e);updateRoute(mode,requested==='callback');renderGate();
+  }
 }
-window.MusaAuth={init,retry:init,show,handle,submit:handle,logout,renderGate,renderAccount,isAuthenticated:()=>Boolean(user&&loaded),queueSave,flush,artworkImage,uploadArtwork,removeArtworkFile,hasImport,importBanner,importLegacy,dismissImport};
+window.addEventListener?.('popstate',()=>{if(!loaded){mode=routeMode();problem='';notice='';renderGate()}});
+window.MusaAuth={init,retry:init,show,handle,submit:handle,logout,enter,resend,renderGate,renderAccount,isAuthenticated:()=>Boolean(user&&loaded),queueSave,flush,artworkImage,uploadArtwork,removeArtworkFile,hasImport,importBanner,importLegacy,dismissImport};
 void init();
 })();
