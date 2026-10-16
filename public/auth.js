@@ -54,11 +54,11 @@ function renderGate(){
     form='<p class="auth-message">Abre el mensaje de Supabase, confirma tu correo y vuelve a MUSA. Si no aparece, revisa Spam.</p><button class="btn secondary" onclick="MusaAuth.show(\'login\')">Volver a iniciar sesión →</button>';
   } else if(mode==='recover'){
     title='RECUPERA TU CHISPA.';subtitle='Te enviaremos un enlace seguro para establecer una nueva contraseña.';
-    form='<form onsubmit="MusaAuth.submit(event)"><div class="field"><label for="auth-email">Correo electrónico</label><input type="email" id="auth-email" autocomplete="email" required placeholder="tu@email.com"></div><button class="btn secondary auth-submit" type="submit" '+(busy?'disabled':'')+'>Enviar enlace →</button></form>';
+    form='<form onsubmit="MusaAuth.submit(event)"><div class="field"><label for="auth-email">Correo electrónico</label><input type="email" id="auth-email" autocomplete="email" required placeholder="tu@email.com"></div><button class="btn secondary auth-submit" type="submit" '+(busy?'disabled':'')+'>Enviar enlace →</button><p id="auth-submit-status" class="auth-small" role="status" aria-live="polite"></p></form>';
     foot='<button class="auth-link" onclick="MusaAuth.show(\'login\')">← Volver a entrar</button>';
   } else if(mode==='reset'){
     title='CREA TU NUEVA CLAVE.';subtitle='Elige una contraseña segura para recuperar tu acceso.';
-    form='<form onsubmit="MusaAuth.submit(event)"><div class="field"><label for="auth-password">Nueva contraseña</label><input type="password" id="auth-password" autocomplete="new-password" minlength="8" required></div><button class="btn secondary auth-submit" type="submit" '+(busy?'disabled':'')+'>Guardar nueva contraseña →</button></form>';
+    form='<form onsubmit="MusaAuth.submit(event)"><div class="field"><label for="auth-password">Nueva contraseña</label><input type="password" id="auth-password" autocomplete="new-password" minlength="8" required></div><button class="btn secondary auth-submit" type="submit" '+(busy?'disabled':'')+'>Guardar nueva contraseña →</button><p id="auth-submit-status" class="auth-small" role="status" aria-live="polite"></p></form>';
   } else {
     const signup=mode==='signup';
     title=signup?'TU HISTORIA CREATIVA EMPIEZA AQUÍ.':'TU MUNDO CREATIVO TE ESPERA.';
@@ -68,7 +68,7 @@ function renderGate(){
       '<div class="field"><label for="auth-email">Correo electrónico</label><input type="email" id="auth-email" required autocomplete="email" placeholder="tu@email.com"></div>'+
       '<div class="field"><label for="auth-password">Contraseña</label><input id="auth-password" type="password" required minlength="8" autocomplete="'+(signup?'new-password':'current-password')+'" placeholder="Mínimo 8 caracteres"></div>'+
       (!signup?'<div class="auth-options"><label class="auth-remember"><input type="checkbox" id="auth-remember" '+(remember?'checked':'')+'> Recordarme</label><button type="button" class="auth-link" onclick="MusaAuth.show(\'recover\')">¿Olvidaste tu contraseña?</button></div>':'<p class="auth-small">Al crear tu cuenta aceptas los <a href="/terminos-de-uso/" target="_blank" rel="noopener">Términos de uso</a> y puedes consultar nuestra <a href="/politica-de-privacidad/" target="_blank" rel="noopener">Política de privacidad</a>.</p>')+
-      '<button class="btn secondary auth-submit" type="submit" '+(busy?'disabled':'')+'>'+(signup?'Crear mi cuenta ↗':'Entrar a MUSA ↗')+'</button></form>';
+      '<button class="btn secondary auth-submit" type="submit" '+(busy?'disabled':'')+'>'+(signup?'Crear mi cuenta ↗':'Entrar a MUSA ↗')+'</button><p id="auth-submit-status" class="auth-small" role="status" aria-live="polite"></p></form>';
     foot=signup?'<span>¿Ya tienes cuenta?</span> <button class="auth-link" onclick="MusaAuth.show(\'login\')">Iniciar sesión</button>':'<span>¿Tu primera vez?</span> <button class="auth-link" onclick="MusaAuth.show(\'signup\')">Crear cuenta</button>';
   }
   document.getElementById('app').innerHTML='<div class="auth-shell"><div class="auth-art"><div class="eyebrow">MUSA / TU ESPACIO PERSONAL</div><h1>NO NECESITAS UNA GRAN IDEA.<br>SOLO EMPEZAR.</h1><p>Sin likes. Sin presión. Todo lo que creas es tuyo.</p><img src="/musa-asterisk.svg" class="auth-star" alt="" aria-hidden="true"></div>'+
@@ -88,6 +88,7 @@ function message(err){
   if(/password should be at least|weak password/i.test(msg))return 'Utiliza una contraseña de al menos 8 caracteres y evita claves fáciles de adivinar.';
   if(/rate limit|security purposes/i.test(msg))return 'Demasiados intentos. Espera un momento antes de volver a probar.';
   if(/failed to fetch|network/i.test(msg))return 'No pudimos contactar con Supabase. Comprueba tu conexión a internet.';
+  if(/context deadline|gateway timeout|504|tiempo de espera|timed? ?out/i.test(msg))return 'Supabase recibió la solicitud, pero está tardando demasiado en responder. Revisa tu correo y la carpeta Spam; espera al menos un minuto antes de intentar de nuevo. Si continúa, revisaremos la configuración SMTP.';
   return msg;
 }
 async function handle(event){
@@ -100,31 +101,48 @@ async function handle(event){
   const choice=form.querySelector('#auth-remember')?.checked;
   const currentMode=mode;
   busy=true;problem='';notice='';
+  const button=form.querySelector('button[type="submit"]');
+  const status=document.getElementById('auth-submit-status');
+  const labels={signup:'Creando tu cuenta…',login:'Iniciando sesión…',recover:'Enviando enlace…',reset:'Actualizando contraseña…'};
+  if(button){button.disabled=true;button.textContent=labels[currentMode]||'Procesando…';}
+  if(status)status.textContent='Conectando con Supabase, espera un momento…';
+  const delayMessage=setTimeout(()=>{
+    if(busy&&status)status.textContent='Supabase sigue procesando la solicitud. El envío del correo puede tardar un poco; no vuelvas a pulsar el botón.';
+  },12000);
+  const waitForReply=async action=>{
+    let timeout;
+    try{
+      return await Promise.race([
+        action,
+        new Promise((_,reject)=>{timeout=setTimeout(()=>reject(new Error('Tiempo de espera agotado en Supabase.')),45000);})
+      ]);
+    }finally{clearTimeout(timeout)}
+  };
   try{
     if(currentMode==='signup'){
       if(password.length<8)throw Error('La contraseña debe tener al menos 8 caracteres.');
-      const {data:result,error}=await client.auth.signUp({email,password,options:{emailRedirectTo:location.origin+'/',data:{display_name:displayName||email.split('@')[0]}}});
+      const {data:result,error}=await waitForReply(client.auth.signUp({email,password,options:{emailRedirectTo:location.origin+'/',data:{display_name:displayName||email.split('@')[0]}}}));
       if(error)throw error;
       if(result.session){await loadWorkspace(result.user);notice='Cuenta creada correctamente.';}
       else{mode='verify';notice='Te enviamos las instrucciones a '+email+'.';}
     }else if(currentMode==='login'){
       rememberChoice(choice);
-      const {data:result,error}=await client.auth.signInWithPassword({email,password});
+      const {data:result,error}=await waitForReply(client.auth.signInWithPassword({email,password}));
       if(error)throw error;
       await loadWorkspace(result.user);
     }else if(currentMode==='recover'){
-      const {error}=await client.auth.resetPasswordForEmail(email,{redirectTo:location.origin+'/'});
+      const {error}=await waitForReply(client.auth.resetPasswordForEmail(email,{redirectTo:location.origin+'/'}));
       if(error)throw error;
       mode='verify';notice='Si existe una cuenta con ese correo, llegará un enlace de recuperación.';
     }else if(currentMode==='reset'){
       if(password.length<8)throw Error('La contraseña debe tener al menos 8 caracteres.');
-      const {error}=await client.auth.updateUser({password});
+      const {error}=await waitForReply(client.auth.updateUser({password}));
       if(error)throw error;
       await client.auth.signOut();
       mode='login';notice='Contraseña actualizada. Entra con tu nueva clave.';
     }
   }catch(e){problem=message(e);if(currentMode!=='reset')mode=currentMode}
-  finally{busy=false;if(!loaded)renderGate();else render();}
+  finally{clearTimeout(delayMessage);busy=false;if(!loaded)renderGate();else render();}
 }
 function renderAccount(){
   const el=document.getElementById('account-menu');
