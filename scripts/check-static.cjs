@@ -32,6 +32,36 @@ assert.ok(introHero, "Intro hero should exist");
 assert.doesNotMatch(introHero, /IDEA PARA CREAR/,
  "Home hero must not duplicate Explore's generated-idea preview");
 
+// The Explore challenge banner is decorative, responsive and refresh-driven.
+assert.match(html, /src="\/challenge-banner\.js"/, "The random artwork controller must load before the app");
+assert.match(html, /href="\/challenge-banner\.css"/, "The challenge collage stylesheet must load");
+assert.match(html, /class="card lime musa-explore-challenges"/, "The lime Explore card hosts the editorial artwork");
+assert.match(html, /window\.MusaChallengeBanner\.render\(\)/, "Banner is rendered with Explore without replacing the CTA");
+assert.match(bannerCSS, /\.mcb-mosaic\{/, "Banner has its own responsive mosaic layout");
+assert.match(bannerCSS, /@media\(max-width:480px\)/, "Editorial banner remains compact on mobile");
+assert.match(bannerJS, /sessionStorage\.setItem\('musa-explore-art-last'/, "Consecutive refreshes track the last composition");
+const artStorage={
+  value:null,
+  getItem(){return this.value;},
+  setItem(_key,value){this.value=String(value)}
+};
+const fixedRandom=Object.create(Math);
+fixedRandom.random=()=>0;
+function renderFreshBanner(){
+  const pageWindow={};
+  vm.runInNewContext(bannerJS,{window:pageWindow,sessionStorage:artStorage,Math:fixedRandom});
+  return pageWindow.MusaChallengeBanner.render();
+}
+const firstBanner=renderFreshBanner();
+const secondBanner=renderFreshBanner();
+assert.notEqual(firstBanner,secondBanner,"Consecutive refreshes must not immediately repeat the same banner");
+for(const markup of [firstBanner,secondBanner]){
+  assert.match(markup, /musa-challenge-banner/, "Rendered banner keeps its layout");
+  assert.match(markup, /mcb-caption/, "Each visual has an editorial title");
+  assert.match(markup, /<svg/, "Banner is self-contained SVG geometry");
+  assert.match(markup, /#musa-mark-icon/, "Banner reuses the user's official MUSA asterisk");
+}
+
 const claimTag = '<meta name="p:domain_verify" content="2f5d9a91026ee62077c40f6bd9da04c7">';
 assert.equal(html.split(claimTag).length-1,1,"Pinterest verification token must be present exactly once");
 assert.ok(html.indexOf(claimTag)>html.indexOf('<head>') && html.indexOf(claimTag)<html.indexOf('</head>'),
@@ -42,6 +72,8 @@ const showcaseJS = fs.readFileSync(path.join(root, "public/showcase-controller.j
 const boardsJS = fs.readFileSync(path.join(root, "public/boards.js"), "utf8");
 const moodboardJS = fs.readFileSync(path.join(root, "public/moodboards.js"), "utf8");
 const moodboardCSS = fs.readFileSync(path.join(root, "public/moodboards.css"), "utf8");
+const bannerJS = fs.readFileSync(path.join(root, "public/challenge-banner.js"), "utf8");
+const bannerCSS = fs.readFileSync(path.join(root, "public/challenge-banner.css"), "utf8");
 const boardsCSS = fs.readFileSync(path.join(root, "public/boards.css"), "utf8");
 const inline = [...html.matchAll(/<script(?:\s[^>]*)?>([\s\S]*?)<\/script>/g)].filter(([,source])=>source.trim());
 assert.ok(inline.length > 0, "MUSA must contain client application JavaScript");
@@ -50,6 +82,7 @@ new vm.Script(api, {filename: "api/inspiration.js"});
 new vm.Script(showcaseJS, {filename: "showcase-controller.js"});
 new vm.Script(boardsJS, {filename: "boards.js"});
 new vm.Script(moodboardJS, {filename: "moodboards.js"});
+new vm.Script(bannerJS, {filename: "challenge-banner.js"});
 // Experimental moodboards keep the existing app navigation and original palettes intact.
 assert.match(html, /href="\/moodboards\.css"/,"The editorial layouts must be styled");
 assert.match(html, /src="\/moodboards\.js"/,"Moodboard controller must load synchronously before app");
@@ -210,6 +243,7 @@ const ctx = vm.createContext({
 });
 vm.runInContext(boardsJS, ctx, {filename:"boards.js"});
 vm.runInContext(moodboardJS, ctx, {filename:"moodboards.js"});
+vm.runInContext(bannerJS, ctx, {filename:"challenge-banner.js"});
 vm.runInContext(inline[0][1], ctx, {filename:"MUSA.inline.js"});
 vm.runInContext(showcaseJS, ctx, {filename:"showcase-controller.js"});
 assert.match(nodes.get("app").innerHTML,/TU PRÓXIMA IDEA EMPIEZA AQUÍ/);
@@ -238,6 +272,11 @@ console.log("✓ Suggested and saved ideas reuse the same accessible, white-bord
 assert.match(nodes.get("app").innerHTML,/BUSCA REFERENCIAS/);
 assert.match(nodes.get("app").innerHTML,/⌕ Buscar imágenes/);
 assert.match(nodes.get("app").innerHTML,/UNA CHISPA VISUAL AL AZAR/);
+assert.match(nodes.get("app").innerHTML,/musa-challenge-banner/);
+const currentBanner=vm.runInContext("window.MusaChallengeBanner.render()",ctx);
+assert.ok(nodes.get("app").innerHTML.includes(currentBanner),"Explore displays the selected banner");
+vm.runInContext("randomIdea()",ctx);
+assert.ok(nodes.get("app").innerHTML.includes(currentBanner),"Generating a new idea should not swap the banner until refresh");
 const mobileNav = nodes.get("mobile-menu").innerHTML;
 for(const section of ["Inicio","Explorar","Mi estudio","Actividad"]) {
   assert.ok(mobileNav.includes(">"+section+"</button>"), section+" must appear in mobile menu");
