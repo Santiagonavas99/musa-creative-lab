@@ -1,0 +1,21 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1320 670" preserveAspectRatio="xMidYMid slice" aria-hidden="true">
+<defs>
+ <radialGradient id="lime"><stop stop-color="#d7ff42" stop-opacity=".95"/><stop offset="1" stop-color="#d7ff42" stop-opacity="0"/></radialGradient>
+ <radialGradient id="violet"><stop stop-color="#8b55ff" stop-opacity=".58"/><stop offset="1" stop-color="#8b55ff" stop-opacity="0"/></radialGradient>
+ <pattern id="dots" width="14" height="14" patternUnits="userSpaceOnUse"><circle cx="3" cy="3" r="1.4" fill="#211b36" opacity=".42"/></pattern>
+ <pattern id="mesh" width="16" height="16" patternUnits="userSpaceOnUse"><path d="M16 0H0V16" fill="none" stroke="#211b36" opacity=".1"/></pattern>
+</defs>
+<rect width="1320" height="670" fill="#f5f0e7"/>
+<circle cx="545" cy="146" r="170" fill="url(#lime)"/>
+<circle cx="1155" cy="100" r="220" fill="url(#violet)"/>
+<circle cx="1126" cy="615" r="176" fill="url(#lime)"/>
+<path d="M0 124 200 36l151 82-34 172-185-15L0 326Z" fill="#18151a" opacity=".92"/>
+<path d="m4 125 116-36 52 38-40 124L0 260Z" fill="url(#dots)" opacity=".86"/>
+<path d="m25 410 118-76 194 91-67 191-207-22Z" fill="#8f4aff" opacity=".8"/>
+<rect x="161" y="413" width="180" height="167" fill="url(#mesh)" transform="rotate(-14 161 413)"/>
+<path d="M-30 320C155 88 199 557 405 278S675 102 704 203" fill="none" stroke="#d7ff42" stroke-width="27" stroke-linecap="round" opacity=".95"/>
+<path d="M1 597q137-160 228-12t227-11" fill="none" stroke="#211b36" stroke-width="5" opacity=".85"/>
+<path d="M993 40q116 111 240-19M1175 211q77-170 179-129" fill="none" stroke="#211b36" stroke-width="3" opacity=".4"/>
+<path d="M1100 555l60-28 28 65-45 53-66-27Z" fill="url(#dots)"/>
+<path d="M245 85l15 26 27-16-18 31 27 13-35-2-12 30-6-33-30 7 25-23Z" fill="#211b36"/>
+</svg>
