@@ -46,6 +46,20 @@
 .ma-drawing-card .mb-outline-button{color:#211b36;border-color:#211b36;background:#ffffff8c}
 .ma-activity-actions .ma-action-primary{background:#d7ff42;color:#211b36}
 .ma-drawing-card .ma-action-primary{background:#211b36;color:#fff}
+.ma-drawing-card .ma-drawing-refresh{
+  background:#3926ce;
+  color:#fff;
+  border:1px solid #3926ce;
+  box-shadow:0 3px 0 rgba(33,27,54,.12);
+}
+.ma-drawing-card .ma-drawing-refresh:hover{
+  background:#2f1fb1;
+  border-color:#2f1fb1;
+}
+.ma-drawing-card .ma-drawing-refresh:focus-visible{
+  outline:3px solid #211b36;
+  outline-offset:3px;
+}
 .ma-activity-actions button{flex:1 1 auto}
 .ma-saved-writing{background:#3926ce!important;color:#fff;display:flex;flex-direction:column;gap:10px}
 .ma-saved-writing h3{color:#fff;margin:0}
