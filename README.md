@@ -6,6 +6,7 @@
 
 - Generador de ideas creativas y retos.
 - Sesiones con temporizador.
+- **Mi espacio creativo:** proyectos con estados, disciplinas, fecha objetivo, ideas, obras y tableros vinculados; diario privado con entradas fechadas; calendario con planes, fechas objetivo, entradas de diario, sesiones y obras. Accesible desde **Mi estudio**, optimizado para móvil.
 - Galería de obras con fotos, reflexiones e historial.
 - Ideas favoritas y **tableros de inspiración** personalizables: crear/renombrar, guardar una referencia en varios tableros y quitarla sin afectar los demás. Las referencias antiguas se migran a «Sin clasificar» en este navegador.
 - Explorador visual con buscador interno: Unsplash, The Met, Art Institute of Chicago y Wikimedia Commons.
@@ -22,14 +23,14 @@ La búsqueda de Unsplash requiere \`UNSPLASH_ACCESS_KEY\`, configurada en el ser
 ## Cuentas privadas y despliegue
 
 - Autenticación: Supabase Auth, confirmación de correo, recuperación y Recordarme.
-- Datos por usuario: `public.musa_workspaces`, protegido mediante RLS por `auth.uid()` para búsquedas, retos, favoritos, obras, referencias y tableros.
+- Datos por usuario: `public.musa_workspaces`, protegido mediante RLS por `auth.uid()` para búsquedas, retos, favoritos, obras, referencias, tableros, proyectos, diario y calendario.
 - Fotografías: bucket privado `musa-artworks` con URLs firmadas.
 - Proyecto Supabase independiente de MUSA: `ygcusertmukfifwpnlkp`. No usar Casa Clara ni NeoTeam.
 - Variables en Vercel: `MUSA_SUPABASE_URL` y `MUSA_SUPABASE_PUBLISHABLE_KEY`; nunca exponer service_role.
 - Confirmaciones: `https://musa-creative-lab.vercel.app/auth/callback`. El Site URL y Redirect URLs se configuran en Supabase Auth.
 - SMTP actual de prueba: `loto1998k@gmail.com`, sustituible por `musacreativelaboratory@gmail.com`. [Guía SMTP](docs/configurar-correo-musa.md).
 - Importación de datos `musa-v1` solo tras autorización explícita del dueño de la cuenta.
-- Pruebas: `node scripts/check-static.cjs`, `node --test tests/auth.test.cjs tests/auth-routes.test.cjs` y `npm run build`.
+- Pruebas: `node scripts/check-static.cjs`, `node --test tests/auth.test.cjs tests/auth-routes.test.cjs tests/creative-hub.test.cjs` y `npm run build`.
 
 ## Privacidad
 
