@@ -1,0 +1,19 @@
+/* Official CTA chevron from the MUSA design reference. Uses a mask so each CTA inherits its current text color. */
+.musa-cta-chevron{
+ display:inline-block;
+ vertical-align:-0.025em;
+ flex:0 0 auto;
+ width:.69em;
+ height:.69em;
+ margin-inline-start:.42em;
+ background-color:currentColor;
+ -webkit-mask:url('/musa-cta-chevron.svg') center / contain no-repeat;
+ mask:url('/musa-cta-chevron.svg') center / contain no-repeat;
+ transition:transform .18s ease;
+}
+@media (hover:hover) and (pointer:fine){
+ button:hover .musa-cta-chevron,
+ a:hover .musa-cta-chevron,
+ [role="button"]:hover .musa-cta-chevron{transform:translateX(2px)}
+}
+@media(prefers-reduced-motion:reduce){.musa-cta-chevron{transition:none}}
