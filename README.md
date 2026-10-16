@@ -19,11 +19,23 @@ La interfaz principal utiliza HTML, CSS y JavaScript; el carrusel se monta en un
 
 La búsqueda de Unsplash requiere \`UNSPLASH_ACCESS_KEY\`, configurada en el servidor como variable de entorno de Vercel. **Nunca guardes secretos en el repositorio ni los envíes al navegador.**
 
+## Cuentas privadas y despliegue
+
+- Autenticación: Supabase Auth, confirmación de correo, recuperación y Recordarme.
+- Datos por usuario: `public.musa_workspaces`, protegido mediante RLS por `auth.uid()` para búsquedas, retos, favoritos, obras, referencias y tableros.
+- Fotografías: bucket privado `musa-artworks` con URLs firmadas.
+- Proyecto Supabase independiente de MUSA: `ygcusertmukfifwpnlkp`. No usar Casa Clara ni NeoTeam.
+- Variables en Vercel: `MUSA_SUPABASE_URL` y `MUSA_SUPABASE_PUBLISHABLE_KEY`; nunca exponer service_role.
+- Confirmaciones: `https://musa-creative-lab.vercel.app/auth/callback`. El Site URL y Redirect URLs se configuran en Supabase Auth.
+- SMTP actual de prueba: `loto1998k@gmail.com`, sustituible por `musacreativelaboratory@gmail.com`. [Guía SMTP](docs/configurar-correo-musa.md).
+- Importación de datos `musa-v1` solo tras autorización explícita del dueño de la cuenta.
+- Pruebas: `node scripts/check-static.cjs`, `node --test tests/auth.test.cjs tests/auth-routes.test.cjs` y `npm run build`.
+
 ## Privacidad
 
-El MVP guarda obras, imágenes, favoritos y sesiones mediante \`localStorage\`, en el navegador del usuario, sin registro ni sincronización. Los términos consultados en el explorador pasan por una función de MUSA y los servicios de imágenes seleccionados.
+La aplicación guarda obras, favoritos, sesiones y tableros en Supabase con separación por cuenta; los datos antiguos del navegador requieren importación voluntaria. Los términos consultados en el explorador pasan por una función de MUSA y los servicios de imágenes seleccionados.
 
-Si se añaden cuentas, guardado en la nube, Pinterest OAuth o analítica, deberán actualizarse la Política de Privacidad, los permisos y las medidas de seguridad antes de desplegar.
+Para introducir Pinterest OAuth u otras integraciones, actualizar privacidad y permisos antes de desplegar.
 
 Contacto de privacidad: **musacreativelaboratory@gmail.com**.
 
