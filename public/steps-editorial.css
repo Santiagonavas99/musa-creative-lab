@@ -276,3 +276,100 @@
  }
  .how-step-photo{transform:none!important}
 }
+
+/* Content-safe editorial layout: reserve separate grid tracks so photos can never cover text. */
+.how-step{
+  display:grid;
+  grid-template-columns:minmax(0,56%) minmax(0,44%);
+  grid-template-rows:auto minmax(0,1fr);
+  min-height:330px;
+  padding:24px;
+}
+.how-step-number{grid-column:1;grid-row:1}
+.how-step-copy{
+  grid-column:1;
+  grid-row:2;
+  min-width:0;
+  max-width:none;
+  width:auto;
+  margin-top:29px;
+  padding-right:12px;
+}
+.how-step h3{
+  font-size:clamp(24px,2.3vw,29px);
+  line-height:1.08;
+  margin-bottom:11px;
+  overflow-wrap:break-word;
+}
+.how-step p{
+  font-size:clamp(12px,1.06vw,14px);
+  line-height:1.48;
+  overflow-wrap:break-word;
+}
+.how-step-art{
+  position:relative;
+  grid-column:2;
+  grid-row:1 / span 2;
+  align-self:stretch;
+  min-width:0;
+  min-height:0;
+  inset:auto;
+  margin:-24px -24px -24px 0;
+  overflow:hidden;
+  pointer-events:none;
+}
+.how-step-photo,
+.how-step--create .how-step-photo,
+.how-step--save .how-step-photo{
+  width:calc(100% - 21px);
+  height:195px;
+  top:98px;
+  right:12px;
+  transform:rotate(2deg);
+}
+.how-step--create .how-step-photo{
+  top:125px;
+  height:170px;
+  right:8px;
+  transform:rotate(-2deg);
+}
+.how-step--save .how-step-photo{
+  top:93px;
+  height:197px;
+  transform:rotate(-2deg);
+}
+@media (max-width:1050px) and (min-width:771px){
+  .how-step{min-height:330px;padding:20px}
+  .how-step-copy{max-width:none;margin-top:25px;padding-right:9px}
+  .how-step h3{font-size:25px}
+  .how-step p{font-size:12px;line-height:1.45}
+  .how-step-art{margin:-20px -20px -20px 0}
+  .how-step-photo,.how-step--create .how-step-photo,.how-step--save .how-step-photo{
+    width:calc(100% - 12px);right:6px;height:182px
+  }
+}
+@media (max-width:770px){
+  .how-step{
+    grid-template-columns:minmax(0,57%) minmax(0,43%);
+    min-height:255px;
+    padding:20px 22px;
+  }
+  .how-step-copy{max-width:none;margin-top:14px;padding-right:10px}
+  .how-step h3{font-size:clamp(25px,5.3vw,30px);margin-bottom:9px}
+  .how-step p{font-size:13px;line-height:1.43}
+  .how-step-art{margin:-20px -22px -20px 0}
+  .how-step-photo,.how-step--create .how-step-photo,.how-step--save .how-step-photo{
+    top:36px;right:12px;width:calc(100% - 18px);height:185px
+  }
+  .how-step--create .how-step-photo{top:57px;height:164px}
+}
+@media (max-width:390px){
+  .how-step{min-height:265px;padding:18px}
+  .how-step-copy{max-width:none;margin-top:15px;padding-right:8px}
+  .how-step h3{font-size:25px}
+  .how-step p{font-size:12px;line-height:1.4}
+  .how-step-art{margin:-18px -18px -18px 0}
+  .how-step-photo,.how-step--create .how-step-photo,.how-step--save .how-step-photo{
+    top:45px;right:7px;width:calc(100% - 10px);height:171px
+  }
+}
