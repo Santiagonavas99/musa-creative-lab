@@ -32,6 +32,27 @@ assert.ok(introHero, "Intro hero should exist");
 assert.doesNotMatch(introHero, /IDEA PARA CREAR/,
  "Home hero must not duplicate Explore's generated-idea preview");
 
+const claimTag = '<meta name="p:domain_verify" content="2f5d9a91026ee62077c40f6bd9da04c7">';
+assert.equal(html.split(claimTag).length-1,1,"Pinterest verification token must be present exactly once");
+assert.ok(html.indexOf(claimTag)>html.indexOf('<head>') && html.indexOf(claimTag)<html.indexOf('</head>'),
+  "Pinterest must find its claim tag in the actual document head");
+
+const api = fs.readFileSync(path.join(root, "api/inspiration.js"), "utf8");
+const showcaseJS = fs.readFileSync(path.join(root, "public/showcase-controller.js"), "utf8");
+const boardsJS = fs.readFileSync(path.join(root, "public/boards.js"), "utf8");
+const moodboardJS = fs.readFileSync(path.join(root, "public/moodboards.js"), "utf8");
+const moodboardCSS = fs.readFileSync(path.join(root, "public/moodboards.css"), "utf8");
+const bannerJS = fs.readFileSync(path.join(root, "public/challenge-banner.js"), "utf8");
+const bannerCSS = fs.readFileSync(path.join(root, "public/challenge-banner.css"), "utf8");
+const boardsCSS = fs.readFileSync(path.join(root, "public/boards.css"), "utf8");
+const inline = [...html.matchAll(/<script(?:\s[^>]*)?>([\s\S]*?)<\/script>/g)].filter(([,source])=>source.trim());
+assert.ok(inline.length > 0, "MUSA must contain client application JavaScript");
+for (const [, source] of inline) new vm.Script(source, {filename: "index.html"});
+new vm.Script(api, {filename: "api/inspiration.js"});
+new vm.Script(showcaseJS, {filename: "showcase-controller.js"});
+new vm.Script(boardsJS, {filename: "boards.js"});
+new vm.Script(moodboardJS, {filename: "moodboards.js"});
+new vm.Script(bannerJS, {filename: "challenge-banner.js"});
 // The Explore challenge banner is decorative, responsive and refresh-driven.
 assert.match(html, /src="\/challenge-banner\.js"/, "The random artwork controller must load before the app");
 assert.match(html, /href="\/challenge-banner\.css"/, "The challenge collage stylesheet must load");
@@ -62,27 +83,7 @@ for(const markup of [firstBanner,secondBanner]){
   assert.match(markup, /#musa-mark-icon/, "Banner reuses the user's official MUSA asterisk");
 }
 
-const claimTag = '<meta name="p:domain_verify" content="2f5d9a91026ee62077c40f6bd9da04c7">';
-assert.equal(html.split(claimTag).length-1,1,"Pinterest verification token must be present exactly once");
-assert.ok(html.indexOf(claimTag)>html.indexOf('<head>') && html.indexOf(claimTag)<html.indexOf('</head>'),
-  "Pinterest must find its claim tag in the actual document head");
 
-const api = fs.readFileSync(path.join(root, "api/inspiration.js"), "utf8");
-const showcaseJS = fs.readFileSync(path.join(root, "public/showcase-controller.js"), "utf8");
-const boardsJS = fs.readFileSync(path.join(root, "public/boards.js"), "utf8");
-const moodboardJS = fs.readFileSync(path.join(root, "public/moodboards.js"), "utf8");
-const moodboardCSS = fs.readFileSync(path.join(root, "public/moodboards.css"), "utf8");
-const bannerJS = fs.readFileSync(path.join(root, "public/challenge-banner.js"), "utf8");
-const bannerCSS = fs.readFileSync(path.join(root, "public/challenge-banner.css"), "utf8");
-const boardsCSS = fs.readFileSync(path.join(root, "public/boards.css"), "utf8");
-const inline = [...html.matchAll(/<script(?:\s[^>]*)?>([\s\S]*?)<\/script>/g)].filter(([,source])=>source.trim());
-assert.ok(inline.length > 0, "MUSA must contain client application JavaScript");
-for (const [, source] of inline) new vm.Script(source, {filename: "index.html"});
-new vm.Script(api, {filename: "api/inspiration.js"});
-new vm.Script(showcaseJS, {filename: "showcase-controller.js"});
-new vm.Script(boardsJS, {filename: "boards.js"});
-new vm.Script(moodboardJS, {filename: "moodboards.js"});
-new vm.Script(bannerJS, {filename: "challenge-banner.js"});
 // Experimental moodboards keep the existing app navigation and original palettes intact.
 assert.match(html, /href="\/moodboards\.css"/,"The editorial layouts must be styled");
 assert.match(html, /src="\/moodboards\.js"/,"Moodboard controller must load synchronously before app");
