@@ -32,7 +32,7 @@ jobs:
       - name: Check client and API syntax, interface and saved references
         run: node scripts/check-static.cjs
       - name: Verify authentication and private users
-        run: node --test tests/auth.test.cjs tests/auth-routes.test.cjs
+        run: node --test tests/auth.test.cjs tests/auth-routes.test.cjs tests/intro-glass.test.cjs
       - name: Build production application and check critical assets
         run: |
           npm install --no-audit --no-fund
