@@ -2,6 +2,7 @@
 // Kept separate from the search gateway and carousel to ease a future account migration.
 let selectedBoardId = "";
 let boardEditor = null;
+let boardDeleteId = "";
 
 function boardMemberships(reference) {
   return Array.isArray(reference.boardIds) ? reference.boardIds : [];
@@ -67,8 +68,72 @@ function renderBoardEditor() {
     '<button type="submit" class="btn">' + (renaming?'Guardar cambios':'Crear tablero') + '</button>' +
     '</div></form></div></div>';
 }
+// Board deletion is deliberate and reversible until confirmed. Saved references are never discarded.
+function renderBoardDeleteConfirm() {
+  if (!boardDeleteId) return "";
+  const board = data.boards.find(item => item.id === boardDeleteId);
+  if (!board) return "";
+  const count = referencesForBoard(board.id).length;
+  return '<div class="board-modal-backdrop" id="board-delete-modal" role="presentation" onclick="closeBoardDeleteConfirm()">' +
+    '<div class="board-modal board-delete-dialog" role="alertdialog" aria-modal="true" aria-labelledby="board-delete-title" aria-describedby="board-delete-description" onclick="event.stopPropagation()">' +
+    '<div class="board-modal-top"><span class="eyebrow">MUSA / TUS TABLEROS</span>' +
+    '<button type="button" class="board-close" aria-label="Cerrar sin eliminar" onclick="closeBoardDeleteConfirm()">×</button></div>' +
+    '<h2 id="board-delete-title">¿ELIMINAR ESTE TABLERO?</h2>' +
+    '<p id="board-delete-description">Vas a eliminar <strong>«' + esc(board.name) + '»</strong>. ' +
+    (count ? 'Sus ' + count + ' ' + (count === 1 ? 'referencia guardada' : 'referencias guardadas') +
+      ' no se perderán: las que no estén en otros tableros pasarán a «Sin clasificar».' :
+      'Este tablero no tiene referencias guardadas.') + '</p>' +
+    '<div class="board-dialog-actions">' +
+    '<button id="board-delete-cancel" type="button" class="btn outline" onclick="closeBoardDeleteConfirm()">Cancelar</button>' +
+    '<button type="button" class="btn board-confirm-delete" onclick="confirmDeleteBoard()">Eliminar tablero</button>' +
+    '</div></div></div>';
+}
+function openBoardDeleteConfirm(boardId) {
+  if (!data.boards.some(board => board.id === boardId)) return;
+  boardEditor = null;
+  boardDeleteId = boardId;
+  render();
+  document.getElementById("board-delete-cancel")?.focus?.();
+}
+function closeBoardDeleteConfirm() {
+  if (!boardDeleteId) return;
+  boardDeleteId = "";
+  render();
+}
+function confirmDeleteBoard() {
+  const board = data.boards.find(item => item.id === boardDeleteId);
+  if (!board) { boardDeleteId = ""; render(); return; }
+  const snapshot = JSON.stringify({boards:data.boards,references:data.references});
+  const deletedId = board.id;
+  data.boards = data.boards.filter(item => item.id !== deletedId);
+  let unclassified = data.boards.find(item => item.name === "Sin clasificar");
+  for (const reference of data.references) {
+    if (!boardMemberships(reference).includes(deletedId)) continue;
+    const remaining = [...new Set(boardMemberships(reference).filter(id => id !== deletedId))];
+    if (!remaining.length) {
+      if (!unclassified) {
+        unclassified = {id:crypto.randomUUID(),name:"Sin clasificar",createdAt:new Date().toISOString()};
+        data.boards.push(unclassified);
+      }
+      remaining.push(unclassified.id);
+    }
+    reference.boardIds = remaining;
+  }
+  if (!save()) {
+    const original = JSON.parse(snapshot);
+    data.boards = original.boards;
+    data.references = original.references;
+    return;
+  }
+  if (selectedBoardId === deletedId) selectedBoardId = "";
+  boardDeleteId = "";
+  boardEditor = null;
+  toast("Tablero eliminado. Tus referencias siguen guardadas.");
+  render();
+}
 function openBoardEditor(id = "", refIndex = null) {
   if (id && !data.boards.some(board => board.id === id)) return;
+  boardDeleteId = "";
   boardEditor = { id, refIndex: Number.isInteger(refIndex) && refIndex >= 0 ? refIndex : null };
   render();
   document.getElementById("board-name")?.focus?.();
@@ -157,7 +222,8 @@ function renderBoards() {
     const references = data.references.map((r,i) => ({r,i})).filter(({r}) =>
       boardMemberships(r).includes(currentBoard.id));
     content = '<div class="board-view"><div class="board-view-bar"><button class="board-back" type="button" onclick="closeBoard()">← Todos los tableros</button>' +
-      '<button type="button" class="btn outline" onclick="openBoardEditor(' + boardActionArgs(currentBoard.id) + ')">Renombrar tablero</button></div>' +
+      '<div class="board-view-actions"><button type="button" class="btn outline" onclick="openBoardEditor(' + boardActionArgs(currentBoard.id) + ')">Renombrar tablero</button>' +
+      '<button type="button" class="btn board-delete" onclick="openBoardDeleteConfirm(' + boardActionArgs(currentBoard.id) + ')">Eliminar tablero</button></div></div>' +
       '<h3>' + esc(currentBoard.name) + '</h3><p class="muted">' + references.length + ' referencias guardadas</p>' +
       (references.length ? '<div class="ref-grid">' + references.map(({r,i}) => refCard(r,i,true,currentBoard.id)).join("") + '</div>' :
         '<div class="board-empty"><p>Este tablero todavía no tiene imágenes. Busca referencias y guárdalas aquí.</p></div>') + '</div>';
@@ -168,21 +234,22 @@ function renderBoards() {
         ')" aria-label="Abrir tablero ' + esc(board.name) + '">' + renderBoardGallery(refs) +
         '<span class="board-title">' + esc(board.name) + '</span><span class="board-count">' + refs.length +
         ' referencias</span></button><button type="button" class="board-rename" onclick="openBoardEditor(' +
-        boardActionArgs(board.id) + ')" aria-label="Renombrar ' + esc(board.name) + '">Renombrar ✎</button></article>';
+        boardActionArgs(board.id) + ')" aria-label="Renombrar ' + esc(board.name) + '">Renombrar ✎</button>' +
+        '<button type="button" class="board-tile-delete" onclick="openBoardDeleteConfirm(' + boardActionArgs(board.id) + ')" aria-label="Eliminar tablero ' + esc(board.name) + '">Eliminar</button></article>';
     }).join("") + '</div>';
   } else {
     content = '<div class="board-empty"><div class="board-empty-mark">' + musaMark() + '</div>' +
       '<h3>TUS IDEAS, BIEN ORGANIZADAS.</h3><p>Crea tu primer tablero y reúne referencias por estilo, técnica o proyecto.</p>' +
       '<button class="btn" type="button" onclick="openBoardEditor()">Crear mi primer tablero ↗</button></div>';
   }
-  return '<section class="board-section" aria-label="Tableros de inspiración">' + header + content + '</section>' + renderBoardEditor();
+  return '<section class="board-section" aria-label="Tableros de inspiración">' + header + content + '</section>' + renderBoardEditor() + renderBoardDeleteConfirm();
 }
 // The global navigation has its own keyboard handler; dialogs trap focus independently.
 document.addEventListener?.("keydown", event => {
-  if (!boardEditor) return;
-  if (event.key === "Escape") { event.preventDefault(); closeBoardEditor(); return; }
+  if (!boardEditor && !boardDeleteId) return;
+  if (event.key === "Escape") { event.preventDefault(); if (boardDeleteId) closeBoardDeleteConfirm(); else closeBoardEditor(); return; }
   if (event.key !== "Tab") return;
-  const dialog = document.getElementById("board-modal");
+  const dialog = document.getElementById(boardDeleteId ? "board-delete-modal" : "board-modal");
   const nodes = [...(dialog?.querySelectorAll?.("button, input") || [])].filter(el => !el.disabled);
   if (!nodes.length) return;
   const first = nodes[0],last = nodes[nodes.length-1];

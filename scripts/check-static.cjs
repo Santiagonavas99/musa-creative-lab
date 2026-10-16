@@ -226,6 +226,14 @@ assert.doesNotMatch(moodboardJS, /source\.unsplash\.com|images\.pexels\.com/,"Do
 assert.match(html, /src="\/boards\.js"/, "Board organizer must load before MUSA inline app");
 assert.match(html, /href="\/boards\.css"/, "Board styling must ship with the site");
 assert.match(boardsCSS, /@media\(max-width:480px\)/, "Boards must adapt to narrow mobile screens");
+assert.match(boardsJS,/function openBoardDeleteConfirm\(boardId\)/,"Board owners can request deletion");
+assert.match(boardsJS,/function confirmDeleteBoard\(\)/,"Board deletion is implemented");
+assert.match(boardsJS,/role="alertdialog"/,"Deletion requires a distinct, accessible confirmation");
+assert.match(boardsJS,/if \(!save\(\)\) \{/,"A failed save must leave board data untouched");
+assert.match(boardsJS,/remaining.push\(unclassified.id\)/,"Deleting a board rehomes orphaned references");
+assert.match(boardsCSS,/\.board-confirm-delete\{/,"Destructive action is visually distinguished");
+assert.match(boardsCSS,/\.board-view-actions\{/,"Delete action is beside rename in board detail");
+
 const reactIsland = fs.readFileSync(path.join(root, "src/circular-carousel-entry.jsx"), "utf8");
 const bitsComponent = fs.readFileSync(path.join(root, "src/components/CircularCarousel/CircularCarousel.jsx"), "utf8");
 const showcaseCSS = fs.readFileSync(path.join(root, "public/showcase.css"), "utf8");
@@ -520,6 +528,47 @@ console.log("✓ MUSA boots and renders Explore with search controls");
   vm.runInContext("closeBoardEditor()",ctx);
   assert.match(nodes.get("app").innerHTML,/TUS TABLEROS DE INSPIRACIÓN/);
   assert.match(results,/GUARDAR EN TABLERO/);
+  // Deletion is opt-in. Cancel is safe; a confirmed deletion preserves all saved references.
+  vm.runInContext("window.__boardBackup = JSON.stringify({boards:data.boards,references:data.references});"+
+    "data.boards=[{id:'board-alpha',name:'Ejemplo'},{id:'board-beta',name:'Segundo tablero'}];"+
+    "data.references=["+
+    "{id:'ref-one',title:'Única',boardIds:['board-alpha'],source:'unsplash',image:'https://example.com/1.jpg',link:'https://example.com/1'},"+
+    "{id:'ref-two',title:'Compartida',boardIds:['board-alpha','board-beta'],source:'unsplash',image:'https://example.com/2.jpg',link:'https://example.com/2'}"+
+    "];selectedBoardId='board-alpha';render()",ctx);
+  assert.match(nodes.get("app").innerHTML,/Renombrar tablero/);
+  assert.match(nodes.get("app").innerHTML,/Eliminar tablero/);
+  vm.runInContext("openBoardDeleteConfirm('board-alpha')",ctx);
+  assert.match(nodes.get("app").innerHTML,/¿ELIMINAR ESTE TABLERO\?/);
+  assert.match(nodes.get("app").innerHTML,/«Ejemplo»/);
+  assert.match(nodes.get("app").innerHTML,/Sus 2 referencias guardadas no se perderán/);
+  assert.match(nodes.get("app").innerHTML,/role="alertdialog"/);
+  vm.runInContext("closeBoardDeleteConfirm()",ctx);
+  assert.equal(vm.runInContext("data.boards.length",ctx),2,"Cancel never deletes any board");
+  assert.equal(vm.runInContext("selectedBoardId",ctx),"board-alpha","Cancel keeps the board open");
+  vm.runInContext("openBoardDeleteConfirm('board-alpha');confirmDeleteBoard()",ctx);
+  assert.equal(vm.runInContext("data.boards.some(b=>b.id==='board-alpha')",ctx),false);
+  assert.equal(vm.runInContext("selectedBoardId",ctx),"","Deleting an open board returns to gallery");
+  assert.equal(vm.runInContext("data.references.length",ctx),2,"Deleting a board never destroys references");
+  assert.equal(vm.runInContext("data.references.find(r=>r.id==='ref-one').boardIds.length",ctx),1);
+  assert.equal(vm.runInContext("data.boards.find(b=>b.id===data.references.find(r=>r.id==='ref-one').boardIds[0]).name",ctx),"Sin clasificar","Unshared images go to default board");
+  assert.equal(vm.runInContext("data.references.find(r=>r.id==='ref-two').boardIds.join(',')",ctx),"board-beta","Shared images remain in other boards");
+  assert.doesNotMatch(nodes.get("app").innerHTML,/¿ELIMINAR ESTE TABLERO\?/,"Confirmation closes once complete");
+  // Remove an empty board, without creating an unnecessary default.
+  vm.runInContext("data.boards.push({id:'board-empty',name:'Vacío'});openBoardDeleteConfirm('board-empty')",ctx);
+  assert.match(nodes.get("app").innerHTML,/Este tablero no tiene referencias guardadas/);
+  vm.runInContext("confirmDeleteBoard()",ctx);
+  assert.equal(vm.runInContext("data.boards.some(b=>b.id==='board-empty')",ctx),false);
+  // Failure to persist must roll back membership and board removal.
+  vm.runInContext("window.__boardSave = save;"+
+    "data.boards.push({id:'board-fail',name:'No borrar'});"+
+    "selectedBoardId='board-fail';"+
+    "save = ()=>false;openBoardDeleteConfirm('board-fail');confirmDeleteBoard()",ctx);
+  assert.equal(vm.runInContext("data.boards.some(b=>b.id==='board-fail')",ctx),true,"Save errors must restore board");
+  assert.equal(vm.runInContext("selectedBoardId",ctx),"board-fail","Failed removal keeps current board");
+  vm.runInContext("save=window.__boardSave;boardDeleteId='';selectedBoardId='';"+
+    "Object.assign(data,JSON.parse(window.__boardBackup));render()",ctx);
+  console.log("✓ Board deletion confirmation, cancel, preservation and rollback verified");
+
   console.log("✓ Search results, board picker, credits and board creation dialog work");
   console.log("All checks passed.");
 })().catch(err=>{console.error(err);process.exitCode=1});

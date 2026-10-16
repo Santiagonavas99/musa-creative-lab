@@ -50,3 +50,37 @@
 @media(max-width:760px){.boards-grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}.board-heading{align-items:flex-start;gap:11px}.board-heading h2{font-size:25px}.board-heading .btn{font-size:12px;padding:11px}.board-cover-grid{aspect-ratio:1.2}}
 @media(max-width:480px){.board-heading{flex-direction:column;align-items:stretch}.board-heading .btn{align-self:flex-start}.board-view{padding:14px}.board-title{font-size:16px;padding:11px 10px 3px}.board-count{padding:0 10px 5px}.board-rename{margin:5px 6px 10px}.board-cover-grid{aspect-ratio:1}.ref-save-options{width:100%}.board-dialog-actions .btn{flex:1}}
 @media(prefers-reduced-motion:reduce){.board-cover-tile img{transition:none}}
+
+
+/* Board management: keep destructive actions secondary until confirmation. */
+.board-view-actions{display:flex;flex-wrap:wrap;align-items:center;gap:9px}
+.board-view-actions .btn{min-height:43px;font-size:13px}
+.board-delete{
+  background:#fff4f0;
+  color:#a63c29;
+  border:1.5px solid #e9b6ab;
+}
+.board-delete:hover,.board-delete:focus-visible{background:#ffebe4;border-color:#d76b50}
+.board-tile-delete{
+  align-self:flex-start;
+  margin:0 9px 11px;
+  padding:8px 7px;
+  border:0;
+  border-radius:8px;
+  background:transparent;
+  color:#a63c29;
+  font-size:12px;
+  font-weight:800;
+}
+.board-tile-delete:hover,.board-tile-delete:focus-visible{background:#ffebe4}
+.board-tile .board-rename{margin-bottom:2px}
+.board-delete-dialog{border:2px solid #ffddd4}
+.board-delete-dialog #board-delete-description{line-height:1.55}
+.board-confirm-delete{background:#bf3f2c;color:#fff;border:1px solid #bf3f2c}
+.board-confirm-delete:hover,.board-confirm-delete:focus-visible{background:#a83323}
+@media(max-width:480px){
+ .board-view-actions{width:100%;gap:8px}
+ .board-view-actions .btn{flex:1 1 140px}
+ .board-delete-dialog .board-dialog-actions{flex-direction:column-reverse}
+ .board-delete-dialog .board-dialog-actions .btn{width:100%}
+}
