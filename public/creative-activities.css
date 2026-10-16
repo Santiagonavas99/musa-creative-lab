@@ -81,8 +81,10 @@
  .ma-activity-actions .btn,.ma-activity-actions .mb-outline-button{font-size:12px}
 }
 @media(max-width:680px){
- .musa-activity-grid{grid-template-columns:1fr;align-items:initial;gap:13px}
- .musa-activity-grid>.card{min-height:0;padding:22px}
+ /* Desktop cards share a height; stacked mobile cards size to their own content. */
+ .musa-activity-grid{grid-template-columns:1fr;grid-auto-rows:auto;align-items:start;gap:13px}
+ .musa-activity-grid>.card{min-height:0;height:auto;align-self:start;padding:22px}
+ .musa-activity-grid .ma-content{flex:0 1 auto}
  .ma-activity-title{font-size:34px}
  .ma-activity-intro{max-width:none}
  .ma-writing-quote,.ma-writing-reference{min-height:148px}

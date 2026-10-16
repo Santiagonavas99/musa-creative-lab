@@ -203,7 +203,14 @@ assert.doesNotMatch(html,/ma-challenge-entry|¿TE APETECE UN RETO CREATIVO\?|Exp
 assert.doesNotMatch(activitiesCSS,/\.ma-challenge-entry/,"Remove obsolete banner styling");
 assert.match(activitiesCSS,/\.musa-activity-grid\{align-items:stretch/,"Both cards should align to equal height");
 assert.match(activitiesCSS,/\.musa-activity-grid>.card\{display:flex;flex-direction:column/,"Both activities stretch naturally");
-assert.match(activitiesCSS,/grid-auto-rows:1fr/,"Both card heights must remain equal even when stacked");
+assert.match(activitiesCSS,/\.musa-activity-grid\{[^}]*grid-auto-rows:1fr/,"Desktop cards must continue to match height");
+const mobileActivityStyles = activitiesCSS.slice(activitiesCSS.indexOf("@media(max-width:680px){"));
+assert.ok(mobileActivityStyles.startsWith("@media(max-width:680px){"),"Expected mobile breakpoint for creative activities");
+assert.match(mobileActivityStyles,/\.musa-activity-grid\{[^}]*grid-template-columns:1fr;grid-auto-rows:auto;/,"Mobile cards must size independently, not share tallest row height");
+assert.match(mobileActivityStyles,/\.musa-activity-grid>\.card\{[^}]*min-height:0;height:auto;align-self:start;/,"Stacked cards must not stretch to another card's height");
+assert.match(mobileActivityStyles,/\.musa-activity-grid \.ma-content\{flex:0 1 auto\}/,"Card content must not stretch buttons away from the explanation on mobile");
+assert.match(mobileActivityStyles,/\.ma-writing-quote,\.ma-writing-reference\{min-height:148px\}/,"Question and image modes remain visible at mobile widths");
+assert.match(mobileActivityStyles,/\.ma-drawing-card \.musa-challenge-banner\{min-height:210px\}/,"Drawing still has its editorial collage");
 assert.match(html, /class="btn ma-drawing-refresh" onclick="randomIdea\(\)"/,"Drawing another idea has a distinctive primary style");
 assert.match(activitiesCSS, /\.ma-drawing-card \.ma-drawing-refresh\{[\s\S]*?background:#3926ce;[\s\S]*?color:#fff;/,"The drawing refresh button contrasts in MUSA purple");
 
