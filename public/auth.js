@@ -4,6 +4,18 @@
 const REMEMBER_KEY='musa-remember-v1';
 const AUTH_KEY='musa-auth-v1';
 const LEGACY_KEY='musa-v1';
+const REDIRECT_PATH='/auth/callback';
+const routeModes={'/login':'login','/signup':'signup','/auth/check-email':'verify','/auth/callback':'callback','/auth/success':'success','/auth/error':'confirmation-error','/auth/recover':'recover','/auth/reset':'reset','/auth/reset-success':'reset-success'};
+const modeRoutes={login:'/login',signup:'/signup',verify:'/auth/check-email',callback:'/auth/callback',success:'/auth/success','confirmation-error':'/auth/error',recover:'/auth/recover',reset:'/auth/reset','reset-success':'/auth/reset-success'};
+function routeMode(){return routeModes[location.pathname||'/']||'login'}
+function updateRoute(next,replace=false){
+  const target=modeRoutes[next];
+  if(target&&location.pathname!==target){
+    const action=replace?'replaceState':'pushState';
+    window.history?.[action]?.({},'',target);
+  }
+}
+
 let remember=localStorage.getItem(REMEMBER_KEY)!=='0';
 let client=null,user=null,loaded=false,mode='login',notice='',problem='',busy=false,loadToken=0,saveTimer=null,saveChain=Promise.resolve(),saveError='';
 const images=new Map();
@@ -46,6 +58,19 @@ function renderGate(){
   if(mode==='loading'){
     title='PREPARANDO TU ESPACIO.';subtitle='Conectando tu laboratorio creativo de forma segura…';
     form='<p class="auth-message" role="status">Un momento, estamos cargando tu estudio.</p>';
+  } else if(mode==='callback'){
+    title='CONFIRMANDO TU CUENTA…';subtitle='Estamos verificando el enlace y preparando tu acceso.';
+    form='<p class="auth-message" role="status">Un momento, estamos comprobando tu correo con Supabase.</p>';
+  } else if(mode==='success'){
+    title='TU CUENTA YA ESTÁ LISTA.';subtitle='Tu correo fue confirmado correctamente. ¡Ya puedes crear sin límites!';
+    form='<button class="btn secondary auth-submit" type="button" onclick="MusaAuth.enter(\'inicio\')">Entrar a mi estudio ↗</button><button class="auth-link" type="button" onclick="MusaAuth.enter(\'explorar\')">Explorar MUSA →</button>';
+  } else if(mode==='confirmation-error'){
+    title='NO PUDIMOS CONFIRMAR TU CUENTA.';subtitle='El enlace puede haber expirado o no es válido. Puedes solicitar uno nuevo.';
+    form='<form onsubmit="MusaAuth.resend(event)"><div class="field"><label for="auth-email">Correo para reenviar confirmación</label><input id="auth-email" type="email" autocomplete="email" required placeholder="tu@email.com" value="'+html(sessionStorage.getItem('musa-pending-email')||'')+'"></div><button class="btn secondary auth-submit" type="submit">Reenviar confirmación ↗</button><p id="auth-submit-status" class="auth-small" role="status" aria-live="polite"></p></form>';
+    foot='<button class="auth-link" type="button" onclick="MusaAuth.show(\'login\')">← Volver al acceso</button>';
+  } else if(mode==='reset-success'){
+    title='CONTRASEÑA ACTUALIZADA.';subtitle='Ya puedes iniciar sesión con tu nueva contraseña.';
+    form='<button class="btn secondary auth-submit" type="button" onclick="MusaAuth.show(\'login\')">Iniciar sesión ↗</button>';
   } else if(mode==='error'){
     title='NO PUDIMOS CONECTAR.';subtitle='Las cuentas de MUSA no están disponibles por el momento.';
     form='<p class="auth-error" role="alert">'+html(problem)+'</p><button class="btn secondary" onclick="MusaAuth.retry()">Reintentar conexión ↻</button>';
