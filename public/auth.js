@@ -103,7 +103,34 @@ function renderGate(){
     form+'<div class="auth-footer">'+foot+'</div></section></div>'+
     '<footer class="foot"><div>MUSA® / Cada estudio es privado y personal.</div><nav class="legal-links"><a href="/politica-de-privacidad/">Privacidad</a><a href="/terminos-de-uso/">Términos</a></nav></footer>';
 }
-function show(next){mode=next;problem='';notice='';busy=false;renderGate()}
+function show(next){mode=next;updateRoute(next);problem='';notice='';busy=false;renderGate()}
+async function enter(target){
+  if(!client)return show('login');
+  if(!user){
+    const {data:session,error}=await client.auth.getUser();
+    if(error||!session?.user)return show('login');
+    user=session.user;
+  }
+  if(!loaded)await loadWorkspace(user);
+  if(loaded&&target==='explorar')go('explorar');
+}
+async function resend(event){
+  event.preventDefault();
+  if(!client||busy)return;
+  const email=event.currentTarget.querySelector('#auth-email')?.value.trim().toLowerCase();
+  if(!email)return;
+  busy=true;problem='';notice='';
+  const submit=event.currentTarget.querySelector('button[type="submit"]');
+  if(submit){submit.disabled=true;submit.textContent='Reenviando…';}
+  try{
+    const {error}=await client.auth.resend({type:'signup',email,options:{emailRedirectTo:location.origin+REDIRECT_PATH}});
+    if(error)throw error;
+    sessionStorage.setItem('musa-pending-email',email);
+    mode='verify';updateRoute('verify');notice='Si el correo está pendiente de confirmar, te llegará un enlace nuevo.';
+  }catch(e){mode='confirmation-error';problem=message(e);}
+  finally{busy=false;renderGate();}
+}
+
 function message(err){
   const msg=String(err?.message||err||'Error desconocido');
   if(/invalid login credentials/i.test(msg))return 'Correo o contraseña incorrectos, o todavía no confirmaste tu correo.';
@@ -146,25 +173,25 @@ async function handle(event){
   try{
     if(currentMode==='signup'){
       if(password.length<8)throw Error('La contraseña debe tener al menos 8 caracteres.');
-      const {data:result,error}=await waitForReply(client.auth.signUp({email,password,options:{emailRedirectTo:location.origin+'/',data:{display_name:displayName||email.split('@')[0]}}}));
+      const {data:result,error}=await waitForReply(client.auth.signUp({email,password,options:{emailRedirectTo:location.origin+REDIRECT_PATH,data:{display_name:displayName||email.split('@')[0]}}}));
       if(error)throw error;
       if(result.session){await loadWorkspace(result.user);notice='Cuenta creada correctamente.';}
-      else{mode='verify';notice='Te enviamos las instrucciones a '+email+'.';}
+      else{sessionStorage.setItem('musa-pending-email',email);mode='verify';updateRoute('verify');notice='Te enviamos las instrucciones a '+email+'.';}
     }else if(currentMode==='login'){
       rememberChoice(choice);
       const {data:result,error}=await waitForReply(client.auth.signInWithPassword({email,password}));
       if(error)throw error;
       await loadWorkspace(result.user);
     }else if(currentMode==='recover'){
-      const {error}=await waitForReply(client.auth.resetPasswordForEmail(email,{redirectTo:location.origin+'/'}));
+      const {error}=await waitForReply(client.auth.resetPasswordForEmail(email,{redirectTo:location.origin+REDIRECT_PATH}));
       if(error)throw error;
-      mode='verify';notice='Si existe una cuenta con ese correo, llegará un enlace de recuperación.';
+      mode='verify';updateRoute('verify');notice='Si existe una cuenta con ese correo, llegará un enlace de recuperación.';
     }else if(currentMode==='reset'){
       if(password.length<8)throw Error('La contraseña debe tener al menos 8 caracteres.');
       const {error}=await waitForReply(client.auth.updateUser({password}));
       if(error)throw error;
       await client.auth.signOut();
-      mode='login';notice='Contraseña actualizada. Entra con tu nueva clave.';
+      mode='reset-success';updateRoute('reset-success');notice='Contraseña actualizada correctamente.';
     }
   }catch(e){problem=message(e);if(currentMode!=='reset')mode=currentMode}
   finally{clearTimeout(delayMessage);busy=false;if(!loaded)renderGate();else render();}
