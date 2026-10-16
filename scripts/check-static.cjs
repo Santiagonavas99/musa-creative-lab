@@ -95,6 +95,7 @@ assert.match(html,/function renderDrawingActivity\(\)/,"Explore includes a drawi
 assert.match(html,/function renderExploreActivities\(\)/,"Two activities share one grid");
 assert.match(activitiesCSS,/\.musa-activity-grid\{align-items:stretch/,"Both cards should align to equal height");
 assert.match(activitiesCSS,/\.musa-activity-grid>.card\{display:flex;flex-direction:column/,"Both activities stretch naturally");
+assert.match(activitiesCSS,/grid-auto-rows:1fr/,"Both card heights must remain equal even when stacked");
 assert.match(writingJS,/\/api\/inspiration\?q=/,"Image writing prompts use existing visual repository API");
 assert.match(html,/function saveWriting\(\)/,"Writing ideas can be saved independently");
 assert.match(html,/function updateWritingDraft\(text\)/,"The writing editor persists its text");
@@ -307,6 +308,7 @@ assert.match(nodes.get("app").innerHTML,/ESCRITURA GUARDADA/);
 const writingId=vm.runInContext("data.favorites[0].id",ctx);
 vm.runInContext("startFavorite("+JSON.stringify(writingId)+")",ctx);
 assert.match(nodes.get("app").innerHTML,/ma-writing-editor/);
+assert.doesNotMatch(nodes.get("app").innerHTML,/mb-session-preview/,"Writing sessions should never display the drawing moodboard");
 vm.runInContext("updateWritingDraft('Texto creativo de prueba que debe conservarse.')",ctx);
 assert.equal(vm.runInContext("data.active.item.draft",ctx),"Texto creativo de prueba que debe conservarse.");
 vm.runInContext("endSession()",ctx);
