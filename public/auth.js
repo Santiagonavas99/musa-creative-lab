@@ -53,7 +53,7 @@ function renderGate(){
   document.body?.classList?.add?.('auth-locked');
   const nav=document.getElementById('nav');if(nav)nav.innerHTML='';
   const mobile=document.getElementById('mobile-menu');if(mobile){mobile.innerHTML='';mobile.hidden=true;}
-  const toggle=document.getElementById('mobile-menu-toggle');if(toggle)toggle.setAttribute('aria-expanded','false');
+  const toggle=document.getElementById('mobile-menu-toggle');toggle?.setAttribute?.('aria-expanded','false');
   const account=document.getElementById('account-menu');
   if(account)account.innerHTML='';
   let title='',subtitle='',form='',foot='';
