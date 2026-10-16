@@ -66,13 +66,14 @@
  .how-it-works{margin-top:30px;scroll-margin-top:84px}
  .how-it-works-heading h2{font-size:28px}
 }
-</style><link rel="stylesheet" href="/showcase.css"><link rel="stylesheet" href="/mobile-menu.css"><link rel="stylesheet" href="/nav-motion.css"><link rel="stylesheet" href="/boards.css"><link rel="stylesheet" href="/favorite-ideas.css"><link rel="stylesheet" href="/moodboards.css"><link rel="stylesheet" href="/challenge-banner.css"><script src="/boards.js"></script><script src="/moodboards.js"></script><script src="/challenge-banner.js"></script><script src="/nav-motion.js" defer></script></head><body><svg xmlns="http://www.w3.org/2000/svg" width="0" height="0" style="position:absolute;width:0;height:0;overflow:hidden" aria-hidden="true" focusable="false"><symbol id="musa-mark-icon" viewBox="0 0 438.529 438.529"><path fill="currentColor" d="M421.833,285.36c-2.573-9.801-8.233-17.179-16.991-22.128l-75.944-43.966l75.944-43.968 c8.758-4.949,14.421-12.322,16.991-22.126c2.566-9.803,1.379-19.082-3.572-27.836L399.99,93.932 c-4.948-8.757-12.319-14.419-22.127-16.989c-9.802-2.565-19.072-1.376-27.833,3.576l-75.944,43.677v-87.65 c0-9.899-3.621-18.464-10.855-25.697C256,3.616,247.433,0,237.537,0h-36.54c-9.9,0-18.464,3.619-25.697,10.849 c-7.232,7.232-10.85,15.798-10.85,25.697v87.65l-75.945-43.68c-8.757-4.952-18.036-6.145-27.837-3.576 c-9.803,2.573-17.179,8.232-22.128,16.989l-18.271,31.405c-4.952,8.754-6.14,18.033-3.571,27.836 c2.574,9.801,8.232,17.178,16.989,22.126l75.945,43.972l-75.945,43.966c-8.757,4.949-14.419,12.323-16.989,22.128 c-2.568,9.801-1.377,19.075,3.571,27.829l18.272,31.408c4.947,8.761,12.32,14.421,22.126,16.995 c9.805,2.562,19.08,1.375,27.837-3.58l75.945-43.681v87.655c0,9.891,3.617,18.466,10.85,25.694 c7.233,7.234,15.8,10.848,25.697,10.848h36.54c9.896,0,18.466-3.613,25.693-10.848c7.238-7.229,10.855-15.804,10.855-25.694 v-87.648l75.944,43.681c8.761,4.948,18.031,6.143,27.833,3.573c9.804-2.574,17.179-8.23,22.127-16.991l18.271-31.405 C423.212,304.438,424.4,295.161,421.833,285.36z"/></symbol></svg><header><div class="brand">MUSA<svg class="musa-mark musa-mark-brand" aria-hidden="true" focusable="false"><use href="#musa-mark-icon"></use></svg></div><nav class="nav" id="nav" aria-label="Navegación principal"></nav><button class="mobile-menu-toggle" id="mobile-menu-toggle" type="button" aria-label="Abrir menú" aria-controls="mobile-menu" aria-expanded="false" onclick="toggleMobileMenu()"><span class="hamburger-line" aria-hidden="true"></span><span class="hamburger-line" aria-hidden="true"></span><span class="hamburger-line" aria-hidden="true"></span></button><nav class="mobile-menu" id="mobile-menu" aria-label="Secciones de MUSA" hidden></nav></header><div class="mobile-menu-scrim" id="mobile-menu-scrim" onclick="closeMobileMenu()" hidden></div><main id="app"></main><div id="toast" class="toast hidden" role="status"></div><div id="musa-moodboard-root"></div><script>
+</style><link rel="stylesheet" href="/showcase.css"><link rel="stylesheet" href="/mobile-menu.css"><link rel="stylesheet" href="/nav-motion.css"><link rel="stylesheet" href="/boards.css"><link rel="stylesheet" href="/favorite-ideas.css"><link rel="stylesheet" href="/moodboards.css"><link rel="stylesheet" href="/challenge-banner.css"><link rel="stylesheet" href="/creative-activities.css"><script src="/boards.js"></script><script src="/moodboards.js"></script><script src="/challenge-banner.js"></script><script src="/creative-writing.js"></script><script src="/nav-motion.js" defer></script></head><body><svg xmlns="http://www.w3.org/2000/svg" width="0" height="0" style="position:absolute;width:0;height:0;overflow:hidden" aria-hidden="true" focusable="false"><symbol id="musa-mark-icon" viewBox="0 0 438.529 438.529"><path fill="currentColor" d="M421.833,285.36c-2.573-9.801-8.233-17.179-16.991-22.128l-75.944-43.966l75.944-43.968 c8.758-4.949,14.421-12.322,16.991-22.126c2.566-9.803,1.379-19.082-3.572-27.836L399.99,93.932 c-4.948-8.757-12.319-14.419-22.127-16.989c-9.802-2.565-19.072-1.376-27.833,3.576l-75.944,43.677v-87.65 c0-9.899-3.621-18.464-10.855-25.697C256,3.616,247.433,0,237.537,0h-36.54c-9.9,0-18.464,3.619-25.697,10.849 c-7.232,7.232-10.85,15.798-10.85,25.697v87.65l-75.945-43.68c-8.757-4.952-18.036-6.145-27.837-3.576 c-9.803,2.573-17.179,8.232-22.128,16.989l-18.271,31.405c-4.952,8.754-6.14,18.033-3.571,27.836 c2.574,9.801,8.232,17.178,16.989,22.126l75.945,43.972l-75.945,43.966c-8.757,4.949-14.419,12.323-16.989,22.128 c-2.568,9.801-1.377,19.075,3.571,27.829l18.272,31.408c4.947,8.761,12.32,14.421,22.126,16.995 c9.805,2.562,19.08,1.375,27.837-3.58l75.945-43.681v87.655c0,9.891,3.617,18.466,10.85,25.694 c7.233,7.234,15.8,10.848,25.697,10.848h36.54c9.896,0,18.466-3.613,25.693-10.848c7.238-7.229,10.855-15.804,10.855-25.694 v-87.648l75.944,43.681c8.761,4.948,18.031,6.143,27.833,3.573c9.804-2.574,17.179-8.23,22.127-16.991l18.271-31.405 C423.212,304.438,424.4,295.161,421.833,285.36z"/></symbol></svg><header><div class="brand">MUSA<svg class="musa-mark musa-mark-brand" aria-hidden="true" focusable="false"><use href="#musa-mark-icon"></use></svg></div><nav class="nav" id="nav" aria-label="Navegación principal"></nav><button class="mobile-menu-toggle" id="mobile-menu-toggle" type="button" aria-label="Abrir menú" aria-controls="mobile-menu" aria-expanded="false" onclick="toggleMobileMenu()"><span class="hamburger-line" aria-hidden="true"></span><span class="hamburger-line" aria-hidden="true"></span><span class="hamburger-line" aria-hidden="true"></span></button><nav class="mobile-menu" id="mobile-menu" aria-label="Secciones de MUSA" hidden></nav></header><div class="mobile-menu-scrim" id="mobile-menu-scrim" onclick="closeMobileMenu()" hidden></div><main id="app"></main><div id="toast" class="toast hidden" role="status"></div><div id="musa-moodboard-root"></div><script>
 function musaMark(extraClass=''){return '<svg class="musa-mark '+extraClass+'" aria-hidden="true" focusable="false"><use href="#musa-mark-icon"></use></svg>'}
 const KEY='musa-v1',initial={favorites:[],artworks:[],sessions:[],savedChallenges:[],acceptedChallenges:[],active:null};let data;try{data={...initial,...JSON.parse(localStorage.getItem(KEY)||'{}')}}catch{data={...initial}}let page='inicio',currentIdea=null,seconds=0,interval=null,paused=true,filter='todos';
 const prompts=[['Representa la nostalgia sin dibujar personas','Nostalgia','Collage','Recuerdos', ['#b76e50','#e5c9a8','#73849a']],['¿De qué color es el silencio?','Calma','Abstracción','Sensaciones',['#a8cbb7','#e7e3d4','#5c8390']],['Inventa un recuerdo del futuro','Curiosidad','Ilustración','Tiempo',['#3926ce','#ff7049','#d7ff42']],['Dibuja una ciudad que respira','Asombro','Dibujo','Arquitectura',['#f5b335','#a458b9','#34337c']],['Haz un autorretrato sin mostrar tu rostro','Identidad','Fotografía','Retrato',['#ff7049','#211b36','#f4ede4']],['Convierte un error en una obra','Libertad','Técnica mixta','Experimentación',['#d7ff42','#3926ce','#ee8fbd']],['Crea un paisaje con objetos cotidianos','Juego','Collage','Paisaje',['#62a9b2','#eab34f','#d45d58']],['Representa el sonido de tu infancia','Melancolía','Abstracción','Memoria',['#73849a','#d4a6c8','#ebd2aa']]].concat(window.MusaMoodboards.extraIdeas);
 const challenges=[{title:'Tres colores, un universo',time:15,level:'Fácil',text:'Crea una composición usando únicamente tres colores y formas geométricas.'},{title:'El objeto imposible',time:30,level:'Medio',text:'Transforma un objeto cotidiano en algo que desafíe las leyes de la realidad.'},{title:'Sin levantar el lápiz',time:5,level:'Fácil',text:'Dibuja una escena completa usando una sola línea continua.'},{title:'Un recuerdo en pedazos',time:45,level:'Medio',text:'Construye un collage que evoque un recuerdo sin representarlo literalmente.'},{title:'Texturas de tu mundo',time:20,level:'Fácil',text:'Encuentra cinco texturas a tu alrededor y combínalas en una composición.'},{title:'Lo que no tiene nombre',time:60,level:'Avanzado',text:'Representa visualmente una emoción que no sepas describir con palabras.'}].concat(window.MusaMoodboards.extraChallenges);
 let challengeFeed=window.MusaMoodboards.initialChallenges(challenges);
 currentIdea=window.MusaMoodboards.nextIdea(prompts,null);
+let currentWriting=window.MusaWriting.next(null),writingMode='question',writingImage=null,writingImageLoading=false,writingImageRequest=0;
 function save(){try{localStorage.setItem(KEY,JSON.stringify(data));return true}catch{toast('No hay espacio disponible. Prueba una imagen más pequeña.');return false}}
 function esc(s){return String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
 function toast(s){let e=document.getElementById('toast');e.textContent=s;e.classList.remove('hidden');clearTimeout(window._toast);window._toast=setTimeout(()=>e.classList.add('hidden'),3000)}
@@ -128,6 +129,42 @@ function fav(itemOverride){
  if(data.favorites.some(f=>f.title===item.title)){toast('Esta idea ya está en tus favoritos');return;}
  data.favorites.unshift({...item,moodboardRefs:window.MusaMoodboards.getRefs(item),id:crypto.randomUUID(),createdAt:new Date().toISOString()});
  save();toast('Idea guardada en favoritos');render();
+}
+function randomWriting(){
+ currentWriting=window.MusaWriting.next(currentWriting);
+ writingMode='question';writingImage=null;writingImageLoading=false;writingImageRequest++;
+ render();
+}
+function changeWritingMode(mode){
+ if(mode!=='question'&&mode!=='image')return;
+ writingMode=mode;writingImage=null;writingImageLoading=false;writingImageRequest++;
+ render();
+ if(mode==='image')loadWritingImage();
+}
+async function loadWritingImage(force=false){
+ const prompt=currentWriting,request=++writingImageRequest;
+ writingImageLoading=true;writingImage=null;render();
+ try{
+  const ref=await window.MusaWriting.loadImage(prompt,force);
+  if(request!==writingImageRequest||currentWriting!==prompt||writingMode!=='image')return;
+  writingImage=ref;
+ }catch(_e){if(request!==writingImageRequest)return;writingImage=null;}
+ if(request===writingImageRequest){writingImageLoading=false;if(page==='explorar')render()}
+}
+function reloadWritingImage(){loadWritingImage(true)}
+function saveWriting(){
+ if(!currentWriting)return;
+ fav({...currentWriting,type:'writing',writingMode,writingImage:writingMode==='image'?writingImage:null});
+}
+function startWriting(itemOverride){
+ const item=itemOverride||currentWriting;
+ if(!item)return;
+ start({...item,type:'writing',writingMode:itemOverride?.writingMode||writingMode,writingImage:itemOverride?.writingImage||(writingMode==='image'?writingImage:null),draft:item.draft||''});
+}
+function updateWritingDraft(text){
+ if(!data.active||data.active.item?.type!=='writing')return;
+ data.active.item.draft=String(text||'').slice(0,50000);
+ save();
 }
 function start(item){data.active={id:crypto.randomUUID(),item,startedAt:new Date().toISOString(),elapsed:0};save();seconds=0;paused=true;go('sesion')}
 function tick(){if(!paused){seconds++;document.getElementById('clock').textContent=fmt(seconds)}}
