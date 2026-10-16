@@ -13,7 +13,7 @@
   ];
   function select(){
     let prev=-1;
-    try{prev=Number(sessionStorage.getItem('musa-explore-art-last'));}catch(_e){}
+    try{const saved=sessionStorage.getItem('musa-explore-art-last');if(saved!==null)prev=Number(saved);}catch(_e){}
     const available=variants.map((_,i)=>i).filter(i=>i!==prev);
     const idx=available[Math.floor(Math.random()*available.length)];
     try{sessionStorage.setItem('musa-explore-art-last',String(idx));}catch(_e){}
