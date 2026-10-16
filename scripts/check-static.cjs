@@ -9,6 +9,59 @@ const favoriteCSS = fs.readFileSync(path.join(root, "public/favorite-ideas.css")
 const homeActivitiesCSS = fs.readFileSync(path.join(root, "public/home-activities.css"), "utf8");
 const stepsCSS = fs.readFileSync(path.join(root, "public/steps-editorial.css"), "utf8");
 const stepsJS = fs.readFileSync(path.join(root, "public/steps-editorial.js"), "utf8");
+
+const ctaSVG = fs.readFileSync(path.join(root, "public/musa-cta-chevron.svg"), "utf8");
+const ctaCSS = fs.readFileSync(path.join(root, "public/cta-chevron.css"), "utf8");
+const ctaJS = fs.readFileSync(path.join(root, "public/cta-chevron.js"), "utf8");
+assert.match(html,/href="\/cta-chevron\.css"/,"Shared chevron styling must load");
+assert.match(html,/src="\/cta-chevron\.js" defer/,"CTA arrows must be upgraded after parsing the page");
+assert.match(ctaSVG,/viewBox="0 0 512 512"/,"Use the exact viewBox supplied for MUSA's chevron");
+assert.match(ctaSVG,/m114\.94 493\.53c12\.31 12\.31/,"Use the supplied solid right chevron, not a generic arrow");
+assert.match(ctaSVG,/l148\.34 148\.34-148\.34 148\.34c-24\.63 24\.63/,"Preserve the full supplied arrow silhouette");
+assert.match(ctaCSS,/background-color:currentColor/,"Arrow colors inherit from the CTA's text color");
+assert.match(ctaCSS,/mask:url\('\/musa-cta-chevron\.svg'\)/,"All controls share the approved SVG file");
+assert.match(ctaCSS,/prefers-reduced-motion:reduce/,"Respect reduced motion");
+new vm.Script(ctaJS,{filename:"cta-chevron.js"});
+// A lightweight DOM simulation verifies both existing buttons and newly rendered modal actions.
+{
+ const controls=[];
+ const fakeButton=(label)=>{
+   const parent={inserted:null,insertBefore(node){this.inserted=node}};
+   const text={nodeValue:label,parentNode:parent,nextSibling:null};
+   return {text,parent,
+     get textContent(){return text.nodeValue;},
+     querySelector(sel){return sel==='.musa-cta-chevron'?parent.inserted:null;}
+   };
+ };
+ const sample=fakeButton("Ver ejercicios ↗");
+ const secondary=fakeButton("Ver mi estudio →");
+ const back=fakeButton("← Mi estudio");
+ controls.push(sample,secondary,back);
+ const mockDocument={readyState:"complete",
+   body:{querySelectorAll:()=>controls},
+   createElement:()=>({className:"",setAttribute(k,v){this[k]=v}}),
+   createTreeWalker(el){let once=false;return {nextNode(){if(once)return null;once=true;return el.text;}};}
+ };
+ let onMutation;
+ class TestObserver {constructor(fn){onMutation=fn;}observe(){}}
+ vm.runInNewContext(ctaJS,{document:mockDocument,MutationObserver:TestObserver,NodeFilter:{SHOW_TEXT:4}});
+ assert.equal(sample.text.nodeValue,"Ver ejercicios");
+ assert.equal(secondary.text.nodeValue,"Ver mi estudio");
+ assert.equal(sample.parent.inserted.className,"musa-cta-chevron");
+ assert.equal(sample.parent.inserted["aria-hidden"],"true");
+ assert.equal(secondary.parent.inserted.className,"musa-cta-chevron");
+ assert.equal(back.text.nodeValue,"← Mi estudio","Back navigation must keep its left arrow");
+ assert.equal(back.parent.inserted,null,"Back icon must not become a right-facing chevron");
+ const newlyRendered=fakeButton("Aceptar reto ↗");
+ controls.push(newlyRendered);
+ onMutation();
+ assert.equal(newlyRendered.text.nodeValue,"Aceptar reto","Dynamic modal actions should use the same chevron");
+ assert.equal(newlyRendered.parent.inserted.className,"musa-cta-chevron");
+ onMutation();
+ assert.equal(sample.parent.inserted.className,"musa-cta-chevron","Repeated observation must not create duplicate arrows");
+}
+console.log("✓ CTA arrow styling, source SVG and dynamic action conversion verified");
+
 assert.match(html, /\.swatch\{[^}]*border:1px solid rgba\(255,255,255,\.92\)/,
  "Suggested idea colors should have a thin white border");
 assert.match(favoriteCSS, /\.idea-glass-palette \.swatch\{[^}]*border:1px solid rgba\(255,255,255,\.92\)/,
