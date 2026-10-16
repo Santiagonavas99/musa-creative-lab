@@ -6,6 +6,7 @@ const path = require("node:path");
 const root = path.resolve(__dirname, "..");
 const html = fs.readFileSync(path.join(root, "index.html"), "utf8");
 const favoriteCSS = fs.readFileSync(path.join(root, "public/favorite-ideas.css"), "utf8");
+const homeActivitiesCSS = fs.readFileSync(path.join(root, "public/home-activities.css"), "utf8");
 assert.match(html, /\.swatch\{[^}]*border:1px solid rgba\(255,255,255,\.92\)/,
  "Suggested idea colors should have a thin white border");
 assert.match(favoriteCSS, /\.idea-glass-palette \.swatch\{[^}]*border:1px solid rgba\(255,255,255,\.92\)/,
@@ -31,6 +32,13 @@ const introHero = html.match(/<section class="hero musa-intro-hero"[\s\S]*?<\/se
 assert.ok(introHero, "Intro hero should exist");
 assert.doesNotMatch(introHero, /IDEA PARA CREAR/,
  "Home hero must not duplicate Explore's generated-idea preview");
+assert.match(html, /href="\/home-activities\.css"/,"The home banner must load its responsive styles");
+assert.match(html, /DOS FORMAS DE CREAR, UN MISMO LABORATORIO\./,"The banner uses the approved option 2 copy");
+assert.match(html, /Explora propuestas para escribir, imaginar, dibujar y experimentar visualmente, todo dentro de MUSA\./,"The banner explains the two types of creation");
+assert.match(html, /class="musa-home-activities-art" aria-hidden="true"/,"Home must include the dynamic editorial illustration");
+assert.match(homeActivitiesCSS, /@media\(max-width:480px\)/,"Home artwork stacks on mobile");
+assert.doesNotMatch(html, /¿QUÉ HACEMOS HOY\?|01 \/ IDEAS|02 \/ RETOS|UNA IDEA INESPERADA|ROMPE LA RUTINA/,"Remove the redundant home card pair");
+
 
 const claimTag = '<meta name="p:domain_verify" content="2f5d9a91026ee62077c40f6bd9da04c7">';
 assert.equal(html.split(claimTag).length-1,1,"Pinterest verification token must be present exactly once");
@@ -98,6 +106,9 @@ assert.doesNotMatch(activitiesCSS,/\.ma-challenge-entry/,"Remove obsolete banner
 assert.match(activitiesCSS,/\.musa-activity-grid\{align-items:stretch/,"Both cards should align to equal height");
 assert.match(activitiesCSS,/\.musa-activity-grid>.card\{display:flex;flex-direction:column/,"Both activities stretch naturally");
 assert.match(activitiesCSS,/grid-auto-rows:1fr/,"Both card heights must remain equal even when stacked");
+assert.match(html, /class="btn ma-drawing-refresh" onclick="randomIdea\(\)"/,"Drawing another idea has a distinctive primary style");
+assert.match(activitiesCSS, /\.ma-drawing-card \.ma-drawing-refresh\{[\s\S]*?background:#3926ce;[\s\S]*?color:#fff;/,"The drawing refresh button contrasts in MUSA purple");
+
 assert.match(writingJS,/\/api\/inspiration\?q=/,"Image writing prompts use existing visual repository API");
 assert.match(html,/function saveWriting\(\)/,"Writing ideas can be saved independently");
 assert.match(html,/function updateWritingDraft\(text\)/,"The writing editor persists its text");
@@ -269,11 +280,22 @@ vm.runInContext(showcaseJS, ctx, {filename:"showcase-controller.js"});
 assert.match(nodes.get("app").innerHTML,/TU PRÓXIMA IDEA EMPIEZA AQUÍ/);
 assert.match(nodes.get("app").innerHTML,/DE LA CHISPA A LA CREACIÓN/);
 assert.doesNotMatch(nodes.get("app").innerHTML,/Descubre cómo funciona|musa-intro-how-link/);
+const homeScreen = nodes.get("app").innerHTML;
+assert.match(homeScreen,/DOS FORMAS DE CREAR, UN MISMO LABORATORIO\./);
+assert.match(homeScreen,/Ver ejercicios ↗/);
+assert.match(homeScreen,/musa-home-activities-art/);
+assert.equal((homeScreen.match(/musa-home-activities-art/g)||[]).length,1,"Exactly one editorial banner on home");
+assert.ok(homeScreen.includes(vm.runInContext("window.MusaChallengeBanner.render()",ctx)),"The home banner must show the selected rotating composition");
+assert.match(homeScreen,/onclick="go\('explorar'\)">Ver ejercicios/,"Home CTA must open the actual Explore section");
+
 vm.runInContext('page="explorar";render()',ctx);
 vm.runInContext("currentIdea={id:'test-palette',title:'Dibuja una ciudad que respira',emotion:'Asombro',technique:'Dibujo',theme:'Arquitectura',colors:['#F4B633','#9D53BB','#373578'],type:'idea'};render()",ctx);
 const initialActivities=nodes.get("app").innerHTML;
 assert.match(initialActivities,/ESCRITURA CREATIVA/);
 assert.match(initialActivities,/ILUSTRACIÓN Y DIBUJO/);
+assert.match(initialActivities,/class="btn ma-drawing-refresh" onclick="randomIdea\(\)"/,"The refresh button has the purple treatment");
+assert.doesNotMatch(initialActivities,/musa-home-activities/,"The home banner is not duplicated in Explore");
+
 assert.doesNotMatch(initialActivities,/¿TE APETECE UN RETO CREATIVO\?|ma-challenge-entry/,"Explore must display only the two creative activity cards");
 assert.match(initialActivities,/Frase o pregunta/);
 assert.match(initialActivities,/Con una imagen/);
