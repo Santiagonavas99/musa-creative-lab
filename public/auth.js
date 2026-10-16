@@ -231,7 +231,7 @@ async function loadWorkspace(identity){
     if(token!==loadToken)return;
     user=identity;data=clean(row?.document);loaded=true;
     initBoards(); // Restore each user's board memberships after fetching their private workspace.
-    currentIdea=null;seconds=data.active?.elapsed||0;paused=true;page='inicio';
+    currentIdea=window.MusaMoodboards.nextIdea(prompts,currentIdea);seconds=data.active?.elapsed||0;paused=true;page='inicio';
     inspiration={query:'collage experimental',source:'unsplash',items:[],loading:false,error:'',searched:false,partial:false,requestId:0};
     await loadArtworkImages();
     if(token!==loadToken)return;
