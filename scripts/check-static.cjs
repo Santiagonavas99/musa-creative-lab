@@ -93,6 +93,8 @@ assert.match(html,/href="\/creative-activities\.css"/,"Two-activity styles must 
 assert.match(html,/function renderWritingActivity\(\)/,"Explore includes a distinct writing activity");
 assert.match(html,/function renderDrawingActivity\(\)/,"Explore includes a drawing activity");
 assert.match(html,/function renderExploreActivities\(\)/,"Two activities share one grid");
+assert.doesNotMatch(html,/ma-challenge-entry|¿TE APETECE UN RETO CREATIVO\?|Explora desafíos con tiempo y moodboards de referencia/,"Remove duplicate challenges banner from Explore");
+assert.doesNotMatch(activitiesCSS,/\.ma-challenge-entry/,"Remove obsolete banner styling");
 assert.match(activitiesCSS,/\.musa-activity-grid\{align-items:stretch/,"Both cards should align to equal height");
 assert.match(activitiesCSS,/\.musa-activity-grid>.card\{display:flex;flex-direction:column/,"Both activities stretch naturally");
 assert.match(activitiesCSS,/grid-auto-rows:1fr/,"Both card heights must remain equal even when stacked");
@@ -272,6 +274,7 @@ vm.runInContext("currentIdea={id:'test-palette',title:'Dibuja una ciudad que res
 const initialActivities=nodes.get("app").innerHTML;
 assert.match(initialActivities,/ESCRITURA CREATIVA/);
 assert.match(initialActivities,/ILUSTRACIÓN Y DIBUJO/);
+assert.doesNotMatch(initialActivities,/¿TE APETECE UN RETO CREATIVO\?|ma-challenge-entry/,"Explore must display only the two creative activity cards");
 assert.match(initialActivities,/Frase o pregunta/);
 assert.match(initialActivities,/Con una imagen/);
 assert.match(initialActivities,/EL EJERCICIO/);
