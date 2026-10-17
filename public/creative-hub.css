@@ -141,3 +141,37 @@
  .mc-form-columns{grid-template-columns:1fr}
 }
 @media(prefers-reduced-motion:reduce){.mc-project,.mc-quick,.mc-tab{transition:none}}
+
+
+/* Mi estudio: four meaningful counters and a short session/project explanation. */
+.mc-quick-links--four{grid-template-columns:repeat(4,minmax(0,1fr));margin-bottom:15px}
+.mc-quick-links--four .mc-quick{min-height:175px;padding:21px;border-radius:23px}
+.mc-quick-links--four .mc-q0{background:#d7ff42}
+.mc-quick-links--four .mc-q1{background:#ffded1}
+.mc-quick-links--four .mc-q2{background:#f2dbe7}
+.mc-quick-links--four .mc-q3{background:#e4e0ff}
+.mc-quick-links--four .mc-quick strong{font-size:48px}
+.mc-clarity{padding:22px 25px 23px;border:1px solid #ddd6cf;border-radius:23px;background:#fffdf9;margin:0 0 39px}
+.mc-clarity h2{font-size:clamp(21px,2.5vw,29px);margin:8px 0 18px;letter-spacing:-.045em;line-height:1.1}
+.mc-clarity-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:19px}
+.mc-clarity-grid>div{border-top:1px solid #e5ded8;padding-top:14px;min-width:0}
+.mc-clarity-grid strong{display:flex;align-items:center;gap:10px;font-size:12px;letter-spacing:.05em}
+.mc-clarity-mark{display:grid;place-items:center;background:#3926ce;color:#fff;border-radius:8px;width:28px;height:28px;letter-spacing:0;font-size:11px;flex:none}
+.mc-clarity-grid>div:nth-child(2) .mc-clarity-mark{background:#d7ff42;color:#211b36}
+.mc-clarity-grid p{color:#625b68;font-size:13px;line-height:1.6;margin:9px 0 0}
+.mc-clarity-grid p button{display:inline;border:0;background:none;color:#3926ce;padding:0;font-weight:850;text-decoration:underline;text-underline-offset:2px}
+@media(max-width:900px){
+ .mc-quick-links--four{grid-template-columns:repeat(2,minmax(0,1fr))}
+ .mc-quick-links--four .mc-quick{min-height:150px}
+}
+@media(max-width:600px){
+ .mc-quick-links--four{grid-template-columns:repeat(2,minmax(0,1fr));gap:9px}
+ .mc-quick-links--four .mc-quick{min-height:148px;padding:17px;border-radius:19px}
+ .mc-quick-links--four .mc-quick:last-child{grid-column:auto}
+ .mc-quick-links--four .mc-quick strong{font-size:39px}
+ .mc-quick-links--four .mc-quick span{font-size:11px}
+ .mc-quick-links--four .mc-quick small{font-size:12px}
+ .mc-clarity{padding:19px;border-radius:19px;margin-bottom:29px}
+ .mc-clarity-grid{grid-template-columns:1fr;gap:16px}
+ .mc-clarity h2{font-size:24px}
+}
