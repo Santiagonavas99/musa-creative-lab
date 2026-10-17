@@ -34,7 +34,8 @@ function renderDraft(item){
   const rich=String(item?.draftHtml||'');
   return rich?sanitize(rich):htmlEscape(item?.draft||'').replace(/\r\n?|\n/g,'<br>');
 }
-function renderEditor(item){
+function renderEditor(item,scope='draft'){
+  const editorScope=scope==='archived'?'archived':'draft';
   return '<div class="ma-writing-editor-group">'+
     '<div class="ma-writing-editor-heading"><label id="ma-editor-label" for="ma-writing-editor">TU TEXTO · BORRADOR PRIVADO</label>'+
     '<span>Se guarda en tu cuenta de MUSA</span></div>'+
@@ -45,7 +46,7 @@ function renderEditor(item){
     '<button type="button" aria-label="Lista con viñetas" title="Lista con viñetas" onmousedown="event.preventDefault()" onclick="MusaWritingEditor.format(\'insertUnorderedList\')"><span aria-hidden="true">• ≡</span></button>'+
     '</div>'+
     '<div id="ma-writing-editor" class="ma-rich-editor" role="textbox" aria-labelledby="ma-editor-label" aria-multiline="true"'+
-    ' contenteditable="true" spellcheck="true" data-placeholder="Empieza con una frase. No hace falta que sea perfecta..."'+
+    ' contenteditable="true" spellcheck="true" data-writing-scope="'+editorScope+'" data-placeholder="Empieza con una frase. No hace falta que sea perfecta..."'+
     ' oninput="MusaWritingEditor.sync(this)" onpaste="MusaWritingEditor.paste(event)"'+
     ' onbeforeinput="MusaWritingEditor.limit(event)">'+renderDraft(item)+'</div>'+
     '</div>';
@@ -59,7 +60,7 @@ function sync(editor){
   let text=String(editor.innerText??editor.textContent??'');
   if(text.length>MAX_TEXT){text=text.slice(0,MAX_TEXT);editor.textContent=text;}
   const rich=sanitize(editor.innerHTML||'');
-  if(typeof updateWritingDraft==='function')updateWritingDraft({text,html:rich});
+  if(editor.dataset?.writingScope!=='archived'&&typeof updateWritingDraft==='function')updateWritingDraft({text,html:rich});
   return {text,html:rich};
 }
 function format(action){
