@@ -36,7 +36,7 @@ function sessionList(){
      '<div><span class="mc-eyebrow">'+escHtml(sessionType(record))+' · '+escHtml(dateLabel(fromTimestamp(record.createdAt)))+'</span>'+
      '<h3>'+escHtml(record.title||'Sesión sin título')+'</h3></div>'+
      '<div class="mc-session-history-actions"><button type="button" class="btn outline" onclick="MusaCreativeHub.openSession('+index+')">Ver sesión</button>'+
-     '<button type="button" class="btn secondary" onclick="MusaCreativeHub.editSession('+index+')">Editar sesión ↗</button></div></article>').join('')+
+     '<button type="button" class="btn secondary" onclick="MusaCreativeHub.editSession('+index+')">Editar sesión ↗</button>'+ '<button type="button" class="mc-delete-link" onclick="MusaCreativeHub.requestDeleteSession('+index+')">Eliminar</button></div></article>').join('')+
    '</div></details></section>';
 }
 
@@ -68,7 +68,7 @@ function projects(){
   const items=arr('projects').slice().sort((a,b)=>String(b.updatedAt||'').localeCompare(a.updatedAt||''));
   return '<section class="mc-main"><div class="mc-heading"><div><span class="mc-eyebrow">01 / UN UNIVERSO DE IDEAS</span><h2>PROYECTOS CREATIVOS.</h2><p>Une en un solo lugar ideas, obras, tableros y notas.</p></div><button class="btn" type="button" onclick="MusaCreativeHub.newProject()">+ Nuevo proyecto ↗</button></div>'+
     '<div class="mc-numbers"><div><strong>'+items.length+'</strong><span>Proyectos</span></div><div><strong>'+items.filter(x=>x.status==='active').length+'</strong><span>En marcha</span></div><div><strong>'+items.filter(x=>x.status==='done').length+'</strong><span>Terminados</span></div></div>'+
-    (items.length?'<div class="mc-project-grid">'+items.map(p=>'<article class="mc-project"><span class="mc-eyebrow">MUSA / PROYECTO</span><h3>'+escHtml(p.title)+'</h3><p>'+escHtml(p.description||'Una idea que espera su siguiente paso.')+'</p><div class="mc-chip-row">'+projectStats(p)+'</div><div class="mc-project-bottom"><small>'+linkedCount(p)+' elementos asociados</small><button type="button" class="mc-text-button" onclick="MusaCreativeHub.openProject('+param(p.id)+')">Ver proyecto ↗</button></div></article>').join('')+'</div>':
+    (items.length?'<div class="mc-project-grid">'+items.map(p=>'<article class="mc-project"><span class="mc-eyebrow">MUSA / PROYECTO</span><h3>'+escHtml(p.title)+'</h3><p>'+escHtml(p.description||'Una idea que espera su siguiente paso.')+'</p><div class="mc-chip-row">'+projectStats(p)+'</div><div class="mc-project-bottom"><small>'+linkedCount(p)+' elementos asociados</small><button type="button" class="mc-text-button" onclick="MusaCreativeHub.openProject('+param(p.id)+')">Ver proyecto ↗</button><button type="button" class="mc-delete-link" onclick="MusaCreativeHub.requestDeleteProject('+param(p.id)+')">Eliminar</button></div></article>').join('')+'</div>':
     blank('TU PRIMER PROYECTO EMPIEZA AQUÍ.','Dale un nombre a esa idea que no deja de rondarte.','Crear un proyecto','MusaCreativeHub.newProject()'))+'</section>';
 }
 function journal(){
@@ -101,7 +101,7 @@ function calendar(){
   }
   const events=activity.get(selected)||[];
   const type={plan:'PLAN',journal:'DIARIO',due:'FECHA OBJETIVO',session:'SESIÓN REALIZADA',artwork:'OBRA GUARDADA'};
-  const item=e=>'<article class="mc-calendar-entry"><div><span class="mc-eyebrow">'+type[e.kind]+'</span><h4>'+escHtml(e.title||'Sin título')+'</h4>'+(e.notes?'<p>'+escHtml(e.notes)+'</p>':'')+(e.completed?'<small class="mc-done">Completado</small>':'')+'</div><div class="mc-entry-actions">'+(e.kind==='plan'?'<button type="button" class="mc-text-button" onclick="MusaCreativeHub.toggleEvent('+param(e.id)+')">'+(e.completed?'Reabrir':'Completar')+'</button><button class="mc-text-button" type="button" onclick="MusaCreativeHub.editEvent('+param(e.id)+')">Editar</button>':e.kind==='journal'?'<button type="button" class="mc-text-button" onclick="MusaCreativeHub.editJournal('+param(e.id)+')">Abrir ↗</button>':e.kind==='due'?'<button type="button" class="mc-text-button" onclick="MusaCreativeHub.openProject('+param(e.id)+')">Ver proyecto ↗</button>':e.kind==='session'?'<button type="button" class="mc-text-button" onclick="MusaCreativeHub.openSession('+Number(e.index)+')">Ver sesión ↗</button><button type="button" class="mc-text-button" onclick="MusaCreativeHub.editSession('+Number(e.index)+')">Editar sesión ↗</button>':e.kind==='artwork'&&e.id?'<button type="button" class="mc-text-button" onclick="MusaCreativeHub.viewArtwork('+param(e.id)+')">Ver obra ↗</button>':'')+'</div></article>';
+  const item=e=>'<article class="mc-calendar-entry"><div><span class="mc-eyebrow">'+type[e.kind]+'</span><h4>'+escHtml(e.title||'Sin título')+'</h4>'+(e.notes?'<p>'+escHtml(e.notes)+'</p>':'')+(e.completed?'<small class="mc-done">Completado</small>':'')+'</div><div class="mc-entry-actions">'+(e.kind==='plan'?'<button type="button" class="mc-text-button" onclick="MusaCreativeHub.toggleEvent('+param(e.id)+')">'+(e.completed?'Reabrir':'Completar')+'</button><button class="mc-text-button" type="button" onclick="MusaCreativeHub.editEvent('+param(e.id)+')">Editar</button>':e.kind==='journal'?'<button type="button" class="mc-text-button" onclick="MusaCreativeHub.editJournal('+param(e.id)+')">Abrir ↗</button>':e.kind==='due'?'<button type="button" class="mc-text-button" onclick="MusaCreativeHub.openProject('+param(e.id)+')">Ver proyecto ↗</button>':e.kind==='session'?'<button type="button" class="mc-text-button" onclick="MusaCreativeHub.openSession('+Number(e.index)+')">Ver sesión ↗</button><button type="button" class="mc-text-button" onclick="MusaCreativeHub.editSession('+Number(e.index)+')">Editar sesión ↗</button><button type="button" class="mc-delete-link" onclick="MusaCreativeHub.requestDeleteSession('+Number(e.index)+')">Eliminar</button>':e.kind==='artwork'&&e.id?'<button type="button" class="mc-text-button" onclick="MusaCreativeHub.viewArtwork('+param(e.id)+')">Ver obra ↗</button>':'')+'</div></article>';
   return '<section class="mc-main"><div class="mc-heading"><div><span class="mc-eyebrow">03 / CREA A TU RITMO</span><h2>CALENDARIO CREATIVO.</h2><p>Consulta tus sesiones y obras anteriores, lee tu diario y organiza tus próximos pasos en un solo lugar.</p></div><button class="btn" type="button" onclick="MusaCreativeHub.newEvent()">+ Planear actividad ↗</button></div>'+
     '<div class="mc-calendar-toolbar"><span>HISTORIAL Y ACTIVIDADES POR FECHA</span><button type="button" class="mc-text-button" onclick="MusaCreativeHub.today()">Ir a hoy ↗</button></div>'+
     '<div class="mc-calendar-layout"><div class="mc-calendar-sheet"><div class="mc-month"><button type="button" aria-label="Mes anterior" onclick="MusaCreativeHub.move(-1)">‹</button><h3>'+escHtml(first.toLocaleDateString('es-CO',{month:'long',year:'numeric'}))+'</h3><button type="button" aria-label="Mes siguiente" onclick="MusaCreativeHub.move(1)">›</button></div>'+
@@ -126,7 +126,7 @@ function projectDetail(p){
   const notes=arr('journalEntries').filter(e=>e.projectId===p.id).slice(0,5);
   return '<div class="mc-chip-row">'+projectStats(p)+'</div><p class="mc-detail-description">'+escHtml(p.description||'Agrega una descripción para contar cómo nació este proyecto.')+'</p>'+groups+
     (notes.length?'<div class="mc-detail-group"><h3>Diario del proyecto</h3>'+notes.map(e=>'<div class="mc-detail-note"><strong>'+escHtml(e.title)+'</strong><small>'+escHtml(shortDate(e.date))+'</small></div>').join('')+'</div>':'')+
-    '<div class="mc-modal-footer"><button type="button" class="btn outline" onclick="MusaCreativeHub.close()">Cerrar</button><button class="btn secondary" type="button" onclick="MusaCreativeHub.editProject('+param(p.id)+')">Editar proyecto ↗</button></div>';
+    '<div class="mc-modal-footer"><button type="button" class="btn outline" onclick="MusaCreativeHub.close()">Cerrar</button><button class="btn secondary" type="button" onclick="MusaCreativeHub.editProject('+param(p.id)+')">Editar proyecto ↗</button><button type="button" class="mc-delete-link mc-delete-modal-link" onclick="MusaCreativeHub.requestDeleteProject('+param(p.id)+')">Eliminar proyecto</button></div>';
 }
 function renderModal(){
   const kind=modal.kind,id=modal.id;
@@ -147,7 +147,7 @@ function renderModal(){
       (note?'<div class="mc-session-note"><strong>'+(record.type==='writing'?'Tu escritura':'Tu creación o reflexión')+'</strong><p>'+escHtml(note)+'</p></div>':'')+
       '</div><div class="mc-modal-footer"><button class="btn outline" type="button" onclick="MusaCreativeHub.close()">Cerrar</button>'+
       (artwork?'<button class="btn outline" type="button" onclick="MusaCreativeHub.viewArtwork('+param(artwork.id)+')">Ver obra creada ↗</button>':'')+
-      '<button class="btn secondary" type="button" onclick="MusaCreativeHub.editSession('+Number(id)+')">Editar sesión ↗</button></div>';
+      '<button class="btn secondary" type="button" onclick="MusaCreativeHub.editSession('+Number(id)+')">Editar sesión ↗</button><button type="button" class="mc-delete-link mc-delete-modal-link" onclick="MusaCreativeHub.requestDeleteSession('+Number(id)+')">Eliminar sesión</button></div>';
   }
   if(kind==='session-edit'){
     const record=sessionByIndex(Number(id));
@@ -161,8 +161,26 @@ function renderModal(){
       '<label class="mc-field"><span>'+(record.type==='writing'?'Tu texto creativo':'Tu creación o reflexión')+'</span>'+
       '<textarea name="notes" rows="7" maxlength="50000" placeholder="Lo que creaste, aprendiste o quieres recordar…">'+escHtml(artwork?.notes??record.notes??'')+'</textarea></label>'+
       (artwork?.imagePath||artwork?.image?'<p class="mc-tip">La fotografía asociada permanece guardada en Mi galería.</p>':'')+
-      '<div class="mc-modal-footer"><button type="button" class="btn outline" onclick="MusaCreativeHub.openSession('+Number(id)+')">Cancelar</button>'+
+      '<div class="mc-modal-footer"><button type="button" class="mc-delete-link mc-delete-modal-link" onclick="MusaCreativeHub.requestDeleteSession('+Number(id)+')">Eliminar sesión</button><button type="button" class="btn outline" onclick="MusaCreativeHub.openSession('+Number(id)+')">Cancelar</button>'+
       '<button type="submit" class="btn secondary">Guardar cambios ↗</button></div></form>';
+  }
+  if(kind==='delete'){
+    const target=modal.target;
+    const original=target==='session'?sessionByIndex(Number(id)):getProject(id);
+    if(!original)return '';
+    const isSession=target==='session',artwork=isSession?sessionArtwork(original):null;
+    const journalCount=isSession?0:arr('journalEntries').filter(x=>x.projectId===id).length;
+    const eventCount=isSession?0:arr('calendarEvents').filter(x=>x.projectId===id).length;
+    title=isSession?'¿ELIMINAR ESTA SESIÓN?':'¿ELIMINAR ESTE PROYECTO?';
+    body='<div class="mc-delete-warning" role="alert"><span class="mc-eyebrow">ACCIÓN IRREVERSIBLE</span>'+
+      '<h3>«'+escHtml(original.title||'Sin título')+'»</h3>'+
+      '<p>'+(isSession?
+       'Se borrará el registro de esta sesión del calendario y de tu historial. '+(artwork?'La obra y su fotografía seguirán en Mi galería.':'No se borrarán otras creaciones de tu estudio.') :
+       'Se eliminará el proyecto de tu listado. Las obras, ideas y tableros vinculados se conservarán. '+
+       (journalCount||eventCount?'Las '+journalCount+' entradas del diario y '+eventCount+' actividades asociadas permanecerán guardadas, sin proyecto vinculado.':'Tus notas y actividades no se eliminarán.')
+      )+'</p><p class="mc-delete-final">Esta acción no se puede deshacer.</p></div>'+
+      '<div class="mc-modal-footer mc-delete-actions"><button type="button" class="btn outline" onclick="MusaCreativeHub.cancelDelete()">Cancelar</button>'+
+      '<button type="button" class="btn mc-confirm-delete" onclick="MusaCreativeHub.confirmDelete()">Sí, eliminar '+(isSession?'sesión':'proyecto')+'</button></div>';
   }
   if(kind==='project'){
     const p=getProject(id)||{};
@@ -171,7 +189,7 @@ function renderModal(){
       '<label class="mc-field"><span>Descripción</span><textarea name="description" maxlength="1200" rows="4" placeholder="¿Qué quieres experimentar?">'+escHtml(p.description||'')+'</textarea></label>'+
       '<div class="mc-form-columns"><label class="mc-field"><span>Disciplina</span><select name="discipline">'+options(disciplines.map(x=>[x,x]),p.discipline||'Arte')+'</select></label><label class="mc-field"><span>Estado</span><select name="status">'+options(Object.entries(states),p.status||'idea')+'</select></label></div>'+
       field('Fecha objetivo (opcional)','dueDate',p.dueDate,'type="date"')+linkPicker(p)+
-      '<div class="mc-modal-footer">'+(id?'<button type="button" class="mc-remove" onclick="MusaCreativeHub.removeProject('+param(id)+')">Eliminar</button>':'')+'<button class="btn secondary" type="submit">Guardar proyecto ↗</button></div></form>';
+      '<div class="mc-modal-footer">'+(id?'<button type="button" class="mc-remove" onclick="MusaCreativeHub.requestDeleteProject('+param(id)+')">Eliminar proyecto</button>':'')+'<button class="btn secondary" type="submit">Guardar proyecto ↗</button></div></form>';
   }
   if(kind==='journal'){
     const e=arr('journalEntries').find(x=>x.id===id)||{};
@@ -191,7 +209,7 @@ function renderModal(){
       '<label class="mc-field"><span>Proyecto relacionado</span><select name="projectId">'+projectOptions(e.projectId)+'</select></label>'+
       '<div class="mc-modal-footer">'+(id?'<button type="button" class="mc-remove" onclick="MusaCreativeHub.removeEvent('+param(id)+')">Eliminar</button>':'')+'<button class="btn secondary" type="submit">Guardar actividad ↗</button></div></form>';
   }
-  return '<div class="mc-backdrop" onclick="MusaCreativeHub.close()" role="presentation"><div class="mc-dialog" role="dialog" aria-modal="true" aria-labelledby="mc-modal-title" onclick="event.stopPropagation()"><div class="mc-dialog-header"><div><span class="mc-eyebrow">MUSA / '+(kind==='project'||kind==='detail'?'PROYECTOS':kind==='journal'?'DIARIO':'CALENDARIO')+'</span><h2 id="mc-modal-title">'+escHtml(title)+'</h2></div><button type="button" class="mc-close" aria-label="Cerrar" onclick="MusaCreativeHub.close()">×</button></div>'+body+'</div></div>';
+  return '<div class="mc-backdrop" onclick="MusaCreativeHub.close()" role="presentation"><div class="mc-dialog" role="'+(kind==='delete'?'alertdialog':'dialog')+'" aria-modal="true" aria-labelledby="mc-modal-title" onclick="event.stopPropagation()"><div class="mc-dialog-header"><div><span class="mc-eyebrow">MUSA / '+(kind==='project'||kind==='detail'?'PROYECTOS':kind==='journal'?'DIARIO':'CALENDARIO')+'</span><h2 id="mc-modal-title">'+escHtml(title)+'</h2></div><button type="button" class="mc-close" aria-label="Cerrar" onclick="MusaCreativeHub.close()">×</button></div>'+body+'</div></div>';
 }
 function open(kind,id=null){if(!window.MusaAuth?.isAuthenticated())return;modal={kind,id};render();document.getElementById('mc-modal-title')?.focus?.();}
 function close(){modal=null;render();}
@@ -202,6 +220,37 @@ function openSession(index){
 function editSession(index){
   if(!sessionByIndex(index))return;
   open('session-edit',index);
+}
+function requestDelete(target,id){
+ if(!window.MusaAuth?.isAuthenticated()||!['session','project'].includes(target))return;
+ const record=target==='session'?sessionByIndex(id):getProject(id);
+ if(!record)return;
+ modal={kind:'delete',target,id,previous:modal?{kind:modal.kind,id:modal.id}:null};
+ render();
+ document.querySelector?.('.mc-confirm-delete')?.focus?.();
+}
+function cancelDelete(){
+ if(modal?.kind!=='delete')return;
+ modal=modal.previous||null;
+ render();
+}
+function confirmDelete(){
+ if(!window.MusaAuth?.isAuthenticated()||modal?.kind!=='delete')return;
+ const {target,id}=modal;
+ if(target==='session'){
+  if(!sessionByIndex(id))return cancelDelete();
+  // Artwork and its uploaded image remain independent assets in My Gallery.
+  data.sessions=arr('sessions').filter((x,i)=>i!==id);
+ }else if(target==='project'){
+  if(!getProject(id))return cancelDelete();
+  data.projects=arr('projects').filter(x=>x.id!==id);
+  arr('journalEntries').forEach(x=>{if(x.projectId===id)x.projectId='';});
+  arr('calendarEvents').forEach(x=>{if(x.projectId===id)x.projectId='';});
+ }else return;
+ modal=null;
+ save();
+ render();
+ toast(target==='session'?'Sesión eliminada. Tus obras siguen guardadas.':'Proyecto eliminado. Tus elementos vinculados se conservaron.');
 }
 function saveSession(event){
   event.preventDefault();
@@ -280,5 +329,5 @@ function move(offset){const dt=parse(month+'-01');if(!dt)return;const next=new D
 function today(){selected=now();month=selected.slice(0,7);render();}
 function reset(){modal=null;selected=now();month=selected.slice(0,7);}
 document.addEventListener?.('keydown',e=>{if(e.key==='Escape'&&modal){e.preventDefault();close();}});
-window.MusaCreativeHub={renderPage,renderStudioLinks,reset,close,newProject:()=>open('project'),editProject:id=>open('project',id),openProject:id=>open('detail',id),newJournal:()=>open('journal'),editJournal:id=>open('journal',id),newEvent:()=>open('event'),editEvent:id=>open('event',id),openSession,editSession,viewArtwork,saveSession,saveProject,saveJournal,saveEvent,removeProject:id=>remove('project',id),removeJournal:id=>remove('journal',id),removeEvent:id=>remove('event',id),toggleEvent,select,move,today};
+window.MusaCreativeHub={renderPage,renderStudioLinks,reset,close,newProject:()=>open('project'),editProject:id=>open('project',id),openProject:id=>open('detail',id),newJournal:()=>open('journal'),editJournal:id=>open('journal',id),newEvent:()=>open('event'),editEvent:id=>open('event',id),openSession,editSession,viewArtwork,saveSession,requestDeleteSession:id=>requestDelete('session',id),requestDeleteProject:id=>requestDelete('project',id),cancelDelete,confirmDelete,saveProject,saveJournal,saveEvent,removeProject:id=>requestDelete('project',id),removeJournal:id=>remove('journal',id),removeEvent:id=>remove('event',id),toggleEvent,select,move,today};
 })();
