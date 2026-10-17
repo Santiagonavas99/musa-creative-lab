@@ -66,7 +66,9 @@ assert.match(html, /\.swatch\{[^}]*border:1px solid rgba\(255,255,255,\.92\)/,
  "Suggested idea colors should have a thin white border");
 assert.doesNotMatch(html,/palette\(f\.colors,'favorite'\)/,"Saved favorites no longer duplicate the palette");
 assert.doesNotMatch(html,/class="mb-favorite-moodboard"/,"Saved favorites no longer duplicate the visual collage");
-assert.match(favoriteCSS,/min-height:0;align-self:start/,"Saved favorites shrink to their content");
+assert.match(favoriteCSS,/\.idea-favorites-grid\{align-items:stretch;grid-auto-rows:auto;/,"Desktop saved favorites share a row height");
+assert.match(favoriteCSS,/min-height:0;align-self:stretch/,"Favorite glass card must match adjacent writing card height");
+assert.match(favoriteCSS,/@media\(max-width:680px\)\{[\s\S]*?align-self:start;height:auto/,"Stacked mobile cards must use natural heights");
 
 // Home onboarding explains MUSA before repeating any specific Explore interaction.
 assert.match(html, /id="musa-intro-title">TU PRÓXIMA IDEA EMPIEZA AQUÍ\./,
