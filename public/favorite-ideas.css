@@ -1,8 +1,8 @@
 /* Favorite ideas: MUSA's layered frosted-glass visual language.
    The backdrop is a local, lightweight abstract SVG — no network image dependencies. */
-.idea-favorites-grid{align-items:stretch;gap:18px}
+.idea-favorites-grid{align-items:stretch;grid-auto-rows:auto;gap:18px}
 .idea-glass-card{
-  position:relative;display:flex;min-width:0;min-height:0;align-self:start;overflow:hidden;
+  position:relative;display:flex;min-width:0;min-height:0;align-self:stretch;overflow:hidden;
   border-radius:30px;
   background:#153f48 url('/idea-glass-art.svg') center/cover no-repeat;
   isolation:isolate;
@@ -52,7 +52,7 @@
   border:1px solid rgba(255,255,255,.92);
   box-shadow:0 2px 8px rgba(9,16,30,.14);
 }
-.idea-glass-actions{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-top:14px}
+.idea-glass-actions{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-top:auto}
 .idea-glass-actions .btn{min-height:46px;padding:12px 16px;line-height:1.3;text-align:center;transition:transform .2s ease,background .2s ease,box-shadow .2s ease}
 .idea-glass-actions .idea-glass-cta{
   background:#d7ff42;color:#211b36;border:1px solid #d7ff42;
@@ -67,6 +67,12 @@
 .idea-glass-actions .idea-glass-remove:hover{background:rgba(255,255,255,.25)}
 @supports not ((-webkit-backdrop-filter:blur(1px)) or (backdrop-filter:blur(1px))){
   .idea-glass-panel{background:rgba(23,37,57,.68)}
+}
+/* Equal height while cards share a desktop row; natural heights once stacked. */
+@media(max-width:680px){
+  .idea-favorites-grid{align-items:start;grid-auto-rows:auto}
+  .idea-glass-card,.idea-favorites-grid>.ma-saved-writing{align-self:start;height:auto}
+  .idea-glass-actions{margin-top:14px}
 }
 @media(max-width:760px){
   .idea-glass-card{min-height:0;border-radius:26px}
