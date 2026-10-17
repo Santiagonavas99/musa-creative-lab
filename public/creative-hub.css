@@ -141,3 +141,58 @@
  .mc-form-columns{grid-template-columns:1fr}
 }
 @media(prefers-reduced-motion:reduce){.mc-project,.mc-quick,.mc-tab{transition:none}}
+
+
+/* Editable sessions in Mi estudio and Calendar */
+.mc-session-list-section{margin:18px 0 30px;background:#fffdf9;border:1px solid #e6dfd8;border-radius:24px;padding:clamp(19px,3vw,28px)}
+.mc-session-list-heading{display:flex;align-items:center;justify-content:space-between;gap:16px;margin-bottom:14px}
+.mc-session-list-heading h2{font-size:clamp(25px,3vw,34px);line-height:1.1;margin:8px 0}
+.mc-session-list-heading p{font-size:14px;color:#6b6271;margin:0;line-height:1.45}
+.mc-session-history{border-top:1px solid #e5dfd8}
+.mc-session-history>summary{cursor:pointer;display:flex;align-items:center;justify-content:space-between;gap:12px;padding:16px 1px;font-size:14px;font-weight:800;color:#3926ce}
+.mc-session-history>summary span{font-size:18px;transition:transform .2s ease}
+.mc-session-history[open]>summary span{transform:rotate(180deg)}
+.mc-session-history-items{display:grid;gap:9px;max-height:450px;overflow-y:auto;overscroll-behavior:contain}
+.mc-session-history-item{display:flex;align-items:center;justify-content:space-between;gap:14px;padding:15px;border-radius:14px;background:#f7f2eb;border:1px solid #ebe4dc}
+.mc-session-history-item>div:first-child{min-width:0;flex:1}
+.mc-session-history-item h3{font-size:17px;line-height:1.25;margin:8px 0 0;overflow-wrap:anywhere}
+.mc-session-history-actions{display:flex;gap:8px;flex-wrap:wrap;justify-content:flex-end}
+.mc-session-history-actions .btn{font-size:12px;min-height:41px;padding:9px 13px}
+.mc-session-note{margin-top:20px;padding:16px;border-radius:14px;background:#f4f0fa}
+.mc-session-note strong{font-size:13px;color:#211b36}
+.mc-session-note p{white-space:pre-wrap;overflow-wrap:anywhere;line-height:1.6;max-height:230px;overflow:auto}
+.mc-session-edit-hint{margin:0 0 18px;padding:14px 16px;border-radius:14px;background:#eafdb4}
+.mc-session-edit-hint p{margin:8px 0 0;font-size:13px;line-height:1.5;color:#40394b}
+.mc-session-history-actions .btn:focus-visible,.mc-session-history>summary:focus-visible{outline:3px solid #3926ce;outline-offset:2px}
+@media(max-width:600px){
+ .mc-session-list-heading{align-items:flex-start}
+ .mc-session-history-item{flex-direction:column;align-items:stretch}
+ .mc-session-history-actions{justify-content:stretch}
+ .mc-session-history-actions .btn{flex:1}
+ .mc-session-list-section{border-radius:20px}
+}
+@media(prefers-reduced-motion:reduce){.mc-session-history>summary span{transition:none}}
+
+
+/* Destructive actions are easy to find but secondary to creative work. */
+.mc-delete-link{border:1px solid #eac2b8;border-radius:10px;background:#fff7f3;color:#943b2c;font-size:12px;font-weight:800;min-height:39px;padding:8px 12px;cursor:pointer;transition:background .15s ease,border-color .15s ease}
+.mc-delete-link:hover,.mc-delete-link:focus-visible{background:#ffebe4;border-color:#c96956}
+.mc-delete-link:focus-visible,.mc-confirm-delete:focus-visible{outline:3px solid #3926ce;outline-offset:2px}
+.mc-project-bottom{flex-wrap:wrap;gap:10px}
+.mc-project-bottom>.mc-delete-link{margin-left:auto}
+.mc-delete-modal-link{margin-right:auto}
+.mc-calendar-entry .mc-delete-link{padding:5px 8px;min-height:31px}
+.mc-delete-warning{padding:18px 20px;background:#fff3ed;border:1px solid #efcebd;border-radius:17px;line-height:1.6}
+.mc-delete-warning h3{font-size:clamp(19px,3vw,24px);line-height:1.25;overflow-wrap:anywhere;margin:12px 0}
+.mc-delete-warning p{font-size:14px;color:#44384a;margin:12px 0 0}
+.mc-delete-warning .mc-delete-final{font-weight:850;color:#9c3224}
+.mc-confirm-delete{background:#ae392a!important;border:1px solid #ae392a!important;color:#fff!important}
+.mc-confirm-delete:hover{background:#8e3026!important}
+.mc-delete-actions{gap:12px}
+@media(max-width:600px){
+ .mc-delete-actions{display:flex;flex-direction:column-reverse;align-items:stretch}
+ .mc-delete-actions .btn{width:100%;flex:none}
+ .mc-delete-modal-link{width:100%;margin-right:0}
+ .mc-project-bottom>.mc-delete-link{margin-left:0}
+}
+@media(prefers-reduced-motion:reduce){.mc-delete-link{transition:none}}

@@ -119,19 +119,34 @@ test('account switching hides old projects and prevents unauthenticated modifica
 });
 test('editing and deleting a linked project preserves journal and event content',()=>{
   const h=createHarness();
+  h.data.favorites.push({id:'idea-keep',title:'Idea que conservamos'});
+  h.data.artworks.push({id:'art-keep',title:'Obra que conservamos',imagePath:'gallery/photo.jpg'});
+  h.data.boards.push({id:'board-keep',name:'Tablero que conservamos'});
   h.win.MusaCreativeHub.newProject();
-  h.submit('saveProject',{title:'Proyecto borrable'});
+  h.submit('saveProject',{title:'Proyecto borrable'},{
+    ref_favorite:['idea-keep'],ref_artwork:['art-keep'],ref_board:['board-keep']
+  });
   const id=h.data.projects[0].id;
   h.win.MusaCreativeHub.newJournal();
   h.submit('saveJournal',{date:'2026-10-16',title:'Entrada persistente',body:'Mi aprendizaje',projectId:id});
   h.win.MusaCreativeHub.newEvent();
   h.submit('saveEvent',{date:'2026-10-16',title:'Actividad persistente',projectId:id});
   h.win.MusaCreativeHub.removeProject(id);
+  assert.match(h.screen,/¿ELIMINAR ESTE PROYECTO\?/);
+  assert.equal(h.data.projects.length,1,"Opening the confirmation must not delete the project");
+  h.win.MusaCreativeHub.cancelDelete();
+  assert.equal(h.data.projects.length,1,"Cancel must preserve the project");
+  h.win.MusaCreativeHub.requestDeleteProject(id);
+  assert.match(h.screen,/Las obras, ideas y tableros vinculados se conservarán/);
+  h.win.MusaCreativeHub.confirmDelete();
   assert.equal(h.data.projects.length,0);
   assert.equal(h.data.journalEntries.length,1);
   assert.equal(h.data.calendarEvents.length,1);
   assert.equal(h.data.journalEntries[0].projectId,'');
   assert.equal(h.data.calendarEvents[0].projectId,'');
+  assert.equal(h.data.favorites[0].id,'idea-keep',"Favorite ideas survive project deletion");
+  assert.equal(h.data.artworks[0].imagePath,'gallery/photo.jpg',"Gallery image remains");
+  assert.equal(h.data.boards[0].name,'Tablero que conservamos',"Boards remain independent");
 });
 test('user input is HTML escaped rather than interpreted as markup',()=>{
   const h=createHarness();
@@ -187,4 +202,87 @@ test('older zero-length sessions have an honest detail view and do not imply a l
   assert.doesNotMatch(h.screen,/Ver obra creada/);
   h.win.MusaCreativeHub.viewArtwork('not-found');
   assert.equal(h.opened,null,'missing artwork cannot navigate');
+});
+
+
+test('session deletion requires explicit confirmation and preserves gallery artwork',()=>{
+  const h=createHarness();
+  h.data.sessions.push(
+    {id:'first',title:'Ejercicio para borrar',type:'writing',elapsed:85,createdAt:'2026-10-15T14:00:00Z',artworkId:'art-first'},
+    {id:'second',title:'Una sesión para conservar',type:'drawing',elapsed:0,createdAt:'2026-10-16T14:00:00Z'}
+  );
+  h.data.artworks.push({id:'art-first',title:'Texto creativo original',notes:'Texto que no se pierde',imagePath:'users/photo.jpg',createdAt:'2026-10-15T14:00:00Z'});
+  h.win.MusaCreativeHub.openSession(0);
+  assert.match(h.screen,/Eliminar sesión/);
+  const savedBefore=h.saved;
+  h.win.MusaCreativeHub.requestDeleteSession(0);
+  assert.match(h.screen,/¿ELIMINAR ESTA SESIÓN\?/);
+  assert.match(h.screen,/Ejercicio para borrar/);
+  assert.match(h.screen,/La obra y su fotografía seguirán en Mi galería/);
+  assert.match(h.screen,/role="alertdialog"/);
+  assert.equal(h.data.sessions.length,2,"Opening confirmation never deletes immediately");
+  assert.equal(h.saved,savedBefore);
+  h.win.MusaCreativeHub.cancelDelete();
+  assert.equal(h.data.sessions.length,2,"Cancel must keep the session");
+  assert.match(h.screen,/ASÍ FUE TU SESIÓN/);
+  h.win.MusaCreativeHub.requestDeleteSession(0);
+  h.win.MusaCreativeHub.confirmDelete();
+  assert.equal(h.data.sessions.length,1,"Exactly one session is deleted");
+  assert.equal(h.data.sessions[0].id,'second',"Other sessions stay intact");
+  assert.equal(h.data.artworks.length,1,"Gallery artwork is independent and survives");
+  assert.equal(h.data.artworks[0].imagePath,'users/photo.jpg');
+  assert.ok(h.saved>savedBefore,"One confirmed deletion syncs workspace");
+  assert.doesNotMatch(h.win.MusaCreativeHub.renderPage('calendario'),/Ejercicio para borrar/);
+});
+test('delete actions are discoverable from the project listing, calendar and session history',()=>{
+ const h=createHarness();
+ h.data.projects.push({id:'p1',title:'Proyecto de ejemplo',status:'active',updatedAt:'2026-10-16'});
+ h.data.sessions.push({id:'s1',title:'Sesión de ejemplo',type:'drawing',elapsed:0,createdAt:'2026-10-16T12:00:00Z'});
+ let html=h.win.MusaCreativeHub.renderPage('proyectos');
+ assert.match(html,/MusaCreativeHub.requestDeleteProject/,"Project cards should expose delete");
+ h.win.MusaCreativeHub.openProject('p1');
+ assert.match(h.screen,/Eliminar proyecto/,"Project detail exposes delete");
+ h.win.MusaCreativeHub.close();
+ html=h.win.MusaCreativeHub.renderStudioLinks();
+ assert.match(html,/MusaCreativeHub.requestDeleteSession\(0\)/);
+ h.win.MusaCreativeHub.select('2026-10-16');
+ html=h.win.MusaCreativeHub.renderPage('calendario');
+ assert.match(html,/MusaCreativeHub.requestDeleteSession\(0\)/,"Calendar offers delete per session");
+ h.win.MusaCreativeHub.editSession(0);
+ assert.match(h.screen,/Eliminar sesión/,"Session editor offers delete");
+});
+test('unauthenticated users and invalid deletion targets never mutate content',()=>{
+ const h=createHarness();
+ h.data.sessions.push({id:'s',title:'Privado',createdAt:'2026-10-15T14:00:00Z'});
+ h.data.projects.push({id:'p',title:'Privado'});
+ const before=h.saved;
+ h.win.MusaCreativeHub.requestDeleteSession(9);
+ h.win.MusaCreativeHub.confirmDelete();
+ assert.equal(h.saved,before);
+ h.setAuthenticated(false);
+ h.win.MusaCreativeHub.requestDeleteSession(0);
+ h.win.MusaCreativeHub.requestDeleteProject('p');
+ h.win.MusaCreativeHub.confirmDelete();
+ assert.equal(h.data.sessions.length,1);
+ assert.equal(h.data.projects.length,1);
+ assert.equal(h.saved,before);
+});
+
+
+test('failed deletion save rolls back and stale session indexes cannot erase other sessions',()=>{
+ const h=createHarness();
+ h.data.sessions.push({id:'first',title:'Mantener al fallar',createdAt:'2026-10-15T14:00:00Z'});
+ h.data.sessions.push({id:'second',title:'No borrar',createdAt:'2026-10-15T14:30:00Z'});
+ h.context.save=()=>false;
+ h.win.MusaCreativeHub.requestDeleteSession(0);
+ h.win.MusaCreativeHub.confirmDelete();
+ assert.equal(h.data.sessions.length,2,"Failed save restores all session records");
+ assert.equal(h.data.sessions[0].id,'first');
+ assert.match(h.notifications.at(-1),/No pudimos eliminar/);
+ h.context.save=()=>true;
+ h.win.MusaCreativeHub.requestDeleteSession(0);
+ h.data.sessions.shift(); // Another update changed the underlying list during confirmation.
+ h.win.MusaCreativeHub.confirmDelete();
+ assert.equal(h.data.sessions.length,1);
+ assert.equal(h.data.sessions[0].id,'second',"A stale deletion cannot remove a different session");
 });
