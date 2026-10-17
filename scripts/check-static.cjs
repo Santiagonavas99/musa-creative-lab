@@ -156,6 +156,9 @@ assert.ok(inline.length > 0, "MUSA must contain client application JavaScript");
 for (const [, source] of inline) new vm.Script(source, {filename: "index.html"});
 new vm.Script(api, {filename: "api/inspiration.js"});
 new vm.Script(authScript,{filename:"public/auth.js"});
+assert.match(authScript,/currentIdea=window\.MusaMoodboards\.nextIdea\(prompts,currentIdea\);seconds=data\.active\?\.elapsed/,"Logging in should initialize a drawing prompt");
+assert.doesNotMatch(html,/Generar idea ↗|Tu próxima idea visual te espera/,"The preliminary illustration state must be removed");
+
 new vm.Script(authConfig,{filename:"api/auth-config.js"});
 assert.match(html,/src="\/auth\.js"/,"MUSA must load the private account manager");
 new vm.Script(showcaseJS, {filename: "showcase-controller.js"});
@@ -416,6 +419,23 @@ assert.match(homeScreen,/musa-home-activities-art/);
 assert.equal((homeScreen.match(/musa-home-activities-art/g)||[]).length,1,"Exactly one editorial banner on home");
 assert.ok(homeScreen.includes(vm.runInContext("window.MusaChallengeBanner.render()",ctx)),"The home banner must show the selected rotating composition");
 assert.match(homeScreen,/onclick="go\('explorar'\)">Ver ejercicios/,"Home CTA must open the actual Explore section");
+
+// The initial illustration render must be complete even after an auth reset.
+vm.runInContext("currentIdea=null;page='explorar';render()",ctx);
+const firstDrawing=nodes.get("app").innerHTML;
+const firstTitle=vm.runInContext("currentIdea.title",ctx);
+assert.ok(firstTitle.length>2);
+assert.match(firstDrawing,/PROPUESTA PARA DIBUJAR/);
+assert.match(firstDrawing,/EL EJERCICIO/);
+assert.match(firstDrawing,/musa-challenge-banner/);
+assert.match(firstDrawing,/onclick="openMoodboard\('idea'\)"/);
+assert.match(firstDrawing,/onclick="fav\(\)"/);
+assert.match(firstDrawing,/onclick="start\(currentIdea\)"/);
+assert.doesNotMatch(firstDrawing,/Generar idea|Tu próxima idea visual te espera/);
+vm.runInContext("page='inicio';render();page='explorar';render()",ctx);
+assert.equal(vm.runInContext("currentIdea.title",ctx),firstTitle,"Navigate away and back without losing the current drawing prompt");
+vm.runInContext("randomIdea()",ctx);
+assert.notEqual(vm.runInContext("currentIdea.title",ctx),firstTitle,"Another idea should replace the prompt");
 
 vm.runInContext('page="explorar";render()',ctx);
 vm.runInContext("currentIdea={id:'test-palette',title:'Dibuja una ciudad que respira',emotion:'Asombro',technique:'Dibujo',theme:'Arquitectura',colors:['#F4B633','#9D53BB','#373578'],type:'idea'};render()",ctx);
