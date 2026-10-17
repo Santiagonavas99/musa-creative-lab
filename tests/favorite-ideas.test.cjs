@@ -11,12 +11,10 @@ const html = fs.readFileSync(path.join(root,"index.html"),"utf8");
 const css = fs.readFileSync(path.join(root,"public/favorite-ideas.css"),"utf8");
 const artwork = fs.readFileSync(path.join(root,"public/idea-glass-art.svg"),"utf8");
 const render = html.match(/function renderFavoriteIdeaCard\(f\)\{[\s\S]*?\n\}/)?.[0];
-const paletteRenderer = html.match(/function palette\(colors,variant=''\)\{[\s\S]*?\n\}/)?.[0];
 
 function card(item) {
   assert.ok(render,"Favorite idea card renderer must exist");
-  assert.ok(paletteRenderer,"Favorite idea card must reuse the shared palette renderer");
-  return vm.runInNewContext(paletteRenderer+";"+render+";renderFavoriteIdeaCard(f)", {
+  return vm.runInNewContext(render+";renderFavoriteIdeaCard(f)", {
     f:item,
     esc(value){return String(value??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]))}
   });
@@ -54,26 +52,30 @@ test("favorite idea titles, pills and event IDs remain encoded",()=>{
   assert.doesNotMatch(result,/onclick="alert\(1\)"/);
 });
 
-test("saved idea palette renders the original saved colors with shared accessible markup",()=>{
-  const result=card({id:"palette-favorite",title:"Dibuja una ciudad que respira",
-    technique:"Dibujo",emotion:"Asombro",theme:"Arquitectura",
-    colors:["#F4B633","#9D53BB","#373578"]});
-  assert.match(result,/class="palette idea-glass-palette"/);
-  assert.match(result,/aria-label="Paleta de colores sugerida"/);
-  assert.equal((result.match(/class="swatch"/g)||[]).length,3);
-  assert.match(result,/background-color:#F4B633/);
-  assert.match(result,/background-color:#9D53BB/);
-  assert.match(result,/background-color:#373578/);
-  assert.ok(result.indexOf("idea-glass-palette")<result.indexOf("idea-glass-actions"));
+test("saved favorites omit duplicated color swatches and geometric preview",()=>{
+  const item={id:"palette-favorite",title:"Dibuja una ciudad que respira",
+    technique:"Dibujo",emotion:"Asombro",theme:"Arquitectura",keyword:"Geometría",
+    colors:["#F4B633","#9D53BB","#373578"]};
+  const result=card(item);
+  assert.match(result,/class="idea-glass-card"/);
+  assert.match(result,/idea-glass-pill--emotion/);
+  assert.match(result,/Crear con esta idea/);
+  assert.match(result,/openMoodboard\('favorite'/);
+  assert.match(result,/Quitar/);
+  assert.doesNotMatch(result,/idea-glass-palette|mb-mini|mb-favorite-moodboard|class="swatch"|background-color:#F4B633/);
+  assert.deepEqual(item.colors,["#F4B633","#9D53BB","#373578"],"The underlying colors are untouched");
+  assert.doesNotMatch(render,/MusaMoodboards\.mini\(f\)|palette\(f\.colors/);
 });
-test("older favorite ideas without saved colors do not invent a palette",()=>{
+test("older favorites remain compact with no invented swatches",()=>{
   const result=card({id:"old",title:"Idea antigua",technique:"Collage"});
-  assert.doesNotMatch(result,/idea-glass-palette/);
+  assert.doesNotMatch(result,/idea-glass-palette|mb-mini|class="swatch"/);
   assert.match(result,/Idea antigua/);
+  assert.match(result,/openMoodboard\('favorite'/);
 });
-test("favorite palette styles include white borders on desktop and mobile",()=>{
-  assert.match(css,/\.idea-glass-palette \.swatch\s*\{[^}]*border:1px solid rgba\(255,255,255,\.92\)/);
-  assert.match(css,/\.idea-glass-palette \.swatch\{height:44px/);
+test("saved cards shrink vertically on desktop and mobile",()=>{
+  assert.match(css,/min-height:0;align-self:start/);
+  assert.match(css,/@media\(max-width:760px\)\{[\s\S]*?\.idea-glass-card\{min-height:0/);
+  assert.match(css,/@media\(max-width:480px\)\{[\s\S]*?\.idea-glass-card\{min-height:0/);
 });
 
 test("glass styles use MUSA brand color, transparent panel and mobile layouts",()=>{
