@@ -33,3 +33,8 @@
  .ma-rich-output{padding:16px}
 }
 @media(prefers-reduced-motion:reduce){.ma-writing-toolbar button{transition:none}}
+
+/* The completed-session modal uses the same safe editor without rewriting live drafts. */
+.ma-writing-archived .ma-writing-editor-heading label{color:#3926ce}
+.ma-writing-archived .ma-writing-editor-heading span{color:#6a6172}
+.mc-session-note .ma-rich-output{margin:11px 0 0;padding:15px 17px}
