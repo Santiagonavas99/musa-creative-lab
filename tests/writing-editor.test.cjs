@@ -108,3 +108,14 @@ test('finished writing artwork persists formatted content and reuses the sanitiz
  assert.match(html,/src="\/writing-editor\.js"/);
  assert.match(html,/href="\/writing-editor\.css"/);
 });
+
+test('editing an archived writing session never replaces an unfinished active draft',()=>{
+ const {api,writes}=init();
+ const html=api.renderEditor({draftHtml:'<strong>Guardado</strong>',draft:'Guardado'},'archived');
+ assert.match(html,/data-writing-scope="archived"/);
+ assert.match(html,/TU TEXTO CREATIVO · EDITAR/);
+ const editor={dataset:{writingScope:'archived'},innerText:'Texto revisado',innerHTML:'<em>Texto revisado</em>'};
+ const result=api.sync(editor);
+ assert.match(result.html,/<em>Texto revisado<\/em>/);
+ assert.equal(writes.length,0,'editing a finished session must not change the active writing draft');
+});
