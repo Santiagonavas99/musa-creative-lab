@@ -1,0 +1,40 @@
+/* MUSA / Writing laboratory: accessible formatting controls + editable prose. */
+.ma-writing-editor-group{width:100%;margin:14px 0 18px}
+.ma-writing-editor-heading{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:10px}
+.ma-writing-editor-heading label{display:block;color:#d7ff42;font-size:12px;font-weight:850;letter-spacing:.08em}
+.ma-writing-editor-heading span{color:#e4dff0;font-size:12px}
+.ma-writing-toolbar{display:flex;align-items:center;gap:7px;background:#eee8ff;color:#211b36;border:1px solid #dad2f1;padding:8px;border-radius:13px 13px 0 0}
+.ma-writing-toolbar button{border:1px solid transparent;background:#fff;color:#211b36;border-radius:9px;display:grid;place-items:center;width:40px;height:36px;min-width:40px;font-size:17px;font-family:'DM Sans',sans-serif;font-weight:850;transition:background .15s ease}
+.ma-writing-toolbar button:hover{background:#d7ff42;border-color:#a4c822}
+.ma-writing-toolbar button:focus-visible{outline:3px solid #ff7049;outline-offset:2px}
+.ma-toolbar-separator{height:23px;width:1px;background:#c7bce5;margin:0 3px}
+.ma-rich-editor{display:block;width:100%;min-height:245px;max-height:min(70vh,650px);overflow:auto;border:2px solid #d7ff42;border-top:0;border-radius:0 0 14px 14px;background:#fffdf9;color:#211b36;padding:19px 20px;font:400 16px/1.7 'DM Sans',sans-serif;white-space:pre-wrap;overflow-wrap:anywhere;outline:none;caret-color:#3926ce}
+.ma-rich-editor:focus-visible{outline:3px solid #ff7049;outline-offset:2px}
+.ma-rich-editor:empty:before{content:attr(data-placeholder);color:#837a8c;pointer-events:none}
+.ma-rich-editor p{color:#211b36!important;font-size:16px!important;line-height:1.7!important;margin:.3em 0!important}
+.ma-rich-editor strong,.ma-rich-output strong{font-weight:800}
+.ma-rich-editor em,.ma-rich-output em{font-style:italic}
+.ma-rich-editor ul,.ma-rich-editor ol,.ma-rich-output ul,.ma-rich-output ol{padding-left:28px;margin:12px 0 17px;white-space:normal}
+.ma-rich-editor ul,.ma-rich-output ul{list-style:disc}
+.ma-rich-editor ol,.ma-rich-output ol{list-style:decimal}
+.ma-rich-editor li,.ma-rich-output li{padding:2px 0;line-height:1.65}
+.ma-rich-output{font:400 16px/1.7 'DM Sans',sans-serif;color:#211b36;white-space:pre-wrap;overflow-wrap:anywhere;margin-top:17px;border:1px solid #e3ddcf;border-radius:16px;padding:20px 23px;background:#fffdf9}
+.ma-rich-output p{margin:.35em 0}
+.ma-rich-output ul,.ma-rich-output ol{white-space:normal}
+.ma-writing-save-info{font-size:12px;line-height:1.5;margin-top:11px;color:#e1ddeb}
+.ma-writing-final .ma-writing-editor-heading label{color:#3926ce}
+.ma-writing-final .ma-writing-editor-heading span{color:#686073}
+.ma-writing-final .ma-writing-save-info{color:#665f6e}
+@media(max-width:680px){
+ .ma-writing-editor-heading{align-items:flex-start;flex-direction:column;gap:3px}
+ .ma-writing-toolbar{gap:9px}
+ .ma-writing-toolbar button{width:44px;height:42px}
+ .ma-rich-editor{min-height:280px;max-height:60vh;padding:17px;font-size:16px}
+ .ma-rich-output{padding:16px}
+}
+@media(prefers-reduced-motion:reduce){.ma-writing-toolbar button{transition:none}}
+
+/* The completed-session modal uses the same safe editor without rewriting live drafts. */
+.ma-writing-archived .ma-writing-editor-heading label{color:#3926ce}
+.ma-writing-archived .ma-writing-editor-heading span{color:#6a6172}
+.mc-session-note .ma-rich-output{margin:11px 0 0;padding:15px 17px}
