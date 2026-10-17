@@ -20,6 +20,14 @@
 .ma-rich-editor li,.ma-rich-output li{padding:2px 0;line-height:1.65}
 .ma-rich-output{font:400 16px/1.7 'DM Sans',sans-serif;color:#211b36;white-space:pre-wrap;overflow-wrap:anywhere;margin-top:17px;border:1px solid #e3ddcf;border-radius:16px;padding:20px 23px;background:#fffdf9}
 .ma-rich-output p{margin:.35em 0}
+/* Saved writing cards use the same typography as the editor, without a nested card. */
+.ma-rich-card-preview{background:transparent;border:0;border-radius:0;padding:0;margin:14px 0 20px;font-size:15px;line-height:1.65;color:inherit}
+.ma-rich-card-preview p{color:inherit;margin:0 0 11px!important;line-height:1.65}
+.ma-rich-card-preview p:last-child{margin-bottom:0!important}
+.ma-rich-card-preview ul,.ma-rich-card-preview ol{margin:8px 0 11px;padding-left:24px;list-style-position:outside}
+.ma-rich-card-preview em{font-style:italic}
+.ma-rich-card-preview strong{font-weight:800}
+
 .ma-rich-output ul,.ma-rich-output ol{white-space:normal}
 .ma-writing-save-info{font-size:12px;line-height:1.5;margin-top:11px;color:#e1ddeb}
 .ma-writing-final .ma-writing-editor-heading label{color:#3926ce}
