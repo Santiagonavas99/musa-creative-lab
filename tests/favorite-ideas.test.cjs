@@ -72,8 +72,18 @@ test("older favorites remain compact with no invented swatches",()=>{
   assert.match(result,/Idea antigua/);
   assert.match(result,/openMoodboard\('favorite'/);
 });
-test("saved cards shrink vertically on desktop and mobile",()=>{
-  assert.match(css,/min-height:0;align-self:start/);
+test("saved writing and favorite idea cards share the same height on desktop",()=>{
+  assert.match(css,/\.idea-favorites-grid\{align-items:stretch;grid-auto-rows:auto;/,
+    "The favorites grid must make items in the same row stretch to the tallest card");
+  assert.match(css,/\.idea-glass-card\{[^}]*min-height:0;align-self:stretch;/,
+    "The favorite idea card must stretch to its writing sibling");
+  assert.match(css,/\.idea-glass-actions\{[^}]*margin-top:auto/,
+    "Favorite actions should settle at the bottom of the stretched card");
+});
+test("stacked mobile favorites size to their own content",()=>{
+  assert.match(css,/@media\(max-width:680px\)\{[\s\S]*?\.idea-favorites-grid\{align-items:start;grid-auto-rows:auto\}/);
+  assert.match(css,/\.idea-glass-card,\.idea-favorites-grid>\.ma-saved-writing\{align-self:start;height:auto\}/);
+  assert.match(css,/@media\(max-width:680px\)\{[\s\S]*?\.idea-glass-actions\{margin-top:14px\}/);
   assert.match(css,/@media\(max-width:760px\)\{[\s\S]*?\.idea-glass-card\{min-height:0/);
   assert.match(css,/@media\(max-width:480px\)\{[\s\S]*?\.idea-glass-card\{min-height:0/);
 });
