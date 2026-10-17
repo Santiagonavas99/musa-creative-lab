@@ -146,7 +146,7 @@ function renderModal(){
       '<p><strong>Tiempo de exploración:</strong> '+escHtml(duration)+'</p>'+
       (note?'<div class="mc-session-note"><strong>'+(record.type==='writing'?'Tu escritura':'Tu creación o reflexión')+'</strong><p>'+escHtml(note)+'</p></div>':'')+
       '</div><div class="mc-modal-footer"><button class="btn outline" type="button" onclick="MusaCreativeHub.close()">Cerrar</button>'+
-      (artwork?'<button class="btn outline" type="button" onclick="MusaCreativeHub.viewArtwork('+param(artwork.id)+')">Ver obra ↗</button>':'')+
+      (artwork?'<button class="btn outline" type="button" onclick="MusaCreativeHub.viewArtwork('+param(artwork.id)+')">Ver obra creada ↗</button>':'')+
       '<button class="btn secondary" type="button" onclick="MusaCreativeHub.editSession('+Number(id)+')">Editar sesión ↗</button></div>';
   }
   if(kind==='session-edit'){
