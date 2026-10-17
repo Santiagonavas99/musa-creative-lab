@@ -119,8 +119,13 @@ test('account switching hides old projects and prevents unauthenticated modifica
 });
 test('editing and deleting a linked project preserves journal and event content',()=>{
   const h=createHarness();
+  h.data.favorites.push({id:'idea-keep',title:'Idea que conservamos'});
+  h.data.artworks.push({id:'art-keep',title:'Obra que conservamos',imagePath:'gallery/photo.jpg'});
+  h.data.boards.push({id:'board-keep',name:'Tablero que conservamos'});
   h.win.MusaCreativeHub.newProject();
-  h.submit('saveProject',{title:'Proyecto borrable'});
+  h.submit('saveProject',{title:'Proyecto borrable'},{
+    ref_favorite:['idea-keep'],ref_artwork:['art-keep'],ref_board:['board-keep']
+  });
   const id=h.data.projects[0].id;
   h.win.MusaCreativeHub.newJournal();
   h.submit('saveJournal',{date:'2026-10-16',title:'Entrada persistente',body:'Mi aprendizaje',projectId:id});
@@ -139,6 +144,9 @@ test('editing and deleting a linked project preserves journal and event content'
   assert.equal(h.data.calendarEvents.length,1);
   assert.equal(h.data.journalEntries[0].projectId,'');
   assert.equal(h.data.calendarEvents[0].projectId,'');
+  assert.equal(h.data.favorites[0].id,'idea-keep',"Favorite ideas survive project deletion");
+  assert.equal(h.data.artworks[0].imagePath,'gallery/photo.jpg',"Gallery image remains");
+  assert.equal(h.data.boards[0].name,'Tablero que conservamos',"Boards remain independent");
 });
 test('user input is HTML escaped rather than interpreted as markup',()=>{
   const h=createHarness();
@@ -258,4 +266,23 @@ test('unauthenticated users and invalid deletion targets never mutate content',(
  assert.equal(h.data.sessions.length,1);
  assert.equal(h.data.projects.length,1);
  assert.equal(h.saved,before);
+});
+
+
+test('failed deletion save rolls back and stale session indexes cannot erase other sessions',()=>{
+ const h=createHarness();
+ h.data.sessions.push({id:'first',title:'Mantener al fallar',createdAt:'2026-10-15T14:00:00Z'});
+ h.data.sessions.push({id:'second',title:'No borrar',createdAt:'2026-10-15T14:30:00Z'});
+ h.context.save=()=>false;
+ h.win.MusaCreativeHub.requestDeleteSession(0);
+ h.win.MusaCreativeHub.confirmDelete();
+ assert.equal(h.data.sessions.length,2,"Failed save restores all session records");
+ assert.equal(h.data.sessions[0].id,'first');
+ assert.match(h.notifications.at(-1),/No pudimos eliminar/);
+ h.context.save=()=>true;
+ h.win.MusaCreativeHub.requestDeleteSession(0);
+ h.data.sessions.shift(); // Another update changed the underlying list during confirmation.
+ h.win.MusaCreativeHub.confirmDelete();
+ assert.equal(h.data.sessions.length,1);
+ assert.equal(h.data.sessions[0].id,'second',"A stale deletion cannot remove a different session");
 });
