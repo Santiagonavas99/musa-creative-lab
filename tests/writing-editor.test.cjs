@@ -103,7 +103,9 @@ test('pasting is plain-text-only and never inserts untrusted clipboard HTML',()=
 test('finished writing artwork persists formatted content and reuses the sanitized renderer',()=>{
  assert.match(html,/writingHtml,image:'',imagePath/);
  assert.match(html,/window\.MusaWritingEditor\.renderDraft/);
- assert.match(html,/window\.MusaWritingEditor\.sanitize\(a\.writingHtml\)/);
+ assert.match(html,/function renderArtworkText\(artwork,summary=false\)/);
+ assert.match(html,/renderArtworkText\(a,true\)/,'Gallery card must render rich writing, not its plain notes');
+ assert.match(html,/renderArtworkText\(a\)\+'<p class="muted">/,'Full artwork detail must use the same renderer');
  assert.match(html,/window\.MusaWritingEditor\.renderEditor\(data\.active\.item\)/);
  assert.match(html,/src="\/writing-editor\.js"/);
  assert.match(html,/href="\/writing-editor\.css"/);
@@ -118,4 +120,47 @@ test('editing an archived writing session never replaces an unfinished active dr
  const result=api.sync(editor);
  assert.match(result.html,/<em>Texto revisado<\/em>/);
  assert.equal(writes.length,0,'editing a finished session must not change the active writing draft');
+});
+
+test('regression: editing a saved story keeps italic, bold and bullet lists visible in Mi estudio gallery and full artwork',()=>{
+ const {ctx}=init();
+ const helper=html.match(/function renderArtworkText\(artwork,summary=false\)\{[\s\S]*?\n\}/)?.[0];
+ assert.ok(helper,'Shared gallery renderer must exist');
+ vm.runInContext(helper,ctx,{filename:'gallery-renderer.js'});
+ ctx.esc=v=>String(v??'').replace(/[&<>"']/g,ch=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[ch]));
+ ctx.artwork={
+   title:'Las palabras del bosque',source:{type:'writing'},
+   notes:'Los árboles contienen miles de historias. Primero y segundo.',
+   writingHtml:'<p>Los árboles contienen <em>miles de historias</em> y <strong>secretos</strong>.</p><ul><li>Primero</li><li>Segundo</li></ul>'
+ };
+ for(const compact of [true,false]){
+   const output=vm.runInContext('renderArtworkText(artwork,'+compact+')',ctx);
+   assert.match(output,/<em>miles de historias<\/em>/,'Italic must be shown outside editing mode');
+   assert.match(output,/<strong>secretos<\/strong>/,'Bold must be shown outside editing mode');
+   assert.match(output,/<ul><li>Primero<\/li><li>Segundo<\/li><\/ul>/,'Bullets must be preserved');
+   assert.match(output,/Texto creativo guardado/);
+   if(compact)assert.match(output,/ma-rich-card-preview/);
+ }
+ assert.match(styles,/\.ma-rich-card-preview em\{font-style:italic\}/,'Italic stays visible inside gallery cards');
+ assert.match(styles,/\.ma-rich-card-preview ul/,'Saved lists use appropriate bullets');
+});
+test('gallery renders old plain-text writings and never executes unsafe HTML',()=>{
+ const {ctx}=init();
+ const helper=html.match(/function renderArtworkText\(artwork,summary=false\)\{[\s\S]*?\n\}/)?.[0];
+ assert.ok(helper);
+ vm.runInContext(helper,ctx);
+ ctx.esc=v=>String(v??'').replace(/[&<>"']/g,ch=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[ch]));
+ ctx.artwork={source:{type:'writing'},notes:'Una línea\nOtra línea <script>alert(1)</script>'};
+ const legacy=vm.runInContext('renderArtworkText(artwork,true)',ctx);
+ assert.match(legacy,/Una línea<br>Otra línea/);
+ assert.match(legacy,/&lt;script&gt;/);
+ assert.doesNotMatch(legacy,/<script>/);
+ ctx.artwork.writingHtml='<p>Historia <em onclick="evil()">mía</em><img src="x" onerror="evil()"></p>';
+ const safe=vm.runInContext('renderArtworkText(artwork,true)',ctx);
+ assert.match(safe,/<em>mía<\/em>/);
+ assert.doesNotMatch(safe,/onclick=|onerror=|<img/);
+ ctx.artwork={notes:'Texto de una ilustración',source:{type:'drawing'}};
+ const draw=vm.runInContext('renderArtworkText(artwork,true)',ctx);
+ assert.match(draw,/<p>Texto de una ilustración<\/p>/);
+ assert.doesNotMatch(draw,/ma-rich-output/);
 });
