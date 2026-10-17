@@ -154,6 +154,10 @@ assert.ok(inline.length > 0, "MUSA must contain client application JavaScript");
 for (const [, source] of inline) new vm.Script(source, {filename: "index.html"});
 new vm.Script(api, {filename: "api/inspiration.js"});
 new vm.Script(authScript,{filename:"public/auth.js"});
+assert.match(authScript,/currentIdea=window\.MusaMoodboards\.nextIdea\(prompts,currentIdea\);seconds=data\.active\?\.elapsed/,"Authenticated load must initialize an illustration idea rather than reset to null");
+assert.doesNotMatch(html,/Generar idea ↗|Tu próxima idea visual te espera/,"The illustration card should not expose a preliminary empty state");
+assert.match(html,/const d=currentIdea\|\|\(currentIdea=window\.MusaMoodboards\.nextIdea\(prompts,null\)\)/,"Illustration self-heals a missing idea on initial render");
+
 new vm.Script(authConfig,{filename:"api/auth-config.js"});
 assert.match(html,/src="\/auth\.js"/,"MUSA must load the private account manager");
 new vm.Script(showcaseJS, {filename: "showcase-controller.js"});
@@ -409,6 +413,24 @@ assert.match(homeScreen,/musa-home-activities-art/);
 assert.equal((homeScreen.match(/musa-home-activities-art/g)||[]).length,1,"Exactly one editorial banner on home");
 assert.ok(homeScreen.includes(vm.runInContext("window.MusaChallengeBanner.render()",ctx)),"The home banner must show the selected rotating composition");
 assert.match(homeScreen,/onclick="go\('explorar'\)">Ver ejercicios/,"Home CTA must open the actual Explore section");
+
+// Regression: even if auth previously left currentIdea=null, Explore shows the complete exercise immediately.
+vm.runInContext("currentIdea=null;page='explorar';render()",ctx);
+const firstDrawingMarkup=nodes.get("app").innerHTML;
+const firstDrawingTitle=vm.runInContext("currentIdea.title",ctx);
+assert.ok(firstDrawingTitle&&firstDrawingTitle.length>2,"First Explore visit must already have a generated idea");
+assert.match(firstDrawingMarkup,/PROPUESTA PARA DIBUJAR/);
+assert.match(firstDrawingMarkup,/EL EJERCICIO/);
+assert.match(firstDrawingMarkup,/musa-challenge-banner/);
+assert.match(firstDrawingMarkup,/onclick="openMoodboard\('idea'\)"/,"Moodboard is available without a prior Generate Idea click");
+assert.match(firstDrawingMarkup,/onclick="fav\(\)"/,"Save works from the first render");
+assert.match(firstDrawingMarkup,/onclick="start\(currentIdea\)"/,"Create works from the first render");
+assert.doesNotMatch(firstDrawingMarkup,/Generar idea|Tu próxima idea visual te espera/);
+vm.runInContext("page='inicio';render();page='explorar';render()",ctx);
+assert.equal(vm.runInContext("currentIdea.title",ctx),firstDrawingTitle,"Returning to Explore keeps the current idea");
+vm.runInContext("randomIdea()",ctx);
+assert.notEqual(vm.runInContext("currentIdea.title",ctx),firstDrawingTitle,"Otra idea generates a fresh drawing prompt");
+assert.match(nodes.get("app").innerHTML,/Ver moodboard/);
 
 vm.runInContext('page="explorar";render()',ctx);
 vm.runInContext("currentIdea={id:'test-palette',title:'Dibuja una ciudad que respira',emotion:'Asombro',technique:'Dibujo',theme:'Arquitectura',colors:['#F4B633','#9D53BB','#373578'],type:'idea'};render()",ctx);
