@@ -142,6 +142,8 @@ const authScript = fs.readFileSync(path.join(root, "public/auth.js"), "utf8");
 const authConfig = fs.readFileSync(path.join(root, "api/auth-config.js"), "utf8");
 const showcaseJS = fs.readFileSync(path.join(root, "public/showcase-controller.js"), "utf8");
 const boardsJS = fs.readFileSync(path.join(root, "public/boards.js"), "utf8");
+const hubJS = fs.readFileSync(path.join(root, "public/creative-hub.js"), "utf8");
+const hubCSS = fs.readFileSync(path.join(root, "public/creative-hub.css"), "utf8");
 const moodboardJS = fs.readFileSync(path.join(root, "public/moodboards.js"), "utf8");
 const moodboardCSS = fs.readFileSync(path.join(root, "public/moodboards.css"), "utf8");
 const bannerJS = fs.readFileSync(path.join(root, "public/challenge-banner.js"), "utf8");
@@ -158,6 +160,10 @@ new vm.Script(authConfig,{filename:"api/auth-config.js"});
 assert.match(html,/src="\/auth\.js"/,"MUSA must load the private account manager");
 new vm.Script(showcaseJS, {filename: "showcase-controller.js"});
 new vm.Script(boardsJS, {filename: "boards.js"});
+new vm.Script(hubJS, {filename:"creative-hub.js"});
+assert.match(html,/src="\/creative-hub\.js"/,"Creative hub controller must be installed");
+assert.match(html,/href="\/creative-hub\.css"/,"Creative hub styles must be installed");
+assert.match(hubCSS,/@media\(max-width:600px\)/,"Projects and calendar are designed for mobile");
 new vm.Script(moodboardJS, {filename: "moodboards.js"});
 new vm.Script(bannerJS, {filename: "challenge-banner.js"});
 new vm.Script(writingJS, {filename:"creative-writing.js"});
@@ -385,6 +391,7 @@ const ctx = vm.createContext({
   }))]})}),
 });
 vm.runInContext(boardsJS, ctx, {filename:"boards.js"});
+vm.runInContext(hubJS, ctx, {filename:"creative-hub.js"});
 vm.runInContext(moodboardJS, ctx, {filename:"moodboards.js"});
 vm.runInContext(bannerJS, ctx, {filename:"challenge-banner.js"});
 vm.runInContext(writingJS, ctx, {filename:"creative-writing.js"});
@@ -485,6 +492,9 @@ documentListeners.keydown({key:"Escape",preventDefault(){escapePrevented=true}})
 assert.ok(escapePrevented,"Escape is handled");
 assert.equal(nodes.get("mobile-menu").hidden,true,"Escape closes the mobile navigation");
 vm.runInContext("toggleMobileMenu();go('estudio')",ctx);
+assert.match(nodes.get('app').innerHTML,/PROYECTOS/,'Studio offers creative projects');
+assert.match(nodes.get('app').innerHTML,/CALENDARIO/,'Studio offers creative calendar');
+assert.match(nodes.get('app').innerHTML,/DIARIO/,'Studio offers creative journal');
 assert.equal(nodes.get("mobile-menu").hidden,true,"Navigation to a page closes the dropdown");
 assert.match(nodes.get("mobile-menu").innerHTML,/aria-current="page"[^>]*>Mi estudio<\/button>/,"Active page updates");
 vm.runInContext("go('retos')",ctx);
