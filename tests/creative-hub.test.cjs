@@ -12,7 +12,7 @@ const css=fs.readFileSync(path.join(root,'public/creative-hub.css'),'utf8');
 const empty=()=>({favorites:[],boards:[],artworks:[],sessions:[],projects:[],journalEntries:[],calendarEvents:[]});
 const escapes=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 function createHarness(){
-  let counter=0,saved=0,rendered='',authenticated=true;
+  let counter=0,saved=0,rendered='',authenticated=true,opened=null;
   let records=empty();
   const notification=[];
   const win={MusaAuth:{isAuthenticated:()=>authenticated}};
@@ -20,6 +20,7 @@ function createHarness(){
     window:win,data:records,esc:escapes,crypto:{randomUUID:()=>('uuid-'+(++counter))},
     document:{addEventListener(){},getElementById(){return null}},
     render(){rendered=win.MusaCreativeHub.renderPage('proyectos')},
+    openArt(id,origin){opened={id,origin}},
     save(){saved++;return true},toast(msg){notification.push(msg)},confirm(){return true},
     Date,Set,Array
   });
@@ -38,7 +39,7 @@ function createHarness(){
     win.MusaCreativeHub[kind]({preventDefault(){},currentTarget:fields(values,checkboxes)});
   };
   return{win,context,submit,get data(){return records},get saved(){return saved},
-    get screen(){return rendered},notifications:notification,setAccount(next){records=next;context.data=next;win.MusaCreativeHub.reset()},
+    get screen(){return rendered},get opened(){return opened},notifications:notification,setAccount(next){records=next;context.data=next;win.MusaCreativeHub.reset()},
     setAuthenticated(v){authenticated=v}
   };
 }
@@ -140,4 +141,50 @@ test('user input is HTML escaped rather than interpreted as markup',()=>{
   assert.doesNotMatch(output,/<script>not allowed<\/script>/);
   assert.match(output,/&lt;script&gt;/);
   assert.match(output,/&lt;img/);
+});
+
+test('main navigation has three destinations and no redundant Activity page',()=>{
+  assert.match(index,/const items=\[\['inicio','Inicio'\],\['explorar','Explorar'\],\['estudio','Mi estudio'\]\]/);
+  assert.doesNotMatch(index,/\['actividad','Actividad'\]/);
+  assert.doesNotMatch(index,/else if\(page==='actividad'\)/);
+  assert.doesNotMatch(index,/Sesiones completadas|Ver actividad →/,'Remove empty statistics cards and obsolete CTA from Inicio');
+  assert.match(index,/01 \/ 03/);
+  assert.match(index,/p==='actividad'\?'calendario':p/,'legacy Activity requests should open calendar');
+  assert.match(index,/go\(window\.musaArtworkReturn/,'return link keeps original calendar context');
+  assert.match(auth,/sessions:\[\]/,'prior sessions remain part of per-user workspace');
+});
+test('calendar shows historical sessions and artworks as actionable entries, keeping all saved data',()=>{
+  const h=createHarness();
+  h.data.sessions.push({id:'s-100',title:'¿Cómo se vería la alegría sin rostros?',type:'drawing',elapsed:125,createdAt:'2026-10-15T14:00:00Z',artworkId:'art-100'});
+  h.data.artworks.push({id:'art-100',title:'Mi alegría abstracta',createdAt:'2026-10-15T14:00:00Z'});
+  h.win.MusaCreativeHub.select('2026-10-15');
+  const html=h.win.MusaCreativeHub.renderPage('calendario');
+  assert.match(html,/SESIÓN REALIZADA/);
+  assert.match(html,/OBRA GUARDADA/);
+  assert.match(html,/Ver sesión ↗/);
+  assert.match(html,/Ver obra ↗/);
+  assert.match(html,/Mi alegría abstracta/);
+  assert.doesNotMatch(html,/class="mc-cal-stats"/,'obsolete decorative stats should be absent');
+  const beforeSaves=h.saved;
+  h.win.MusaCreativeHub.openSession(0);
+  assert.match(h.screen,/ASÍ FUE TU SESIÓN/);
+  assert.match(h.screen,/02:05/,'show actual elapsed time in session details');
+  assert.match(h.screen,/Ver obra creada/);
+  h.win.MusaCreativeHub.viewArtwork('art-100');
+  assert.equal(h.opened.id,'art-100');
+  assert.equal(h.opened.origin,'calendario');
+  assert.equal(h.data.sessions.length,1);
+  assert.equal(h.data.artworks.length,1);
+  assert.equal(h.saved,beforeSaves,'viewing history must not mutate or resave user data');
+});
+test('older zero-length sessions have an honest detail view and do not imply a linked artwork',()=>{
+  const h=createHarness();
+  h.data.sessions.push({id:'s-legacy',title:'Boceto antiguo',type:'challenge',elapsed:0,createdAt:'2026-10-15T14:00:00Z'});
+  h.win.MusaCreativeHub.select('2026-10-15');
+  assert.match(h.win.MusaCreativeHub.renderPage('calendario'),/Boceto antiguo/);
+  h.win.MusaCreativeHub.openSession(0);
+  assert.match(h.screen,/Sin tiempo registrado/);
+  assert.doesNotMatch(h.screen,/Ver obra creada/);
+  h.win.MusaCreativeHub.viewArtwork('not-found');
+  assert.equal(h.opened,null,'missing artwork cannot navigate');
 });
