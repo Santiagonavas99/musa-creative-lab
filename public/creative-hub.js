@@ -55,7 +55,7 @@ function renderStudioLinks(){
     ['proyectos','PROYECTOS',arr('projects').length,'Ideas conectadas, de principio a fin'],
     ['diario','DIARIO',arr('journalEntries').length,'Tu proceso merece ser recordado'],
     ['calendario','CALENDARIO',arr('calendarEvents').filter(e=>!e.completed).length,'Planea tu próxima exploración']
-  ].map(([route,label,count,desc],i)=>'<button class="mc-quick mc-q'+i+'" type="button" onclick="go(\''+route+'\')"><span>'+label+' ↗</span><strong>'+count+'</strong><small>'+escHtml(desc)+'</small></button>').join('')+'</div>'+sessionList();
+  ].map(([route,label,count,desc],i)=>'<button class="mc-quick mc-q'+i+'" type="button" onclick="go(\''+route+'\')"><span>'+label+' ↗</span><strong>'+count+'</strong><small>'+escHtml(desc)+'</small></button>').join('')+'</div>'+sessionList()+(modal?renderModal():'');
 }
 function blank(title,desc,button,action){
   return '<div class="mc-empty"><span class="mc-empty-symbol" aria-hidden="true">✳</span><h3>'+escHtml(title)+'</h3><p>'+escHtml(desc)+'</p><button class="btn secondary" type="button" onclick="'+action+'">'+escHtml(button)+' ↗</button></div>';
