@@ -87,7 +87,7 @@ function activities(){
   arr('calendarEvents').forEach(e=>add(e.date,'plan',e.title,{id:e.id,completed:e.completed,notes:e.notes}));
   arr('journalEntries').forEach(e=>add(e.date,'journal',e.title,{id:e.id}));
   arr('projects').forEach(p=>add(p.dueDate,'due',p.title,{id:p.id,completed:p.status==='done'}));
-  arr('sessions').forEach((session,index)=>add(fromTimestamp(session.createdAt),'session',session.title,{index,id:session.id,artworkId:session.artworkId,elapsed:session.elapsed,type:session.type}));
+  arr('sessions').forEach((session,index)=>add(fromTimestamp(session.createdAt),'session',session.title,{index,id:session.id,artworkId:session.artworkId,type:session.type}));
   arr('artworks').forEach(a=>add(fromTimestamp(a.createdAt),'artwork',a.title,{id:a.id}));
   return map;
 }
@@ -135,15 +135,13 @@ function renderModal(){
   if(kind==='session'){
     const record=sessionByIndex(Number(id));
     if(!record)return '';
-    const seconds=Number(record.elapsed);
-    const duration=Number.isFinite(seconds)&&seconds>0?String(Math.floor(seconds/60)).padStart(2,'0')+':'+String(Math.floor(seconds%60)).padStart(2,'0'):'Sin tiempo registrado';
     const artwork=sessionArtwork(record);
     const note=artwork?.notes??record.notes??'';
     title='ASÍ FUE TU SESIÓN.';
     body='<div class="mc-session-summary"><span class="mc-eyebrow">'+escHtml(sessionType(record))+'</span>'+
       '<h3>'+escHtml(record.title||'Sesión sin título')+'</h3>'+
       '<p><strong>Fecha:</strong> '+escHtml(dateLabel(fromTimestamp(record.createdAt)))+'</p>'+
-      '<p><strong>Tiempo de exploración:</strong> '+escHtml(duration)+'</p>'+
+
       (note?'<div class="mc-session-note"><strong>'+(record.type==='writing'?'Tu escritura':'Tu creación o reflexión')+'</strong><p>'+escHtml(note)+'</p></div>':'')+
       '</div><div class="mc-modal-footer"><button class="btn outline" type="button" onclick="MusaCreativeHub.close()">Cerrar</button>'+
       (artwork?'<button class="btn outline" type="button" onclick="MusaCreativeHub.viewArtwork('+param(artwork.id)+')">Ver obra creada ↗</button>':'')+
@@ -156,7 +154,7 @@ function renderModal(){
     title='EDITAR ESTA SESIÓN.';
     body='<form id="mc-edit" onsubmit="MusaCreativeHub.saveSession(event)">'+
       '<div class="mc-session-edit-hint"><span class="mc-eyebrow">'+escHtml(sessionType(record))+' · '+escHtml(dateLabel(fromTimestamp(record.createdAt)))+'</span>'+
-      '<p>Actualiza esta sesión sin crear otra. La fecha, la duración y la imagen original se conservarán.</p></div>'+
+      '<p>Actualiza esta sesión sin crear otra. La fecha y la imagen original se conservarán.</p></div>'+
       field('Título de la sesión *','title',record.title||artwork?.title||'','required maxlength="130"')+
       '<label class="mc-field"><span>'+(record.type==='writing'?'Tu texto creativo':'Tu creación o reflexión')+'</span>'+
       '<textarea name="notes" rows="7" maxlength="50000" placeholder="Lo que creaste, aprendiste o quieres recordar…">'+escHtml(artwork?.notes??record.notes??'')+'</textarea></label>'+

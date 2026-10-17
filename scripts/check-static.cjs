@@ -167,7 +167,7 @@ assert.match(html,/\.search-history-backdrop\{/,"History confirmation is visuall
 assert.match(html,/\.search-history-dialog-actions button\{width:100%\}/,"Dialog controls adapt to mobile");
 assert.match(authScript,/searchHistoryDeleteOpen=false;document\.getElementById\('search-history-dialog-root'\)/,"Logging out dismisses any deletion confirmation");
 
-assert.match(authScript,/currentIdea=window\.MusaMoodboards\.nextIdea\(prompts,currentIdea\);seconds=data\.active\?\.elapsed/,"Logging in should initialize a drawing prompt");
+assert.match(authScript,/currentIdea=window\.MusaMoodboards\.nextIdea\(prompts,currentIdea\);page='inicio'/,"Logging in should initialize a drawing prompt without a clock");
 assert.doesNotMatch(html,/Generar idea ↗|Tu próxima idea visual te espera/,"The preliminary illustration state must be removed");
 
 new vm.Script(authConfig,{filename:"api/auth-config.js"});
@@ -176,6 +176,12 @@ new vm.Script(showcaseJS, {filename: "showcase-controller.js"});
 new vm.Script(boardsJS, {filename: "boards.js"});
 new vm.Script(hubJS, {filename:"creative-hub.js"});
 assert.match(html,/src="\/creative-hub\.js"/,"Creative hub controller must be installed");
+assert.doesNotMatch(html,/id="clock"|onclick="toggleTimer\(\)"|Iniciar \/ reanudar|Ⅱ Pausar|<div class="timer"/,"No running timer or timer controls should appear in creative sessions");
+assert.doesNotMatch(html,/function tick\(\)|function toggleTimer\(\)|setInterval\(tick,1000\)|elapsed:data\.active\.elapsed/,"No timer engine or elapsed tracking should be enabled");
+assert.match(html,/Guardar mi proceso ↗/,"Session CTA saves a work-in-progress without a time limit");
+assert.doesNotMatch(hubJS,/Tiempo de exploración:|Sin tiempo registrado|const duration=Number/,"Calendar sessions do not display duration metrics");
+assert.match(html,/function resume\(\)\{if\(data\.active\)go\('sesion'\)\}/,"Unfinished sessions can resume without timer state");
+
 assert.match(html,/href="\/creative-hub\.css"/,"Creative hub styles must be installed");
 assert.match(hubCSS,/@media\(max-width:600px\)/,"Projects and calendar are designed for mobile");
 assert.match(hubJS,/function sessionList\(\)/,"My Studio exposes a list of previous sessions");
@@ -443,7 +449,7 @@ assert.match(studioSessionHTML,/Explorar sesiones anteriores/);
 assert.match(studioSessionHTML,/MusaCreativeHub\.editSession\(0\)/,"Studio and artwork expose editing");
 vm.runInContext("window.MusaCreativeHub.openSession(0)",ctx);
 assert.match(nodes.get("app").innerHTML,/ASÍ FUE TU SESIÓN/,"Studio can open session summary");
-assert.match(nodes.get("app").innerHTML,/Sin tiempo registrado/,"Historical zero-duration sessions still display correctly");
+assert.doesNotMatch(nodes.get("app").innerHTML,/Sin tiempo registrado|Tiempo de exploración/,"Historical sessions must not show time metrics");
 assert.match(nodes.get("app").innerHTML,/Texto inicial/,"Existing creative text is visible");
 assert.match(nodes.get("app").innerHTML,/Editar sesión ↗/);
 vm.runInContext("window.MusaCreativeHub.editSession(0)",ctx);
@@ -459,7 +465,7 @@ vm.runInContext("window.MusaCreativeHub.saveSession({preventDefault(){},currentT
 assert.equal(vm.runInContext("data.sessions.length",ctx),1,"Editing must not create a duplicate session");
 assert.equal(vm.runInContext("data.sessions[0].title",ctx),"Sesión con título actualizado");
 assert.equal(vm.runInContext("data.sessions[0].notes",ctx),"Nueva versión de mi texto creativo");
-assert.equal(vm.runInContext("data.sessions[0].elapsed",ctx),0,"Duration is immutable in the edit");
+assert.equal(vm.runInContext("data.sessions[0].elapsed",ctx),0,"Previously stored elapsed data stays intact even though it is not shown");
 assert.equal(vm.runInContext("data.sessions[0].id",ctx),"old-session","Original session identifier persists");
 assert.equal(vm.runInContext("data.artworks[0].notes",ctx),"Nueva versión de mi texto creativo","Linked artwork reflects edited content");
 assert.equal(vm.runInContext("data.artworks[0].title",ctx),"Sesión con título actualizado");
@@ -584,9 +590,15 @@ vm.runInContext("startFavorite("+JSON.stringify(writingId)+")",ctx);
 assert.match(nodes.get("app").innerHTML,/ma-writing-editor/);
 assert.doesNotMatch(nodes.get("app").innerHTML,/mb-session-preview/,"Writing sessions should never display the drawing moodboard");
 vm.runInContext("updateWritingDraft('Texto creativo de prueba que debe conservarse.')",ctx);
+
+assert.doesNotMatch(nodes.get("app").innerHTML,/id="clock"|Iniciar \/ reanudar|Pausar|Tiempo de exploración/,"Session screen stays free of time pressure");
+
 assert.equal(vm.runInContext("data.active.item.draft",ctx),"Texto creativo de prueba que debe conservarse.");
 vm.runInContext("endSession()",ctx);
 assert.match(nodes.get("app").innerHTML,/Texto creativo de prueba que debe conservarse/,"Written text should carry into the saving screen");
+assert.equal(vm.runInContext("data.active.elapsed",ctx),undefined,"New sessions do not track elapsed time");
+assert.doesNotMatch(nodes.get("app").innerHTML,/clock|timer|Tiempo de exploración/,"Saving screen has no timer indicators");
+
 vm.runInContext("data.active=null;data.favorites=[];page='explorar';render()",ctx);
 
 assert.match(nodes.get("app").innerHTML,/BUSCA REFERENCIAS/);

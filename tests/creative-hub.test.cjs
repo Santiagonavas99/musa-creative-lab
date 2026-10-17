@@ -183,7 +183,7 @@ test('calendar shows historical sessions and artworks as actionable entries, kee
   const beforeSaves=h.saved;
   h.win.MusaCreativeHub.openSession(0);
   assert.match(h.screen,/ASÍ FUE TU SESIÓN/);
-  assert.match(h.screen,/02:05/,'show actual elapsed time in session details');
+  assert.doesNotMatch(h.screen,/02:05|Tiempo de exploración|Sin tiempo registrado/,'never show duration even if historical records have elapsed data');
   assert.match(h.screen,/Ver obra creada/);
   h.win.MusaCreativeHub.viewArtwork('art-100');
   assert.equal(h.opened.id,'art-100');
@@ -198,13 +198,25 @@ test('older zero-length sessions have an honest detail view and do not imply a l
   h.win.MusaCreativeHub.select('2026-10-15');
   assert.match(h.win.MusaCreativeHub.renderPage('calendario'),/Boceto antiguo/);
   h.win.MusaCreativeHub.openSession(0);
-  assert.match(h.screen,/Sin tiempo registrado/);
+  assert.doesNotMatch(h.screen,/Tiempo de exploración|Sin tiempo registrado/,'older sessions also have timer-free details');
   assert.doesNotMatch(h.screen,/Ver obra creada/);
   h.win.MusaCreativeHub.viewArtwork('not-found');
   assert.equal(h.opened,null,'missing artwork cannot navigate');
 });
 
 
+
+test('calendar and editable session retain legacy durations privately without displaying them',()=>{
+ const h=createHarness();
+ h.data.sessions.push({id:'legacy-timed',title:'Sin presión',type:'writing',elapsed:340,createdAt:'2026-10-15T14:00:00Z'});
+ h.win.MusaCreativeHub.openSession(0);
+ assert.match(h.screen,/Sin presión/);
+ assert.doesNotMatch(h.screen,/05:40|Tiempo de exploración|Sin tiempo registrado/);
+ h.win.MusaCreativeHub.editSession(0);
+ assert.match(h.screen,/EDITAR ESTA SESIÓN/);
+ assert.doesNotMatch(h.screen,/duración|Tiempo de exploración/i);
+ assert.equal(h.data.sessions[0].elapsed,340,'Historical saved data is preserved');
+});
 test('session deletion requires explicit confirmation and preserves gallery artwork',()=>{
   const h=createHarness();
   h.data.sessions.push(
