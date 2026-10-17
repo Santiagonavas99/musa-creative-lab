@@ -545,10 +545,13 @@ assert.ok(nodes.get("app").innerHTML.includes(currentBanner),"Explore displays t
 vm.runInContext("randomIdea()",ctx);
 assert.ok(nodes.get("app").innerHTML.includes(currentBanner),"Generating a new idea should not swap the banner until refresh");
 const mobileNav = nodes.get("mobile-menu").innerHTML;
-for(const section of ["Inicio","Explorar","Mi estudio","Actividad"]) {
+for(const section of ["Inicio","Explorar","Mi estudio"]) {
   assert.ok(mobileNav.includes(">"+section+"</button>"), section+" must appear in mobile menu");
 }
-assert.equal((mobileNav.match(/mobile-menu-link/g)||[]).length,4,"Exactly four mobile sections");
+assert.equal((mobileNav.match(/mobile-menu-link/g)||[]).length,3,"Exactly three mobile sections");
+assert.doesNotMatch(mobileNav,/>Actividad<\/button>/,"Activity link removed");
+assert.match(mobileNav,/01 \/ 03/,"Mobile count displays three items");
+assert.doesNotMatch(html,/else if\(page===\x27actividad\x27\)/,"Old Activity page removed");
 assert.match(mobileNav,/aria-current="page"[^>]*>Explorar<\/button>/, "Explore should be highlighted");
 vm.runInContext("toggleMobileMenu()",ctx);
 assert.equal(nodes.get("mobile-menu").hidden,false,"Hamburger opens navigation");

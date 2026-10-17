@@ -49,9 +49,12 @@
 .mc-journal p{white-space:pre-wrap;overflow-wrap:anywhere;color:#504a58;line-height:1.64;margin:0;max-height:14em;overflow:auto}
 .mc-calendar-layout{display:grid;grid-template-columns:minmax(0,1.3fr) minmax(290px,.75fr);gap:18px;align-items:start}
 .mc-calendar-sheet,.mc-day-panel{background:#fffdf9;border:1px solid #e3ddd6;border-radius:26px;padding:clamp(15px,2.5vw,26px);min-width:0}
-.mc-cal-stats{display:flex;align-items:center;gap:18px;flex-wrap:wrap;margin:-2px 0 18px;color:#645c6b;font-size:13px}
-.mc-cal-stats span strong{color:#211b36;font-size:21px}
-.mc-cal-stats button{margin-left:auto}
+.mc-calendar-toolbar{display:flex;align-items:center;justify-content:space-between;gap:14px;margin:0 0 18px;color:#645c6b;font-size:12px;font-weight:800;letter-spacing:.08em}
+.mc-calendar-toolbar button{flex:none;letter-spacing:0}
+.mc-session-summary{padding:6px 0 14px;border-bottom:1px solid #e5ded4}
+.mc-session-summary h3{font-size:clamp(23px,4vw,31px);line-height:1.15;margin:12px 0 20px;overflow-wrap:anywhere}
+.mc-session-summary p{font-size:14px;line-height:1.5;margin:12px 0;color:#5c5365}
+.mc-session-summary strong{color:#211b36}
 .mc-month{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:21px}
 .mc-month h3{text-transform:capitalize;font-size:23px;text-align:center;margin:0;letter-spacing:-.045em}
 .mc-month button{border:1px solid #e7e1d8;border-radius:12px;background:#f6f1e8;width:42px;height:42px;font-size:27px;line-height:1}
@@ -123,6 +126,7 @@
  .mc-heading{flex-direction:column;align-items:stretch;gap:14px}
  .mc-heading .btn{width:100%}
  .mc-heading h2{font-size:34px}
+ .mc-calendar-toolbar{align-items:center;font-size:10px;letter-spacing:.055em}
  .mc-numbers>div{flex-direction:column;gap:4px;padding:12px}
  .mc-numbers strong{font-size:29px}
  .mc-project-grid,.mc-journal-list{grid-template-columns:1fr}
