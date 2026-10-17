@@ -249,7 +249,7 @@ assert.match(activitiesCSS, /\.ma-drawing-card \.ma-drawing-refresh\{[\s\S]*?bac
 
 assert.match(writingJS,/\/api\/inspiration\?q=/,"Image writing prompts use existing visual repository API");
 assert.match(html,/function saveWriting\(\)/,"Writing ideas can be saved independently");
-assert.match(html,/function updateWritingDraft\(text\)/,"The writing editor persists its text");
+assert.match(html,/function updateWritingDraft\(value\)/,"The writing editor persists plain text and formatted content");
 
 // Experimental moodboards keep the existing app navigation and original palettes intact.
 assert.match(html, /href="\/moodboards\.css"/,"The editorial layouts must be styled");
