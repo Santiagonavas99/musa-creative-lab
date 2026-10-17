@@ -6,6 +6,7 @@ const path=require('node:path');
 const vm=require('node:vm');
 const root=path.resolve(__dirname,'..');
 const hub=fs.readFileSync(path.join(root,'public/creative-hub.js'),'utf8');
+const richEditor=fs.readFileSync(path.join(root,'public/writing-editor.js'),'utf8');
 const auth=fs.readFileSync(path.join(root,'public/auth.js'),'utf8');
 const index=fs.readFileSync(path.join(root,'index.html'),'utf8');
 const css=fs.readFileSync(path.join(root,'public/creative-hub.css'),'utf8');
@@ -24,6 +25,7 @@ function createHarness(){
     save(){saved++;return true},toast(msg){notification.push(msg)},confirm(){return true},
     Date,Set,Array
   });
+  vm.runInContext(richEditor,context,{filename:'writing-editor.js'});
   vm.runInContext(hub,context,{filename:'creative-hub.js'});
   const fields=(values,checkboxes={})=>({
     querySelector(sel){
