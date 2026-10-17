@@ -1,8 +1,8 @@
 /* Favorite ideas: MUSA's layered frosted-glass visual language.
    The backdrop is a local, lightweight abstract SVG — no network image dependencies. */
-.idea-favorites-grid{align-items:stretch;gap:18px}
+.idea-favorites-grid{align-items:stretch;grid-auto-rows:auto;gap:18px}
 .idea-glass-card{
-  position:relative;display:flex;min-width:0;min-height:330px;overflow:hidden;
+  position:relative;display:flex;min-width:0;min-height:0;align-self:stretch;overflow:hidden;
   border-radius:30px;
   background:#153f48 url('/idea-glass-art.svg') center/cover no-repeat;
   isolation:isolate;
@@ -32,7 +32,7 @@
   font-size:clamp(22px,2.5vw,29px);line-height:1.1;letter-spacing:-.045em;
   margin:0;max-width:31ch;overflow-wrap:anywhere;text-shadow:0 1px 8px rgba(16,20,47,.22);
 }
-.idea-glass-pills{display:flex;gap:8px;flex-wrap:wrap;align-items:flex-start;margin:2px 0 10px}
+.idea-glass-pills{display:flex;gap:8px;flex-wrap:wrap;align-items:flex-start;margin:2px 0 2px}
 .idea-glass-pill{
   display:inline-flex;align-items:center;justify-content:center;min-height:34px;
   padding:8px 13px;border-radius:999px;
@@ -68,14 +68,20 @@
 @supports not ((-webkit-backdrop-filter:blur(1px)) or (backdrop-filter:blur(1px))){
   .idea-glass-panel{background:rgba(23,37,57,.68)}
 }
+/* Equal height while cards share a desktop row; natural heights once stacked. */
+@media(max-width:680px){
+  .idea-favorites-grid{align-items:start;grid-auto-rows:auto}
+  .idea-glass-card,.idea-favorites-grid>.ma-saved-writing{align-self:start;height:auto}
+  .idea-glass-actions{margin-top:14px}
+}
 @media(max-width:760px){
-  .idea-glass-card{min-height:300px;border-radius:26px}
+  .idea-glass-card{min-height:0;border-radius:26px}
   .idea-glass-panel{margin:11px;padding:20px;border-radius:20px}
   .idea-glass-title{font-size:clamp(23px,5.5vw,29px)}
 }
 @media(max-width:480px){
   .idea-favorites-grid{gap:13px}
-  .idea-glass-card{min-height:310px;border-radius:24px}
+  .idea-glass-card{min-height:0;border-radius:24px}
   .idea-glass-panel{gap:13px;margin:10px;padding:19px;border-radius:19px}
   .idea-glass-title{font-size:clamp(22px,6vw,28px)}
   .idea-glass-palette{gap:7px;margin-bottom:0}

@@ -64,9 +64,11 @@ console.log("✓ CTA arrow styling, source SVG and dynamic action conversion ver
 
 assert.match(html, /\.swatch\{[^}]*border:1px solid rgba\(255,255,255,\.92\)/,
  "Suggested idea colors should have a thin white border");
-assert.match(favoriteCSS, /\.idea-glass-palette \.swatch\{[^}]*border:1px solid rgba\(255,255,255,\.92\)/,
- "Saved idea colors should have the same white border");
-assert.match(html, /palette\(f\.colors,'favorite'\)/, "Favorites must reuse the original palette renderer");
+assert.doesNotMatch(html,/palette\(f\.colors,'favorite'\)/,"Saved favorites no longer duplicate the palette");
+assert.doesNotMatch(html,/class="mb-favorite-moodboard"/,"Saved favorites no longer duplicate the visual collage");
+assert.match(favoriteCSS,/\.idea-favorites-grid\{align-items:stretch;grid-auto-rows:auto;/,"Desktop saved favorites share a row height");
+assert.match(favoriteCSS,/min-height:0;align-self:stretch/,"Favorite glass card must match adjacent writing card height");
+assert.match(favoriteCSS,/@media\(max-width:680px\)\{[\s\S]*?align-self:start;height:auto/,"Stacked mobile cards must use natural heights");
 
 // Home onboarding explains MUSA before repeating any specific Explore interaction.
 assert.match(html, /id="musa-intro-title">TU PRÓXIMA IDEA EMPIEZA AQUÍ\./,
@@ -559,19 +561,33 @@ assert.match(initialActivities,/Ver moodboard/);
 assert.doesNotMatch(initialActivities,/class="swatch"/,"The palette should no longer appear inside the generated illustration card");
 assert.match(initialActivities,/musa-challenge-banner/);
 vm.runInContext("fav()",ctx);
-const savedPalette = nodes.get("app").innerHTML;
-assert.match(savedPalette,/class="palette idea-glass-palette"/,"Saved favorites reuse the palette markup");
-assert.match(savedPalette,/background-color:#F4B633/);
-assert.match(savedPalette,/background-color:#9D53BB/);
-assert.match(savedPalette,/background-color:#373578/);
+const savedFavoriteCard = nodes.get("app").innerHTML;
+assert.match(savedFavoriteCard,/MUSA \/ IDEA FAVORITA/,"Saved illustration cards still render");
+assert.match(savedFavoriteCard,/Crear con esta idea/,"Saved ideas keep their creation action");
+assert.match(savedFavoriteCard,/openMoodboard\('favorite'/,"Saved ideas keep their Moodboard action");
+assert.match(savedFavoriteCard,/Quitar/,"Saved ideas keep removal action");
+assert.doesNotMatch(savedFavoriteCard,/idea-glass-palette|mb-favorite-moodboard|mb-mini-collage|class="swatch"/,
+ "Saved illustration cards must not repeat palette swatches or geometric mini moodboards");
 assert.deepEqual(Array.from(vm.runInContext("data.favorites[0].colors",ctx)),['#F4B633','#9D53BB','#373578'],
- "All three colors must be stored with the saved idea");
+ "Removing a preview must preserve the saved color data");
+vm.runInContext("openMoodboard('favorite',data.favorites[0].id)",ctx);
+const savedMoodboard = nodes.get("musa-moodboard-root").innerHTML;
+assert.match(savedMoodboard,/Paleta sugerida/,"Full moodboard keeps the suggested palette");
+for(const hex of ['#F4B633','#9D53BB','#373578'])assert.ok(savedMoodboard.includes(hex),"HEX color "+hex+" stays in the popup");
+assert.match(savedMoodboard,/mb-editorial-grid/,"Full moodboard keeps its collage and references");
+vm.runInContext("window.MusaMoodboards.close()",ctx);
 vm.runInContext("data.favorites.push({id:'legacy-fav',title:'Una idea antigua'});render()",ctx);
-assert.match(nodes.get("app").innerHTML,/Una idea antigua/,"Older saved ideas without palette still render");
-assert.equal((nodes.get("app").innerHTML.match(/idea-glass-palette/g)||[]).length,1,
- "Legacy saved ideas without colors should not display invented palettes");
+assert.match(nodes.get("app").innerHTML,/Una idea antigua/,"Older saved ideas still render");
+assert.doesNotMatch(nodes.get("app").innerHTML,/idea-glass-palette|mb-favorite-moodboard/,
+ "No saved favorite, including old records, should display duplicated visual blocks");
+const favoriteHTML=vm.runInContext("renderFavoriteIdeaCard(data.favorites[0])",ctx);
+assert.doesNotMatch(favoriteHTML,/mb-mini|palette|swatch|mb-art-block/,"Only the favorite card changes");
+const greenCardHTML=vm.runInContext("renderDrawingActivity()",ctx);
+assert.match(greenCardHTML,/ma-drawing-card/,"The green main illustration card remains");
+assert.match(greenCardHTML,/musa-challenge-banner/,"The main green illustration card keeps its original artwork");
+assert.match(greenCardHTML,/Ver moodboard/,"The main green card keeps the moodboard action");
 vm.runInContext("data.favorites=[];currentIdea=null;render()",ctx);
-console.log("✓ The illustration card hides its palette while saved ideas keep original swatches");
+console.log("✓ Saved idea cards are compact; their full moodboards and green activity card remain intact");
 // Writing prompts can switch between question/image without affecting the illustration.
 vm.runInContext("randomWriting()",ctx);
 const firstWriting=vm.runInContext("currentWriting.id",ctx);

@@ -594,8 +594,7 @@ function renderFavoriteIdeaCard(f){
   '<span class="idea-glass-eyebrow">MUSA / IDEA FAVORITA</span>'+
   '<h3 class="idea-glass-title">'+esc(f.title)+'</h3>'+
   (pills?'<div class="idea-glass-pills" aria-label="Conceptos de la idea">'+pills+'</div>':'')+
-  palette(f.colors,'favorite')+
-  (f.keyword?'<div class="mb-favorite-moodboard">'+window.MusaMoodboards.mini(f)+'</div>':'')+
+  // The saved card is a quick-access bookmark. Visual references and HEX colors stay in Moodboard.
   '<div class="idea-glass-actions">'+
   '<button type="button" class="btn idea-glass-cta" onclick="startFavorite('+safeId+')">Crear con esta idea ↗</button>'+
   '<button type="button" class="btn idea-glass-remove" onclick="openMoodboard(\'favorite\','+safeId+')">Moodboard</button>'+
