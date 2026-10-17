@@ -172,3 +172,27 @@
  .mc-session-list-section{border-radius:20px}
 }
 @media(prefers-reduced-motion:reduce){.mc-session-history>summary span{transition:none}}
+
+
+/* Destructive actions are easy to find but secondary to creative work. */
+.mc-delete-link{border:1px solid #eac2b8;border-radius:10px;background:#fff7f3;color:#943b2c;font-size:12px;font-weight:800;min-height:39px;padding:8px 12px;cursor:pointer;transition:background .15s ease,border-color .15s ease}
+.mc-delete-link:hover,.mc-delete-link:focus-visible{background:#ffebe4;border-color:#c96956}
+.mc-delete-link:focus-visible,.mc-confirm-delete:focus-visible{outline:3px solid #3926ce;outline-offset:2px}
+.mc-project-bottom{flex-wrap:wrap;gap:10px}
+.mc-project-bottom>.mc-delete-link{margin-left:auto}
+.mc-delete-modal-link{margin-right:auto}
+.mc-calendar-entry .mc-delete-link{padding:5px 8px;min-height:31px}
+.mc-delete-warning{padding:18px 20px;background:#fff3ed;border:1px solid #efcebd;border-radius:17px;line-height:1.6}
+.mc-delete-warning h3{font-size:clamp(19px,3vw,24px);line-height:1.25;overflow-wrap:anywhere;margin:12px 0}
+.mc-delete-warning p{font-size:14px;color:#44384a;margin:12px 0 0}
+.mc-delete-warning .mc-delete-final{font-weight:850;color:#9c3224}
+.mc-confirm-delete{background:#ae392a!important;border:1px solid #ae392a!important;color:#fff!important}
+.mc-confirm-delete:hover{background:#8e3026!important}
+.mc-delete-actions{gap:12px}
+@media(max-width:600px){
+ .mc-delete-actions{display:flex;flex-direction:column-reverse;align-items:stretch}
+ .mc-delete-actions .btn{width:100%;flex:none}
+ .mc-delete-modal-link{width:100%;margin-right:0}
+ .mc-project-bottom>.mc-delete-link{margin-left:0}
+}
+@media(prefers-reduced-motion:reduce){.mc-delete-link{transition:none}}
