@@ -188,3 +188,15 @@ test('older zero-length sessions have an honest detail view and do not imply a l
   h.win.MusaCreativeHub.viewArtwork('not-found');
   assert.equal(h.opened,null,'missing artwork cannot navigate');
 });
+
+test('Mi estudio counts saved creative sessions separately from projects and explains why',()=>{
+  const h=createHarness();
+  h.data.sessions.push({id:'writing-1',type:'writing',title:'Un poema',createdAt:'2026-10-16T18:00:00Z'});
+  const markup=h.win.MusaCreativeHub.renderStudioLinks();
+  assert.equal((markup.match(/class="mc-quick mc-q/g)||[]).length,4,'Four quick access cards');
+  assert.match(markup,/SESIONES: 1/,'One saved session must be counted');
+  assert.match(markup,/PROYECTOS: 0/,'No project is automatically created');
+  assert.match(markup,/¿SESIÓN O PROYECTO\?/);
+  assert.match(markup,/Hacer una sesión no crea un proyecto automáticamente/);
+  assert.match(markup,/onclick="go\('calendario'\)"/,'Sessions open their history in the calendar');
+});
