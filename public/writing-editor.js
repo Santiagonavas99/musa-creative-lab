@@ -37,7 +37,7 @@ function renderDraft(item){
 function renderEditor(item,scope='draft'){
   const editorScope=scope==='archived'?'archived':'draft';
   return '<div class="ma-writing-editor-group">'+
-    '<div class="ma-writing-editor-heading"><label id="ma-editor-label" for="ma-writing-editor">TU TEXTO · BORRADOR PRIVADO</label>'+
+    '<div class="ma-writing-editor-heading"><label id="ma-editor-label" for="ma-writing-editor">'+(editorScope==='archived'?'TU TEXTO CREATIVO · EDITAR':'TU TEXTO · BORRADOR PRIVADO')+'</label>'+
     '<span>Se guarda en tu cuenta de MUSA</span></div>'+
     '<div class="ma-writing-toolbar" role="toolbar" aria-label="Formato de texto">'+
     '<button type="button" aria-label="Negrita" title="Negrita (Ctrl/Cmd + B)" onmousedown="event.preventDefault()" onclick="MusaWritingEditor.format(\'bold\')"><strong>B</strong></button>'+
