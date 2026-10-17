@@ -51,11 +51,25 @@ function heading(active){
   return '<div class="mc-hero"><div><span class="mc-eyebrow">MUSA / MI ESPACIO CREATIVO</span><h1>TODO EMPIEZA <em>CON UNA IDEA.</em></h1><p>Organiza tus proyectos, escribe tu proceso y descubre cuándo y cómo creas.</p></div><img src="/musa-asterisk.svg" aria-hidden="true" alt=""></div>'+nav(active);
 }
 function renderStudioLinks(){
-  return heading('estudio')+'<div class="mc-quick-links">'+[
-    ['proyectos','PROYECTOS',arr('projects').length,'Ideas conectadas, de principio a fin'],
-    ['diario','DIARIO',arr('journalEntries').length,'Tu proceso merece ser recordado'],
-    ['calendario','CALENDARIO',arr('calendarEvents').filter(e=>!e.completed).length,'Planea tu próxima exploración']
-  ].map(([route,label,count,desc],i)=>'<button class="mc-quick mc-q'+i+'" type="button" onclick="go(\''+route+'\')"><span>'+label+' ↗</span><strong>'+count+'</strong><small>'+escHtml(desc)+'</small></button>').join('')+'</div>'+sessionList()+(modal?renderModal():'');
+ const cards=[
+   ['proyectos','PROYECTOS',arr('projects').length,'Organiza tus ideas y obras'],
+   ['sesiones','SESIONES',arr('sessions').length,'Ejercicios creativos guardados'],
+   ['diario','DIARIO',arr('journalEntries').length,'Reflexiones sobre tu proceso'],
+   ['calendario','CALENDARIO',arr('calendarEvents').filter(e=>!e.completed).length,'Actividades pendientes']
+ ];
+ return heading('estudio')+
+   '<div class="mc-quick-links mc-quick-links--four">'+cards.map(([route,label,count,desc],i)=>{
+     const action=route==='sesiones'?'MusaCreativeHub.showSessions()':"go('"+route+"')";
+     return '<button class="mc-quick mc-q'+i+'" type="button" onclick="'+action+'" aria-label="'+label+': '+count+'. '+escHtml(desc)+'">'+
+       '<span>'+label+' ↗</span><strong>'+count+'</strong><small>'+escHtml(desc)+'</small></button>';
+   }).join('')+'</div>'+
+   '<section class="mc-clarity" aria-labelledby="mc-clarity-title">'+
+     '<span class="mc-eyebrow">GUÍA RÁPIDA / TU ESPACIO</span><h2 id="mc-clarity-title">¿SESIÓN O PROYECTO?</h2>'+
+     '<div class="mc-clarity-grid"><div><strong><span class="mc-clarity-mark">01</span> SESIÓN CREATIVA</strong>'+
+     '<p>Es un ejercicio de escritura o ilustración que realizas y guardas. Puedes revisarlo y editarlo en <button type="button" onclick="MusaCreativeHub.showSessions()">Tus sesiones ↗</button>, o consultarlo por fecha en el Calendario.</p></div>'+
+     '<div><strong><span class="mc-clarity-mark">02</span> PROYECTO CREATIVO</strong>'+
+     '<p>Es un espacio que creas para reunir ideas, obras, tableros y notas sobre un objetivo. Hacer una sesión no crea un proyecto automáticamente.</p></div></div></section>'+
+   sessionList()+(modal?renderModal():'');
 }
 function blank(title,desc,button,action){
   return '<div class="mc-empty"><span class="mc-empty-symbol" aria-hidden="true">✳</span><h3>'+escHtml(title)+'</h3><p>'+escHtml(desc)+'</p><button class="btn secondary" type="button" onclick="'+action+'">'+escHtml(button)+' ↗</button></div>';
@@ -343,7 +357,14 @@ function toggleEvent(id){
 function select(date){if(!parse(date))return;selected=date;month=date.slice(0,7);render();}
 function move(offset){const dt=parse(month+'-01');if(!dt)return;const next=new Date(dt.getFullYear(),dt.getMonth()+offset,1);selected=iso(next);month=selected.slice(0,7);render();}
 function today(){selected=now();month=selected.slice(0,7);render();}
+function showSessions(){
+ if(!window.MusaAuth?.isAuthenticated())return;
+ if(!arr('sessions').length){go('calendario');return;}
+ const details=document.querySelector?.('.mc-session-history');
+ if(details)details.open=true;
+ document.getElementById?.('mc-sessions-heading')?.scrollIntoView?.({behavior:'smooth',block:'start'});
+}
 function reset(){modal=null;selected=now();month=selected.slice(0,7);}
 document.addEventListener?.('keydown',e=>{if(e.key==='Escape'&&modal){e.preventDefault();close();}});
-window.MusaCreativeHub={renderPage,renderStudioLinks,reset,close,newProject:()=>open('project'),editProject:id=>open('project',id),openProject:id=>open('detail',id),newJournal:()=>open('journal'),editJournal:id=>open('journal',id),newEvent:()=>open('event'),editEvent:id=>open('event',id),openSession,editSession,viewArtwork,saveSession,requestDeleteSession:id=>requestDelete('session',id),requestDeleteProject:id=>requestDelete('project',id),cancelDelete,confirmDelete,saveProject,saveJournal,saveEvent,removeProject:id=>requestDelete('project',id),removeJournal:id=>remove('journal',id),removeEvent:id=>remove('event',id),toggleEvent,select,move,today};
+window.MusaCreativeHub={renderPage,renderStudioLinks,showSessions,reset,close,newProject:()=>open('project'),editProject:id=>open('project',id),openProject:id=>open('detail',id),newJournal:()=>open('journal'),editJournal:id=>open('journal',id),newEvent:()=>open('event'),editEvent:id=>open('event',id),openSession,editSession,viewArtwork,saveSession,requestDeleteSession:id=>requestDelete('session',id),requestDeleteProject:id=>requestDelete('project',id),cancelDelete,confirmDelete,saveProject,saveJournal,saveEvent,removeProject:id=>requestDelete('project',id),removeJournal:id=>remove('journal',id),removeEvent:id=>remove('event',id),toggleEvent,select,move,today};
 })();
