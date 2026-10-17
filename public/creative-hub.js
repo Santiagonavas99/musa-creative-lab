@@ -209,7 +209,7 @@ function renderModal(){
       '<label class="mc-field"><span>Proyecto relacionado</span><select name="projectId">'+projectOptions(e.projectId)+'</select></label>'+
       '<div class="mc-modal-footer">'+(id?'<button type="button" class="mc-remove" onclick="MusaCreativeHub.removeEvent('+param(id)+')">Eliminar</button>':'')+'<button class="btn secondary" type="submit">Guardar actividad ↗</button></div></form>';
   }
-  return '<div class="mc-backdrop" onclick="MusaCreativeHub.close()" role="presentation"><div class="mc-dialog" role="'+(kind==='delete'?'alertdialog':'dialog')+'" aria-modal="true" aria-labelledby="mc-modal-title" onclick="event.stopPropagation()"><div class="mc-dialog-header"><div><span class="mc-eyebrow">MUSA / '+(kind==='project'||kind==='detail'?'PROYECTOS':kind==='journal'?'DIARIO':'CALENDARIO')+'</span><h2 id="mc-modal-title">'+escHtml(title)+'</h2></div><button type="button" class="mc-close" aria-label="Cerrar" onclick="MusaCreativeHub.close()">×</button></div>'+body+'</div></div>';
+  return '<div class="mc-backdrop" onclick="MusaCreativeHub.close()" role="presentation"><div class="mc-dialog" role="'+(kind==='delete'?'alertdialog':'dialog')+'" aria-modal="true" aria-labelledby="mc-modal-title" onclick="event.stopPropagation()"><div class="mc-dialog-header"><div><span class="mc-eyebrow">MUSA / '+(kind==='delete'?(modal.target==='project'?'PROYECTOS':'SESIONES'):kind==='project'||kind==='detail'?'PROYECTOS':kind==='journal'?'DIARIO':'CALENDARIO')+'</span><h2 id="mc-modal-title">'+escHtml(title)+'</h2></div><button type="button" class="mc-close" aria-label="Cerrar" onclick="MusaCreativeHub.close()">×</button></div>'+body+'</div></div>';
 }
 function open(kind,id=null){if(!window.MusaAuth?.isAuthenticated())return;modal={kind,id};render();document.getElementById('mc-modal-title')?.focus?.();}
 function close(){modal=null;render();}
@@ -225,7 +225,7 @@ function requestDelete(target,id){
  if(!window.MusaAuth?.isAuthenticated()||!['session','project'].includes(target))return;
  const record=target==='session'?sessionByIndex(id):getProject(id);
  if(!record)return;
- modal={kind:'delete',target,id,previous:modal?{kind:modal.kind,id:modal.id}:null};
+ modal={kind:'delete',target,id,expected:record,previous:modal?{kind:modal.kind,id:modal.id}:null};
  render();
  document.querySelector?.('.mc-confirm-delete')?.focus?.();
 }
@@ -236,19 +236,35 @@ function cancelDelete(){
 }
 function confirmDelete(){
  if(!window.MusaAuth?.isAuthenticated()||modal?.kind!=='delete')return;
- const {target,id}=modal;
+ const {target,id,expected}=modal;
+ // A delayed click cannot delete another record if the workspace has changed.
+ const current=target==='session'?sessionByIndex(id):getProject(id);
+ if(!current||current!==expected)return cancelDelete();
+ const backup={
+  sessions:data.sessions,projects:data.projects,
+  journalEntries:arr('journalEntries').map(x=>({...x})),
+  calendarEvents:arr('calendarEvents').map(x=>({...x}))
+ };
  if(target==='session'){
-  if(!sessionByIndex(id))return cancelDelete();
   // Artwork and its uploaded image remain independent assets in My Gallery.
   data.sessions=arr('sessions').filter((x,i)=>i!==id);
  }else if(target==='project'){
-  if(!getProject(id))return cancelDelete();
   data.projects=arr('projects').filter(x=>x.id!==id);
   arr('journalEntries').forEach(x=>{if(x.projectId===id)x.projectId='';});
   arr('calendarEvents').forEach(x=>{if(x.projectId===id)x.projectId='';});
  }else return;
+ try{
+  if(!save())throw Error('Could not queue workspace save');
+ }catch(e){
+  data.sessions=backup.sessions;
+  data.projects=backup.projects;
+  data.journalEntries=backup.journalEntries;
+  data.calendarEvents=backup.calendarEvents;
+  modal=null;render();
+  toast('No pudimos eliminar el elemento. Inténtalo nuevamente.');
+  return;
+ }
  modal=null;
- save();
  render();
  toast(target==='session'?'Sesión eliminada. Tus obras siguen guardadas.':'Proyecto eliminado. Tus elementos vinculados se conservaron.');
 }
