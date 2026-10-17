@@ -114,6 +114,18 @@ function setMobileMenu(open,returnFocus=false){
 function toggleMobileMenu(){setMobileMenu(!isMobileMenuOpen())}
 function closeMobileMenu(returnFocus=false){setMobileMenu(false,returnFocus)}
 document.addEventListener?.('keydown',event=>{
+ if(searchHistoryDeleteOpen){
+  if(event.key==='Escape'){event.preventDefault();closeSearchHistoryDelete();return;}
+  if(event.key==='Tab'){
+   const dialog=document.querySelector?.('.search-history-dialog');
+   const buttons=Array.from(dialog?.querySelectorAll?.('button')||[]);
+   if(!buttons.length)return;
+   const current=buttons.indexOf(document.activeElement);
+   if(event.shiftKey&&current<=0){event.preventDefault();buttons[buttons.length-1].focus();}
+   else if(!event.shiftKey&&current===buttons.length-1){event.preventDefault();buttons[0].focus();}
+  }
+  return;
+ }
  if(!isMobileMenuOpen())return;
  if(event.key==='Escape'){event.preventDefault();closeMobileMenu(true);return}
  if(event.key!=='Tab')return;
@@ -282,17 +294,6 @@ function confirmClearSearchHistory(){
  render();
  toast('Historial de búsquedas eliminado.');
 }
-document.addEventListener?.('keydown',event=>{
- if(!searchHistoryDeleteOpen)return;
- if(event.key==='Escape'){event.preventDefault();closeSearchHistoryDelete();return;}
- if(event.key!=='Tab')return;
- const dialog=document.querySelector?.('.search-history-dialog');
- const buttons=Array.from(dialog?.querySelectorAll?.('button')||[]);
- if(!buttons.length)return;
- const current=buttons.indexOf(document.activeElement);
- if(event.shiftKey&&current<=0){event.preventDefault();buttons[buttons.length-1].focus();}
- else if(!event.shiftKey&&current===buttons.length-1){event.preventDefault();buttons[0].focus();}
-});
 
 async function lookupInspiration(e){
   if(e)e.preventDefault();
