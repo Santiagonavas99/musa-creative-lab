@@ -158,7 +158,8 @@ function renderModal(){
       '<h3>'+escHtml(record.title||'Sesión sin título')+'</h3>'+
       '<p><strong>Fecha:</strong> '+escHtml(dateLabel(fromTimestamp(record.createdAt)))+'</p>'+
       '<p><strong>Tiempo de exploración:</strong> '+escHtml(duration)+'</p>'+
-      (note?'<div class="mc-session-note"><strong>'+(record.type==='writing'?'Tu escritura':'Tu creación o reflexión')+'</strong><p>'+escHtml(note)+'</p></div>':'')+
+      (note?'<div class="mc-session-note"><strong>'+(record.type==='writing'?'Tu escritura':'Tu creación o reflexión')+'</strong>'+
+        (record.type==='writing'&&artwork?.writingHtml?'<div class="ma-rich-output">'+window.MusaWritingEditor.sanitize(artwork.writingHtml)+'</div>':'<p>'+escHtml(note)+'</p>')+'</div>':'')+
       '</div><div class="mc-modal-footer"><button class="btn outline" type="button" onclick="MusaCreativeHub.close()">Cerrar</button>'+
       (artwork?'<button class="btn outline" type="button" onclick="MusaCreativeHub.viewArtwork('+param(artwork.id)+')">Ver obra creada ↗</button>':'')+
       '<button class="btn secondary" type="button" onclick="MusaCreativeHub.editSession('+Number(id)+')">Editar sesión ↗</button><button type="button" class="mc-delete-link mc-delete-modal-link" onclick="MusaCreativeHub.requestDeleteSession('+Number(id)+')">Eliminar sesión</button></div>';
@@ -172,8 +173,11 @@ function renderModal(){
       '<div class="mc-session-edit-hint"><span class="mc-eyebrow">'+escHtml(sessionType(record))+' · '+escHtml(dateLabel(fromTimestamp(record.createdAt)))+'</span>'+
       '<p>Actualiza esta sesión sin crear otra. La fecha, la duración y la imagen original se conservarán.</p></div>'+
       field('Título de la sesión *','title',record.title||artwork?.title||'','required maxlength="130"')+
-      '<label class="mc-field"><span>'+(record.type==='writing'?'Tu texto creativo':'Tu creación o reflexión')+'</span>'+
-      '<textarea name="notes" rows="7" maxlength="50000" placeholder="Lo que creaste, aprendiste o quieres recordar…">'+escHtml(artwork?.notes??record.notes??'')+'</textarea></label>'+
+      (record.type==='writing'?'<div class="ma-writing-archived">'+window.MusaWritingEditor.renderEditor({
+          draftHtml:artwork?.writingHtml||'',draft:artwork?.notes??record.notes??''
+        },'archived')+'</div>':
+       '<label class="mc-field"><span>Tu creación o reflexión</span>'+
+       '<textarea name="notes" rows="7" maxlength="50000" placeholder="Lo que creaste, aprendiste o quieres recordar…">'+escHtml(artwork?.notes??record.notes??'')+'</textarea></label>')+
       (artwork?.imagePath||artwork?.image?'<p class="mc-tip">La fotografía asociada permanece guardada en Mi galería.</p>':'')+
       '<div class="mc-modal-footer"><button type="button" class="mc-delete-link mc-delete-modal-link" onclick="MusaCreativeHub.requestDeleteSession('+Number(id)+')">Eliminar sesión</button><button type="button" class="btn outline" onclick="MusaCreativeHub.openSession('+Number(id)+')">Cancelar</button>'+
       '<button type="submit" class="btn secondary">Guardar cambios ↗</button></div></form>';
@@ -289,7 +293,10 @@ function saveSession(event){
   if(!record)return;
   const form=event.currentTarget;
   const title=getInput(form,'title').trim().slice(0,130);
-  const notes=getInput(form,'notes').trim().slice(0,50000);
+  const writingEditor=record.type==='writing'?form.querySelector('#ma-writing-editor'):null;
+  const formatted=writingEditor?.getAttribute?.('contenteditable')==='true'?window.MusaWritingEditor.sync(writingEditor):null;
+  const notes=record.type==='writing'?String(formatted?.text??record.notes??'').trim().slice(0,50000):
+    getInput(form,'notes').trim().slice(0,50000);
   if(!title){toast('Escribe un título para guardar la sesión.');return;}
   // One-to-one update: never create a duplicate session or replace its image.
   record.title=title;
@@ -299,6 +306,11 @@ function saveSession(event){
   if(artwork){
     artwork.title=title;
     artwork.notes=notes;
+    if(record.type==='writing'){
+      artwork.writingHtml=window.MusaWritingEditor.renderDraft({
+        draftHtml:formatted?.html??artwork.writingHtml,draft:notes
+      });
+    }
     artwork.updatedAt=record.updatedAt;
   }
   modal={kind:'session',id:index};
