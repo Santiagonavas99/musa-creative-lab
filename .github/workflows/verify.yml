@@ -32,7 +32,7 @@ jobs:
       - name: Check client and API syntax, interface and saved references
         run: node scripts/check-static.cjs
       - name: Verify authentication, private users and creative hub
-        run: node --test tests/auth.test.cjs tests/auth-routes.test.cjs tests/creative-hub.test.cjs
+        run: node --test tests/auth.test.cjs tests/auth-routes.test.cjs tests/creative-hub.test.cjs tests/writing-editor.test.cjs
       - name: Build production application and check critical assets
         run: |
           npm install --no-audit --no-fund
@@ -43,6 +43,8 @@ jobs:
           test -s dist/boards.js
           test -s dist/creative-hub.js
           test -s dist/creative-hub.css
+          test -s dist/writing-editor.js
+          test -s dist/writing-editor.css
           grep -q '/auth.js' dist/index.html
       - name: Validate app metadata, manifest and legal routes
         run: node --test tests/site.test.cjs tests/boards.test.cjs tests/favorite-ideas.test.cjs tests/nav-motion.test.cjs

@@ -6,6 +6,7 @@ const path=require('node:path');
 const vm=require('node:vm');
 const root=path.resolve(__dirname,'..');
 const hub=fs.readFileSync(path.join(root,'public/creative-hub.js'),'utf8');
+const richEditor=fs.readFileSync(path.join(root,'public/writing-editor.js'),'utf8');
 const auth=fs.readFileSync(path.join(root,'public/auth.js'),'utf8');
 const index=fs.readFileSync(path.join(root,'index.html'),'utf8');
 const css=fs.readFileSync(path.join(root,'public/creative-hub.css'),'utf8');
@@ -24,6 +25,7 @@ function createHarness(){
     save(){saved++;return true},toast(msg){notification.push(msg)},confirm(){return true},
     Date,Set,Array
   });
+  vm.runInContext(richEditor,context,{filename:'writing-editor.js'});
   vm.runInContext(hub,context,{filename:'creative-hub.js'});
   const fields=(values,checkboxes={})=>({
     querySelector(sel){
@@ -297,4 +299,17 @@ test('failed deletion save rolls back and stale session indexes cannot erase oth
  h.win.MusaCreativeHub.confirmDelete();
  assert.equal(h.data.sessions.length,1);
  assert.equal(h.data.sessions[0].id,'second',"A stale deletion cannot remove a different session");
+});
+
+test('a saved writing session is counted separately from projects and opens editable session history',()=>{
+ const h=createHarness();
+ h.data.sessions.push({id:'writing-1',type:'writing',title:'Un poema personal',createdAt:'2026-10-16T18:00:00Z'});
+ const markup=h.win.MusaCreativeHub.renderStudioLinks();
+ assert.equal((markup.match(/class="mc-quick mc-q/g)||[]).length,4);
+ assert.match(markup,/SESIONES: 1/);
+ assert.match(markup,/PROYECTOS: 0/);
+ assert.match(markup,/¿SESIÓN O PROYECTO\?/);
+ assert.match(markup,/Hacer una sesión no crea un proyecto automáticamente/);
+ assert.match(markup,/onclick="MusaCreativeHub.showSessions\(\)"/);
+ assert.match(markup,/Un poema personal/);
 });

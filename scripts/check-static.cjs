@@ -151,6 +151,8 @@ const moodboardCSS = fs.readFileSync(path.join(root, "public/moodboards.css"), "
 const bannerJS = fs.readFileSync(path.join(root, "public/challenge-banner.js"), "utf8");
 const bannerCSS = fs.readFileSync(path.join(root, "public/challenge-banner.css"), "utf8");
 const writingJS = fs.readFileSync(path.join(root, "public/creative-writing.js"), "utf8");
+const richWritingJS = fs.readFileSync(path.join(root, "public/writing-editor.js"), "utf8");
+const richWritingCSS = fs.readFileSync(path.join(root, "public/writing-editor.css"), "utf8");
 const activitiesCSS = fs.readFileSync(path.join(root, "public/creative-activities.css"), "utf8");
 const boardsCSS = fs.readFileSync(path.join(root, "public/boards.css"), "utf8");
 const inline = [...html.matchAll(/<script(?:\s[^>]*)?>([\s\S]*?)<\/script>/g)].filter(([,source])=>source.trim());
@@ -196,6 +198,10 @@ assert.match(html,/Editar sesión ↗/,"Gallery includes direct edit link for as
 new vm.Script(moodboardJS, {filename: "moodboards.js"});
 new vm.Script(bannerJS, {filename: "challenge-banner.js"});
 new vm.Script(writingJS, {filename:"creative-writing.js"});
+new vm.Script(richWritingJS, {filename:"writing-editor.js"});
+assert.match(html,/src="\/writing-editor\.js"/);
+assert.match(html,/href="\/writing-editor\.css"/);
+assert.match(richWritingCSS,/\.ma-rich-editor\{/);
 new vm.Script(stepsJS, {filename:"steps-editorial.js"});
 // The Explore challenge banner is decorative, responsive and refresh-driven.
 assert.match(html, /src="\/challenge-banner\.js"/, "The random artwork controller must load before the app");
@@ -251,7 +257,7 @@ assert.match(activitiesCSS, /\.ma-drawing-card \.ma-drawing-refresh\{[\s\S]*?bac
 
 assert.match(writingJS,/\/api\/inspiration\?q=/,"Image writing prompts use existing visual repository API");
 assert.match(html,/function saveWriting\(\)/,"Writing ideas can be saved independently");
-assert.match(html,/function updateWritingDraft\(text\)/,"The writing editor persists its text");
+assert.match(html,/function updateWritingDraft\(value\)/,"The editor stores plain and rich drafts");
 
 // Experimental moodboards keep the existing app navigation and original palettes intact.
 assert.match(html, /href="\/moodboards\.css"/,"The editorial layouts must be styled");
@@ -424,6 +430,7 @@ vm.runInContext(hubJS, ctx, {filename:"creative-hub.js"});
 vm.runInContext(moodboardJS, ctx, {filename:"moodboards.js"});
 vm.runInContext(bannerJS, ctx, {filename:"challenge-banner.js"});
 vm.runInContext(writingJS, ctx, {filename:"creative-writing.js"});
+vm.runInContext(richWritingJS, ctx, {filename:"writing-editor.js"});
 vm.runInContext(stepsJS, ctx, {filename:"steps-editorial.js"});
 vm.runInContext(inline[0][1], ctx, {filename:"MUSA.inline.js"});
 vm.runInContext(showcaseJS, ctx, {filename:"showcase-controller.js"});
@@ -457,11 +464,12 @@ assert.match(nodes.get("app").innerHTML,/Editar sesión ↗/);
 vm.runInContext("window.MusaCreativeHub.editSession(0)",ctx);
 const editSessionHTML=nodes.get("app").innerHTML;
 assert.match(editSessionHTML,/EDITAR ESTA SESIÓN/);
-assert.match(editSessionHTML,/Tu texto creativo/);
+assert.match(editSessionHTML,/TU TEXTO CREATIVO · EDITAR/);
+assert.match(editSessionHTML,/aria-label="Negrita"/);
 assert.match(editSessionHTML,/Texto inicial/);
 assert.match(editSessionHTML,/Guardar cambios/);
 assert.match(editSessionHTML,/imagen original se conservarán/);
-const form={querySelector(sel){if(sel==='[name="title"]')return {value:"Sesión con título actualizado"};if(sel==='[name="notes"]')return {value:"Nueva versión de mi texto creativo"};return null}};
+const form={querySelector(sel){if(sel==='[name="title"]')return {value:"Sesión con título actualizado"};if(sel==="#ma-writing-editor")return {getAttribute(name){return name==="contenteditable"?"true":null},innerText:"Nueva versión de mi texto creativo",innerHTML:"Nueva versión de mi texto creativo",dataset:{writingScope:"archived"}};if(sel==='[name="notes"]')return {value:"Nueva versión de mi texto creativo"};return null}};
 ctx.testSessionEditForm=form;
 vm.runInContext("window.MusaCreativeHub.saveSession({preventDefault(){},currentTarget:testSessionEditForm})",ctx);
 assert.equal(vm.runInContext("data.sessions.length",ctx),1,"Editing must not create a duplicate session");
@@ -604,6 +612,10 @@ assert.match(nodes.get("app").innerHTML,/ESCRITURA GUARDADA/);
 const writingId=vm.runInContext("data.favorites[0].id",ctx);
 vm.runInContext("startFavorite("+JSON.stringify(writingId)+")",ctx);
 assert.match(nodes.get("app").innerHTML,/ma-writing-editor/);
+assert.match(nodes.get("app").innerHTML,/contenteditable="true"/);
+assert.match(nodes.get("app").innerHTML,/aria-label="Negrita"/);
+assert.match(nodes.get("app").innerHTML,/aria-label="Cursiva"/);
+assert.match(nodes.get("app").innerHTML,/aria-label="Lista con viñetas"/);
 assert.doesNotMatch(nodes.get("app").innerHTML,/mb-session-preview/,"Writing sessions should never display the drawing moodboard");
 vm.runInContext("updateWritingDraft('Texto creativo de prueba que debe conservarse.')",ctx);
 
@@ -646,6 +658,8 @@ vm.runInContext("toggleMobileMenu();go('estudio')",ctx);
 assert.match(nodes.get('app').innerHTML,/PROYECTOS/,'Studio offers creative projects');
 assert.match(nodes.get('app').innerHTML,/CALENDARIO/,'Studio offers creative calendar');
 assert.match(nodes.get('app').innerHTML,/DIARIO/,'Studio offers creative journal');
+assert.match(nodes.get('app').innerHTML,/SESIONES/,'Studio displays saved sessions');
+assert.match(nodes.get('app').innerHTML,/¿SESIÓN O PROYECTO\?/);
 assert.equal(nodes.get("mobile-menu").hidden,true,"Navigation to a page closes the dropdown");
 assert.match(nodes.get("mobile-menu").innerHTML,/aria-current="page"[^>]*>Mi estudio<\/button>/,"Active page updates");
 vm.runInContext("go('retos')",ctx);
