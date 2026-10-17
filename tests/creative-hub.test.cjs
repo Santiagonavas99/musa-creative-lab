@@ -147,6 +147,7 @@ test('main navigation has three destinations and no redundant Activity page',()=
   assert.match(index,/const items=\[\['inicio','Inicio'\],\['explorar','Explorar'\],\['estudio','Mi estudio'\]\]/);
   assert.doesNotMatch(index,/\['actividad','Actividad'\]/);
   assert.doesNotMatch(index,/else if\(page==='actividad'\)/);
+  assert.doesNotMatch(index,/Sesiones completadas|Ver actividad →/,'Remove empty statistics cards and obsolete CTA from Inicio');
   assert.match(index,/01 \/ 03/);
   assert.match(index,/p==='actividad'\?'calendario':p/,'legacy Activity requests should open calendar');
   assert.match(index,/go\(window\.musaArtworkReturn/,'return link keeps original calendar context');
