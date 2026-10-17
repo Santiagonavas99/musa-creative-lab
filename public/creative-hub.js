@@ -69,8 +69,8 @@ function activities(){
   arr('calendarEvents').forEach(e=>add(e.date,'plan',e.title,{id:e.id,completed:e.completed,notes:e.notes}));
   arr('journalEntries').forEach(e=>add(e.date,'journal',e.title,{id:e.id}));
   arr('projects').forEach(p=>add(p.dueDate,'due',p.title,{id:p.id,completed:p.status==='done'}));
-  arr('sessions').forEach(s=>add(fromTimestamp(s.createdAt),'session',s.title));
-  arr('artworks').forEach(a=>add(fromTimestamp(a.createdAt),'artwork',a.title));
+  arr('sessions').forEach((session,index)=>add(fromTimestamp(session.createdAt),'session',session.title,{index,id:session.id,artworkId:session.artworkId,elapsed:session.elapsed,type:session.type}));
+  arr('artworks').forEach(a=>add(fromTimestamp(a.createdAt),'artwork',a.title,{id:a.id}));
   return map;
 }
 function calendar(){
@@ -82,13 +82,13 @@ function calendar(){
     cells.push('<button class="mc-day'+(selected===date?' selected':'')+(date===now()?' today':'')+'" type="button" aria-pressed="'+(selected===date)+'" aria-label="'+escHtml(dateLabel(date))+'; '+count+' actividades" onclick="MusaCreativeHub.select('+param(date)+')"><span>'+i+'</span>'+(count?'<i aria-hidden="true"></i>':'')+'</button>');
   }
   const events=activity.get(selected)||[];
-  const type={plan:'PLAN',journal:'DIARIO',due:'FECHA OBJETIVO',session:'SESIÓN',artwork:'OBRA'};
-  const item=e=>'<article class="mc-calendar-entry"><div><span class="mc-eyebrow">'+type[e.kind]+'</span><h4>'+escHtml(e.title||'Sin título')+'</h4>'+(e.notes?'<p>'+escHtml(e.notes)+'</p>':'')+(e.completed?'<small class="mc-done">Completado</small>':'')+'</div><div class="mc-entry-actions">'+(e.kind==='plan'?'<button type="button" class="mc-text-button" onclick="MusaCreativeHub.toggleEvent('+param(e.id)+')">'+(e.completed?'Reabrir':'Completar')+'</button><button class="mc-text-button" type="button" onclick="MusaCreativeHub.editEvent('+param(e.id)+')">Editar</button>':e.kind==='journal'?'<button type="button" class="mc-text-button" onclick="MusaCreativeHub.editJournal('+param(e.id)+')">Abrir ↗</button>':e.kind==='due'?'<button type="button" class="mc-text-button" onclick="MusaCreativeHub.openProject('+param(e.id)+')">Ver proyecto ↗</button>':'')+'</div></article>';
-  return '<section class="mc-main"><div class="mc-heading"><div><span class="mc-eyebrow">03 / CREA A TU RITMO</span><h2>CALENDARIO CREATIVO.</h2><p>Organiza próximos pasos y encuentra tus días de inspiración.</p></div><button class="btn" type="button" onclick="MusaCreativeHub.newEvent()">+ Planear actividad ↗</button></div>'+
-    '<div class="mc-cal-stats"><span><strong>'+arr('calendarEvents').filter(e=>!e.completed).length+'</strong> pendientes</span><span><strong>'+new Set(arr('journalEntries').map(e=>e.date)).size+'</strong> días de diario</span><button type="button" class="mc-text-button" onclick="MusaCreativeHub.today()">Ir a hoy ↗</button></div>'+
+  const type={plan:'PLAN',journal:'DIARIO',due:'FECHA OBJETIVO',session:'SESIÓN REALIZADA',artwork:'OBRA GUARDADA'};
+  const item=e=>'<article class="mc-calendar-entry"><div><span class="mc-eyebrow">'+type[e.kind]+'</span><h4>'+escHtml(e.title||'Sin título')+'</h4>'+(e.notes?'<p>'+escHtml(e.notes)+'</p>':'')+(e.completed?'<small class="mc-done">Completado</small>':'')+'</div><div class="mc-entry-actions">'+(e.kind==='plan'?'<button type="button" class="mc-text-button" onclick="MusaCreativeHub.toggleEvent('+param(e.id)+')">'+(e.completed?'Reabrir':'Completar')+'</button><button class="mc-text-button" type="button" onclick="MusaCreativeHub.editEvent('+param(e.id)+')">Editar</button>':e.kind==='journal'?'<button type="button" class="mc-text-button" onclick="MusaCreativeHub.editJournal('+param(e.id)+')">Abrir ↗</button>':e.kind==='due'?'<button type="button" class="mc-text-button" onclick="MusaCreativeHub.openProject('+param(e.id)+')">Ver proyecto ↗</button>':e.kind==='session'?'<button type="button" class="mc-text-button" onclick="MusaCreativeHub.openSession('+Number(e.index)+')">Ver sesión ↗</button>':e.kind==='artwork'&&e.id?'<button type="button" class="mc-text-button" onclick="MusaCreativeHub.viewArtwork('+param(e.id)+')">Ver obra ↗</button>':'')+'</div></article>';
+  return '<section class="mc-main"><div class="mc-heading"><div><span class="mc-eyebrow">03 / CREA A TU RITMO</span><h2>CALENDARIO CREATIVO.</h2><p>Consulta tus sesiones y obras anteriores, lee tu diario y organiza tus próximos pasos en un solo lugar.</p></div><button class="btn" type="button" onclick="MusaCreativeHub.newEvent()">+ Planear actividad ↗</button></div>'+
+    '<div class="mc-calendar-toolbar"><span>HISTORIAL Y ACTIVIDADES POR FECHA</span><button type="button" class="mc-text-button" onclick="MusaCreativeHub.today()">Ir a hoy ↗</button></div>'+
     '<div class="mc-calendar-layout"><div class="mc-calendar-sheet"><div class="mc-month"><button type="button" aria-label="Mes anterior" onclick="MusaCreativeHub.move(-1)">‹</button><h3>'+escHtml(first.toLocaleDateString('es-CO',{month:'long',year:'numeric'}))+'</h3><button type="button" aria-label="Mes siguiente" onclick="MusaCreativeHub.move(1)">›</button></div>'+
     '<div class="mc-calendar-grid mc-weekdays">'+['L','M','X','J','V','S','D'].map(d=>'<span>'+d+'</span>').join('')+'</div><div class="mc-calendar-grid">'+cells.join('')+'</div><p class="mc-legend"><i></i> Día con actividad · Selecciona una fecha</p></div>'+
-    '<aside class="mc-day-panel"><span class="mc-eyebrow">TU DÍA CREATIVO</span><h3>'+escHtml(dateLabel(selected))+'</h3>'+(events.length?events.map(item).join(''):'<p class="mc-no-events">Un lienzo en blanco. ¿Qué te gustaría crear este día?</p>')+
+    '<aside class="mc-day-panel"><span class="mc-eyebrow">HISTORIAL Y PLANES DEL DÍA</span><h3>'+escHtml(dateLabel(selected))+'</h3>'+(events.length?events.map(item).join(''):'<p class="mc-no-events">Un lienzo en blanco. ¿Qué te gustaría crear este día?</p>')+
     '<div class="mc-day-buttons"><button type="button" class="btn secondary" onclick="MusaCreativeHub.newEvent()">+ Planear</button><button type="button" class="btn outline" onclick="MusaCreativeHub.newJournal()">Escribir ↗</button></div></aside></div></section>';
 }
 function renderPage(page){return heading(page)+(page==='proyectos'?projects():page==='diario'?journal():calendar())+(modal?renderModal():'')}
@@ -114,6 +114,21 @@ function renderModal(){
   const kind=modal.kind,id=modal.id;
   let title='',body='';
   if(kind==='detail'){const p=getProject(id);if(!p)return '';title=p.title;body=projectDetail(p);}
+  if(kind==='session'){
+    const record=arr('sessions')[Number(id)];
+    if(!record)return '';
+    const seconds=Number(record.elapsed);
+    const duration=Number.isFinite(seconds)&&seconds>0?String(Math.floor(seconds/60)).padStart(2,'0')+':'+String(Math.floor(seconds%60)).padStart(2,'0'):'Sin tiempo registrado';
+    const labels={challenge:'Reto creativo',writing:'Escritura creativa',drawing:'Ilustración'};
+    const artwork=arr('artworks').find(a=>a.id===record.artworkId);
+    title='ASÍ FUE TU SESIÓN.';
+    body='<div class="mc-session-summary"><span class="mc-eyebrow">'+escHtml(labels[record.type]||'Sesión creativa')+'</span>'+
+      '<h3>'+escHtml(record.title||'Sesión sin título')+'</h3>'+
+      '<p><strong>Fecha:</strong> '+escHtml(dateLabel(fromTimestamp(record.createdAt)))+'</p>'+
+      '<p><strong>Tiempo de exploración:</strong> '+escHtml(duration)+'</p></div>'+
+      '<div class="mc-modal-footer"><button class="btn outline" type="button" onclick="MusaCreativeHub.close()">Volver al calendario</button>'+
+      (artwork?'<button class="btn secondary" type="button" onclick="MusaCreativeHub.viewArtwork('+param(artwork.id)+')">Ver obra creada ↗</button>':'')+'</div>';
+  }
   if(kind==='project'){
     const p=getProject(id)||{};
     title=id?'EDITAR MI PROYECTO.':'UNA NUEVA IDEA EMPIEZA AQUÍ.';
@@ -145,6 +160,16 @@ function renderModal(){
 }
 function open(kind,id=null){if(!window.MusaAuth?.isAuthenticated())return;modal={kind,id};render();document.getElementById('mc-modal-title')?.focus?.();}
 function close(){modal=null;render();}
+function openSession(index){
+  if(!Number.isInteger(index)||index<0||index>=arr('sessions').length)return;
+  open('session',index);
+}
+function viewArtwork(id){
+  if(!window.MusaAuth?.isAuthenticated()||!arr('artworks').some(art=>art.id===id))return;
+  modal=null;
+  openArt(id,'calendario');
+}
+
 function saveProject(event){
   event.preventDefault();if(!window.MusaAuth?.isAuthenticated())return;
   const f=event.currentTarget,t=getInput(f,'title').trim().slice(0,110),date=getInput(f,'dueDate');
@@ -194,5 +219,5 @@ function move(offset){const dt=parse(month+'-01');if(!dt)return;const next=new D
 function today(){selected=now();month=selected.slice(0,7);render();}
 function reset(){modal=null;selected=now();month=selected.slice(0,7);}
 document.addEventListener?.('keydown',e=>{if(e.key==='Escape'&&modal){e.preventDefault();close();}});
-window.MusaCreativeHub={renderPage,renderStudioLinks,reset,close,newProject:()=>open('project'),editProject:id=>open('project',id),openProject:id=>open('detail',id),newJournal:()=>open('journal'),editJournal:id=>open('journal',id),newEvent:()=>open('event'),editEvent:id=>open('event',id),saveProject,saveJournal,saveEvent,removeProject:id=>remove('project',id),removeJournal:id=>remove('journal',id),removeEvent:id=>remove('event',id),toggleEvent,select,move,today};
+window.MusaCreativeHub={renderPage,renderStudioLinks,reset,close,newProject:()=>open('project'),editProject:id=>open('project',id),openProject:id=>open('detail',id),newJournal:()=>open('journal'),editJournal:id=>open('journal',id),newEvent:()=>open('event'),editEvent:id=>open('event',id),openSession,viewArtwork,saveProject,saveJournal,saveEvent,removeProject:id=>remove('project',id),removeJournal:id=>remove('journal',id),removeEvent:id=>remove('event',id),toggleEvent,select,move,today};
 })();
