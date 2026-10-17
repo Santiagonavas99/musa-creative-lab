@@ -68,12 +68,25 @@
 }
 /* Acceso personal MUSA */
 .auth-shell{display:grid;grid-template-columns:1.05fr 1fr;gap:22px;align-items:stretch;min-height:610px}.auth-art{background:#3926ce;color:#fff;position:relative;overflow:hidden;padding:45px 33px;border-radius:24px}.auth-art h1{margin-top:26px;font-size:clamp(34px,4vw,57px)}.auth-art p{max-width:280px}.auth-star{width:280px;height:auto;position:absolute;bottom:-80px;right:-35px;transform:rotate(-15deg);pointer-events:none}.auth-card{background:#fff;border-radius:24px;padding:clamp(25px,4vw,50px);display:flex;flex-direction:column;justify-content:center;min-width:0}.auth-card h2{font-size:clamp(27px,3.4vw,39px);line-height:1.07;margin-top:16px}.auth-card .muted{font-size:14px}.auth-card .field{margin:15px 0}.auth-card .field input{background:#faf8f4}.auth-options{display:flex;gap:12px;align-items:center;justify-content:space-between;margin:12px 0 20px}.auth-remember{font-size:13px;font-weight:700;display:flex;align-items:center;gap:7px}.auth-remember input{accent-color:#3926ce;width:18px;height:18px}.auth-link{border:0;background:transparent;padding:5px;color:#3926ce;text-decoration:underline;text-underline-offset:3px;cursor:pointer;font-size:13px;font-weight:800}.auth-small{font-size:12px;color:#62586b}.auth-small a{color:#3926ce}.auth-submit{width:100%;margin:10px 0}.auth-footer{display:flex;gap:6px;align-items:center;justify-content:center;margin-top:13px;font-size:13px;flex-wrap:wrap}.auth-error,.auth-message{border-radius:12px;padding:13px 16px;font-size:13px;line-height:1.55}.auth-error{color:#a02d20;background:#ffebe7}.auth-message{color:#2e284c;background:#ede7ff}.account-holder{display:flex;align-items:center;gap:8px;background:#fff;border-radius:14px;padding:8px 11px;max-width:280px} .account-dot{background:#d7ff42;border-radius:50%;width:32px;height:32px;display:grid;place-items:center;padding:5px}.account-dot img{width:100%;height:100%;object-fit:contain}.account-info{display:grid;max-width:145px;overflow:hidden;white-space:nowrap}.account-info strong,.account-info small{overflow:hidden;text-overflow:ellipsis}.account-info strong{font-size:13px}.account-info small{font-size:10px;color:#68606e}.account-logout{border:0;background:transparent;color:#3926ce;font-size:12px;font-weight:800;padding:7px}.legacy-banner{background:#d7ff42;padding:20px 22px;border-radius:18px;margin-bottom:18px}.legacy-banner p{font-size:13px;max-width:680px}.legacy-banner .btn{font-size:12px;margin-right:12px}.search-history{background:#fff;padding:15px 20px;border-radius:18px;margin-top:12px}.search-history summary{cursor:pointer;font-size:13px;font-weight:800}.search-tags{display:flex;gap:7px;flex-wrap:wrap;margin-top:13px}
+.search-history-actions{display:flex;justify-content:flex-end;align-items:center;margin-top:12px}
+.search-history-clear{border:1px solid #e6b2a7;background:#fff5f1;color:#9f392a;border-radius:11px;font-size:12px;font-weight:800;padding:9px 13px;cursor:pointer}
+.search-history-clear:hover,.search-history-clear:focus-visible{background:#ffe8df;border-color:#c75c45}
+.search-history-backdrop{position:fixed;inset:0;z-index:1200;display:grid;place-items:center;overflow-y:auto;padding:20px;background:rgba(33,27,54,.64)}
+.search-history-dialog{width:min(100%,480px);background:#fffdf9;border-radius:23px;padding:clamp(22px,4vw,34px);color:#211b36;box-shadow:0 20px 65px rgba(33,27,54,.25)}
+.search-history-dialog h2{font-size:clamp(23px,4.5vw,32px);line-height:1.12;margin:12px 0}
+.search-history-dialog p{color:#595365;line-height:1.55;margin:0 0 24px}
+.search-history-dialog-actions{display:flex;justify-content:flex-end;flex-wrap:wrap;gap:10px}
+.search-history-dialog-actions button{min-height:45px;padding:10px 16px;border-radius:12px;font-size:13px;font-weight:800}
+.search-history-dialog-cancel{background:#fff;border:1.5px solid #211b36;color:#211b36}
+.search-history-dialog-confirm{background:#af3c2d;border:1.5px solid #af3c2d;color:#fff}
+.search-history-dialog-confirm:hover,.search-history-dialog-confirm:focus-visible{background:#923020}
+@media(max-width:480px){.search-history-dialog-actions{flex-direction:column-reverse}.search-history-dialog-actions button{width:100%}}
 @media(max-width:830px){.auth-shell{grid-template-columns:1fr;min-height:auto}.auth-art{min-height:270px}.auth-art h1{max-width:600px}.auth-star{width:190px;bottom:-58px}.auth-card{padding:27px}.account-info{max-width:115px}}
 @media(max-width:480px){.auth-art{padding:27px 24px;min-height:235px}.auth-art h1{font-size:32px;max-width:300px}.auth-star{width:145px;right:-22px;bottom:-42px}.auth-card{padding:24px}.account-holder{padding:6px;gap:5px}.account-dot{width:25px;height:25px;font-size:17px}.account-info{max-width:80px}.account-logout{padding:5px;font-size:11px}}
 
 
 .auth-locked #mobile-menu-toggle,.auth-locked #nav{display:none!important}#account-menu{max-width:min(32vw,290px)}.account-holder{box-shadow:0 1px 8px #211b3610}.account-info{min-width:0}@media(max-width:680px){#account-menu{max-width:48vw;margin-left:auto;margin-right:8px}.account-holder{padding:5px 8px}.account-info{max-width:75px}.account-dot{width:25px;height:25px}.account-logout{font-size:11px}}
-</style><link rel="stylesheet" href="/showcase.css"><link rel="stylesheet" href="/mobile-menu.css"><link rel="stylesheet" href="/nav-motion.css"><link rel="stylesheet" href="/boards.css"><link rel="stylesheet" href="/favorite-ideas.css"><link rel="stylesheet" href="/moodboards.css"><link rel="stylesheet" href="/challenge-banner.css"><link rel="stylesheet" href="/creative-activities.css"><link rel="stylesheet" href="/home-activities.css"><link rel="stylesheet" href="/steps-editorial.css"><link rel="stylesheet" href="/creative-hub.css"><link rel="stylesheet" href="/cta-chevron.css"><script src="/boards.js"></script><script src="/moodboards.js"></script><script src="/challenge-banner.js"></script><script src="/creative-writing.js"></script><script src="/creative-hub.js"></script><script src="/steps-editorial.js"></script><script src="/cta-chevron.js" defer></script><script src="/nav-motion.js" defer></script></head><body><svg xmlns="http://www.w3.org/2000/svg" width="0" height="0" style="position:absolute;width:0;height:0;overflow:hidden" aria-hidden="true" focusable="false"><symbol id="musa-mark-icon" viewBox="0 0 438.529 438.529"><path fill="currentColor" d="M421.833,285.36c-2.573-9.801-8.233-17.179-16.991-22.128l-75.944-43.966l75.944-43.968 c8.758-4.949,14.421-12.322,16.991-22.126c2.566-9.803,1.379-19.082-3.572-27.836L399.99,93.932 c-4.948-8.757-12.319-14.419-22.127-16.989c-9.802-2.565-19.072-1.376-27.833,3.576l-75.944,43.677v-87.65 c0-9.899-3.621-18.464-10.855-25.697C256,3.616,247.433,0,237.537,0h-36.54c-9.9,0-18.464,3.619-25.697,10.849 c-7.232,7.232-10.85,15.798-10.85,25.697v87.65l-75.945-43.68c-8.757-4.952-18.036-6.145-27.837-3.576 c-9.803,2.573-17.179,8.232-22.128,16.989l-18.271,31.405c-4.952,8.754-6.14,18.033-3.571,27.836 c2.574,9.801,8.232,17.178,16.989,22.126l75.945,43.972l-75.945,43.966c-8.757,4.949-14.419,12.323-16.989,22.128 c-2.568,9.801-1.377,19.075,3.571,27.829l18.272,31.408c4.947,8.761,12.32,14.421,22.126,16.995 c9.805,2.562,19.08,1.375,27.837-3.58l75.945-43.681v87.655c0,9.891,3.617,18.466,10.85,25.694 c7.233,7.234,15.8,10.848,25.697,10.848h36.54c9.896,0,18.466-3.613,25.693-10.848c7.238-7.229,10.855-15.804,10.855-25.694 v-87.648l75.944,43.681c8.761,4.948,18.031,6.143,27.833,3.573c9.804-2.574,17.179-8.23,22.127-16.991l18.271-31.405 C423.212,304.438,424.4,295.161,421.833,285.36z"/></symbol></svg><header><div class="brand">MUSA<svg class="musa-mark musa-mark-brand" aria-hidden="true" focusable="false"><use href="#musa-mark-icon"></use></svg></div><nav class="nav" id="nav" aria-label="Navegación principal"></nav><div id="account-menu" aria-live="polite"></div><button class="mobile-menu-toggle" id="mobile-menu-toggle" type="button" aria-label="Abrir menú" aria-controls="mobile-menu" aria-expanded="false" onclick="toggleMobileMenu()"><span class="hamburger-line" aria-hidden="true"></span><span class="hamburger-line" aria-hidden="true"></span><span class="hamburger-line" aria-hidden="true"></span></button><nav class="mobile-menu" id="mobile-menu" aria-label="Secciones de MUSA" hidden></nav></header><div class="mobile-menu-scrim" id="mobile-menu-scrim" onclick="closeMobileMenu()" hidden></div><main id="app"></main><div id="toast" class="toast hidden" role="status"></div><div id="musa-moodboard-root"></div><script>
+</style><link rel="stylesheet" href="/showcase.css"><link rel="stylesheet" href="/mobile-menu.css"><link rel="stylesheet" href="/nav-motion.css"><link rel="stylesheet" href="/boards.css"><link rel="stylesheet" href="/favorite-ideas.css"><link rel="stylesheet" href="/moodboards.css"><link rel="stylesheet" href="/challenge-banner.css"><link rel="stylesheet" href="/creative-activities.css"><link rel="stylesheet" href="/home-activities.css"><link rel="stylesheet" href="/steps-editorial.css"><link rel="stylesheet" href="/creative-hub.css"><link rel="stylesheet" href="/cta-chevron.css"><script src="/boards.js"></script><script src="/moodboards.js"></script><script src="/challenge-banner.js"></script><script src="/creative-writing.js"></script><script src="/creative-hub.js"></script><script src="/steps-editorial.js"></script><script src="/cta-chevron.js" defer></script><script src="/nav-motion.js" defer></script></head><body><svg xmlns="http://www.w3.org/2000/svg" width="0" height="0" style="position:absolute;width:0;height:0;overflow:hidden" aria-hidden="true" focusable="false"><symbol id="musa-mark-icon" viewBox="0 0 438.529 438.529"><path fill="currentColor" d="M421.833,285.36c-2.573-9.801-8.233-17.179-16.991-22.128l-75.944-43.966l75.944-43.968 c8.758-4.949,14.421-12.322,16.991-22.126c2.566-9.803,1.379-19.082-3.572-27.836L399.99,93.932 c-4.948-8.757-12.319-14.419-22.127-16.989c-9.802-2.565-19.072-1.376-27.833,3.576l-75.944,43.677v-87.65 c0-9.899-3.621-18.464-10.855-25.697C256,3.616,247.433,0,237.537,0h-36.54c-9.9,0-18.464,3.619-25.697,10.849 c-7.232,7.232-10.85,15.798-10.85,25.697v87.65l-75.945-43.68c-8.757-4.952-18.036-6.145-27.837-3.576 c-9.803,2.573-17.179,8.232-22.128,16.989l-18.271,31.405c-4.952,8.754-6.14,18.033-3.571,27.836 c2.574,9.801,8.232,17.178,16.989,22.126l75.945,43.972l-75.945,43.966c-8.757,4.949-14.419,12.323-16.989,22.128 c-2.568,9.801-1.377,19.075,3.571,27.829l18.272,31.408c4.947,8.761,12.32,14.421,22.126,16.995 c9.805,2.562,19.08,1.375,27.837-3.58l75.945-43.681v87.655c0,9.891,3.617,18.466,10.85,25.694 c7.233,7.234,15.8,10.848,25.697,10.848h36.54c9.896,0,18.466-3.613,25.693-10.848c7.238-7.229,10.855-15.804,10.855-25.694 v-87.648l75.944,43.681c8.761,4.948,18.031,6.143,27.833,3.573c9.804-2.574,17.179-8.23,22.127-16.991l18.271-31.405 C423.212,304.438,424.4,295.161,421.833,285.36z"/></symbol></svg><header><div class="brand">MUSA<svg class="musa-mark musa-mark-brand" aria-hidden="true" focusable="false"><use href="#musa-mark-icon"></use></svg></div><nav class="nav" id="nav" aria-label="Navegación principal"></nav><div id="account-menu" aria-live="polite"></div><button class="mobile-menu-toggle" id="mobile-menu-toggle" type="button" aria-label="Abrir menú" aria-controls="mobile-menu" aria-expanded="false" onclick="toggleMobileMenu()"><span class="hamburger-line" aria-hidden="true"></span><span class="hamburger-line" aria-hidden="true"></span><span class="hamburger-line" aria-hidden="true"></span></button><nav class="mobile-menu" id="mobile-menu" aria-label="Secciones de MUSA" hidden></nav></header><div class="mobile-menu-scrim" id="mobile-menu-scrim" onclick="closeMobileMenu()" hidden></div><main id="app"></main><div id="toast" class="toast hidden" role="status"></div><div id="musa-moodboard-root"></div><div id="search-history-dialog-root"></div><script>
 function musaMark(extraClass=''){return '<svg class="musa-mark '+extraClass+'" aria-hidden="true" focusable="false"><use href="#musa-mark-icon"></use></svg>'}
 const KEY='musa-v1',initial={favorites:[],artworks:[],sessions:[],savedChallenges:[],acceptedChallenges:[],references:[],searches:[],boards:[],projects:[],journalEntries:[],calendarEvents:[],active:null};let data;try{data={...initial,...JSON.parse(localStorage.getItem(KEY)||'{}')}}catch{data={...initial}}let page='inicio',currentIdea=null,seconds=0,interval=null,paused=true,filter='todos';
 const prompts=[['Representa la nostalgia sin dibujar personas','Nostalgia','Collage','Recuerdos', ['#b76e50','#e5c9a8','#73849a']],['¿De qué color es el silencio?','Calma','Abstracción','Sensaciones',['#a8cbb7','#e7e3d4','#5c8390']],['Inventa un recuerdo del futuro','Curiosidad','Ilustración','Tiempo',['#3926ce','#ff7049','#d7ff42']],['Dibuja una ciudad que respira','Asombro','Dibujo','Arquitectura',['#f5b335','#a458b9','#34337c']],['Haz un autorretrato sin mostrar tu rostro','Identidad','Fotografía','Retrato',['#ff7049','#211b36','#f4ede4']],['Convierte un error en una obra','Libertad','Técnica mixta','Experimentación',['#d7ff42','#3926ce','#ee8fbd']],['Crea un paisaje con objetos cotidianos','Juego','Collage','Paisaje',['#62a9b2','#eab34f','#d45d58']],['Representa el sonido de tu infancia','Melancolía','Abstracción','Memoria',['#73849a','#d4a6c8','#ebd2aa']]].concat(window.MusaMoodboards.extraIdeas);
@@ -81,6 +94,7 @@ const challenges=[{title:'Tres colores, un universo',time:15,level:'Fácil',text
 let challengeFeed=window.MusaMoodboards.initialChallenges(challenges);
 currentIdea=window.MusaMoodboards.nextIdea(prompts,null);
 let currentWriting=window.MusaWriting.next(null),writingMode='question',writingImage=null,writingImageLoading=false,writingImageRequest=0;
+let searchHistoryDeleteOpen=false,searchHistoryClearEpoch=0;
 function save(){if(window.MusaAuth?.isAuthenticated()){window.MusaAuth.queueSave();return true}return false}
 function esc(s){return String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
 function toast(s){let e=document.getElementById('toast');e.textContent=s;e.classList.remove('hidden');clearTimeout(window._toast);window._toast=setTimeout(()=>e.classList.add('hidden'),3000)}
@@ -100,6 +114,18 @@ function setMobileMenu(open,returnFocus=false){
 function toggleMobileMenu(){setMobileMenu(!isMobileMenuOpen())}
 function closeMobileMenu(returnFocus=false){setMobileMenu(false,returnFocus)}
 document.addEventListener?.('keydown',event=>{
+ if(searchHistoryDeleteOpen){
+  if(event.key==='Escape'){event.preventDefault();closeSearchHistoryDelete();return;}
+  if(event.key==='Tab'){
+   const dialog=document.querySelector?.('.search-history-dialog');
+   const buttons=Array.from(dialog?.querySelectorAll?.('button')||[]);
+   if(!buttons.length)return;
+   const current=buttons.indexOf(document.activeElement);
+   if(event.shiftKey&&current<=0){event.preventDefault();buttons[buttons.length-1].focus();}
+   else if(!event.shiftKey&&current===buttons.length-1){event.preventDefault();buttons[0].focus();}
+  }
+  return;
+ }
  if(!isMobileMenuOpen())return;
  if(event.key==='Escape'){event.preventDefault();closeMobileMenu(true);return}
  if(event.key!=='Tab')return;
@@ -112,7 +138,7 @@ document.addEventListener?.('keydown',event=>{
  else if(!event.shiftKey && activeIndex===focusable.length-1){event.preventDefault();focusable[0].focus()}
 });
 window.addEventListener?.('resize',()=>{if(window.innerWidth>680 && isMobileMenuOpen())closeMobileMenu()});
-function go(p){window.MusaMoodboards.close();closeMobileMenu();page=p;render();window.scrollTo(0,0);if(p==='explorar'&&!inspiration.searched)lookupInspiration()}
+function go(p){closeSearchHistoryDelete();window.MusaMoodboards.close();closeMobileMenu();page=p;render();window.scrollTo(0,0);if(p==='explorar'&&!inspiration.searched)lookupInspiration()}
 function nav(){
  const items=[['inicio','Inicio'],['explorar','Explorar'],['estudio','Mi estudio'],['actividad','Actividad']];
  const build=(mobile)=>items.map(([route,label])=>'<button type="button" class="'+((page===route||(route==='estudio'&&['proyectos','diario','calendario'].includes(page)))?'active':'')+(mobile?' mobile-menu-link':'')+'" '+((page===route||(route==='estudio'&&['proyectos','diario','calendario'].includes(page)))?'aria-current="page" ':'')+'onclick="go(\''+route+'\')">'+label+'</button>').join('');
@@ -227,12 +253,55 @@ function chooseSource(source){
   inspiration.source=source;
   lookupInspiration();
 }
+
+function searchHistoryDialog(){
+ const count=(data.searches||[]).length;
+ return '<div class="search-history-backdrop" role="presentation" onclick="closeSearchHistoryDelete()">'+
+  '<div class="search-history-dialog" role="alertdialog" aria-modal="true" aria-labelledby="search-history-dialog-title" aria-describedby="search-history-dialog-description" onclick="event.stopPropagation()">'+
+  '<div class="eyebrow">MUSA / INSPIRACIÓN VISUAL</div>'+
+  '<h2 id="search-history-dialog-title">¿BORRAR EL HISTORIAL?</h2>'+
+  '<p id="search-history-dialog-description">Vas a eliminar '+count+' '+(count===1?'búsqueda guardada':'búsquedas guardadas')+'. Esta acción no se puede deshacer. Tus tableros, referencias e ideas guardadas no se eliminarán.</p>'+
+  '<div class="search-history-dialog-actions">'+
+  '<button type="button" id="search-history-cancel" class="search-history-dialog-cancel" onclick="closeSearchHistoryDelete()">Cancelar</button>'+
+  '<button type="button" class="search-history-dialog-confirm" onclick="confirmClearSearchHistory()">Sí, borrar historial</button>'+
+  '</div></div></div>';
+}
+function openSearchHistoryDelete(){
+ if(!(data.searches||[]).length||searchHistoryDeleteOpen)return;
+ searchHistoryDeleteOpen=true;
+ document.getElementById('search-history-dialog-root').innerHTML=searchHistoryDialog();
+ document.getElementById('search-history-cancel')?.focus?.();
+}
+function closeSearchHistoryDelete(){
+ if(!searchHistoryDeleteOpen)return;
+ searchHistoryDeleteOpen=false;
+ document.getElementById('search-history-dialog-root').innerHTML='';
+ document.getElementById('search-history-delete-trigger')?.focus?.();
+}
+function confirmClearSearchHistory(){
+ if(!searchHistoryDeleteOpen)return;
+ const previous=data.searches;
+ data.searches=[];
+ if(!save()){
+  data.searches=previous;
+  closeSearchHistoryDelete();
+  toast('No pudimos borrar el historial. Inténtalo de nuevo.');
+  return;
+ }
+ searchHistoryClearEpoch++;
+ searchHistoryDeleteOpen=false;
+ document.getElementById('search-history-dialog-root').innerHTML='';
+ render();
+ toast('Historial de búsquedas eliminado.');
+}
+
 async function lookupInspiration(e){
   if(e)e.preventDefault();
   const field=document.getElementById("query");
   if(field)inspiration.query=field.value.trim();
   if(inspiration.query.length<2){toast("Escribe por lo menos dos caracteres");return}
   const requestId=++inspiration.requestId;
+  const historyEpoch=searchHistoryClearEpoch;
   inspiration.loading=true;inspiration.error="";inspiration.searched=true;render();
   try {
     const url="/api/inspiration?q="+encodeURIComponent(inspiration.query)+"&source="+encodeURIComponent(inspiration.source);
@@ -240,7 +309,7 @@ async function lookupInspiration(e){
     const payload=await response.json();
     if(requestId!==inspiration.requestId)return;
     if(!response.ok)throw Error(payload.error||"No fue posible consultar las imágenes");
-    if(window.MusaAuth?.isAuthenticated()){data.searches.unshift({id:crypto.randomUUID(),query:inspiration.query,source:inspiration.source,count:Array.isArray(payload.results)?payload.results.length:0,createdAt:new Date().toISOString()});data.searches=data.searches.slice(0,100);save();}
+    if(window.MusaAuth?.isAuthenticated()&&historyEpoch===searchHistoryClearEpoch){data.searches.unshift({id:crypto.randomUUID(),query:inspiration.query,source:inspiration.source,count:Array.isArray(payload.results)?payload.results.length:0,createdAt:new Date().toISOString()});data.searches=data.searches.slice(0,100);save();}
     inspiration.items=Array.isArray(payload.results)?payload.results:[];
     inspiration.partial=Boolean(payload.partial);
   } catch(e){
@@ -327,7 +396,9 @@ function renderInspiration(){
  else if(inspiration.error) content='<div class="inspiration-message" role="alert"><h3>NO PUDIMOS CARGAR ESTA FUENTE.</h3><p>'+esc(inspiration.error)+'</p><div class="row" style="justify-content:center"><button class="btn secondary" onclick="lookupInspiration()">Reintentar ↻</button><button class="btn outline" onclick="chooseSource(&#39;met&#39;)">Probar The Met ↗</button></div></div>';
  else if(inspiration.searched&&!displayItems.length) content='<div class="inspiration-message"><h3>NO APARECIERON REFERENCIAS.</h3><p>Prueba otro concepto, una técnica o una palabra en inglés.</p></div>';
  else if(displayItems.length) content='<div class="ref-grid">'+displayItems.map(({r,i})=>refCard(r,i)).join("")+'</div>';
- const history=(data.searches||[]).length?'<details class="search-history"><summary>Mis búsquedas anteriores ('+data.searches.length+')</summary><div class="search-tags">'+data.searches.slice(0,14).map(s=>'<span class="pill">'+esc(s.query)+' · '+esc(s.source)+'</span>').join('')+'</div></details>':'';
+ const history=(data.searches||[]).length?'<details class="search-history"><summary>Mis búsquedas anteriores ('+data.searches.length+')</summary>'+
+   '<div class="search-history-actions"><button id="search-history-delete-trigger" type="button" class="search-history-clear" onclick="openSearchHistoryDelete()">Borrar historial</button></div>'+
+   '<div class="search-tags">'+data.searches.slice(0,14).map(s=>'<span class="pill">'+esc(s.query)+' · '+esc(s.source)+'</span>').join('')+'</div></details>':'';
  return search+history+'<section class="inspire-results" aria-live="polite"><div class="sectionhead"><h2>RESULTADOS · '+inspirationTitle()+'</h2>'+
    (displayItems.length?'<span class="badge">'+displayItems.length+' referencias</span>':"")+'</div>'+
    (inspiration.partial?'<p class="inspiration-hint">Algunas fuentes no respondieron, pero puedes explorar los resultados disponibles.</p>':"")+

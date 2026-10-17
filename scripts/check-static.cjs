@@ -156,6 +156,17 @@ assert.ok(inline.length > 0, "MUSA must contain client application JavaScript");
 for (const [, source] of inline) new vm.Script(source, {filename: "index.html"});
 new vm.Script(api, {filename: "api/inspiration.js"});
 new vm.Script(authScript,{filename:"public/auth.js"});
+assert.match(html,/id="search-history-dialog-root"/,"The history confirmation dialog has an independent mount");
+assert.match(html,/class="search-history-clear"/,"A visible action clears the search list");
+assert.match(html,/function openSearchHistoryDelete\(\)/);
+assert.match(html,/function confirmClearSearchHistory\(\)/);
+assert.match(html,/searchHistoryClearEpoch\+\+/,"Clearing history must invalidate old in-flight search records");
+assert.match(html,/role="alertdialog" aria-modal="true"/,"A destructive action should ask for confirmation");
+assert.match(html,/search-history-dialog-confirm/,"Confirming history deletion is explicit");
+assert.match(html,/\.search-history-backdrop\{/,"History confirmation is visually styled");
+assert.match(html,/\.search-history-dialog-actions button\{width:100%\}/,"Dialog controls adapt to mobile");
+assert.match(authScript,/searchHistoryDeleteOpen=false;document\.getElementById\('search-history-dialog-root'\)/,"Logging out dismisses any deletion confirmation");
+
 assert.match(authScript,/currentIdea=window\.MusaMoodboards\.nextIdea\(prompts,currentIdea\);seconds=data\.active\?\.elapsed/,"Logging in should initialize a drawing prompt");
 assert.doesNotMatch(html,/Generar idea ↗|Tu próxima idea visual te espera/,"The preliminary illustration state must be removed");
 
@@ -419,6 +430,42 @@ assert.match(homeScreen,/musa-home-activities-art/);
 assert.equal((homeScreen.match(/musa-home-activities-art/g)||[]).length,1,"Exactly one editorial banner on home");
 assert.ok(homeScreen.includes(vm.runInContext("window.MusaChallengeBanner.render()",ctx)),"The home banner must show the selected rotating composition");
 assert.match(homeScreen,/onclick="go\('explorar'\)">Ver ejercicios/,"Home CTA must open the actual Explore section");
+
+// Search history: confirm-only deletion, no changes to boards, favorites or saved references.
+vm.runInContext("data.searches=[{id:'search-1',query:'collage experimental',source:'unsplash'},{id:'search-2',query:'arte geométrico',source:'met'}];"+
+  "data.references=[{id:'reference-safe',title:'Guardada'}];"+
+  "data.boards=[{id:'board-safe',name:'Mi tablero'}];"+
+  "page='explorar';render()",ctx);
+assert.match(nodes.get("app").innerHTML,/Mis búsquedas anteriores \(2\)/);
+assert.match(nodes.get("app").innerHTML,/Borrar historial/);
+vm.runInContext("openSearchHistoryDelete()",ctx);
+const historyDialogRoot=nodes.get("search-history-dialog-root");
+assert.match(historyDialogRoot.innerHTML,/¿BORRAR EL HISTORIAL\?/);
+assert.match(historyDialogRoot.innerHTML,/2 búsquedas guardadas/);
+assert.match(historyDialogRoot.innerHTML,/Tus tableros, referencias e ideas guardadas no se eliminarán/);
+assert.equal(vm.runInContext("data.searches.length",ctx),2,"Opening confirmation must not delete anything");
+vm.runInContext("closeSearchHistoryDelete()",ctx);
+assert.equal(historyDialogRoot.innerHTML,"","Cancel closes the modal");
+assert.equal(vm.runInContext("data.searches.length",ctx),2,"Cancel preserves all searches");
+vm.runInContext("openSearchHistoryDelete()",ctx);
+documentListeners.keydown({key:"Escape",preventDefault(){}});
+assert.equal(historyDialogRoot.innerHTML,"","Escape should dismiss confirmation");
+assert.equal(vm.runInContext("data.searches.length",ctx),2,"Escape must never delete searches");
+vm.runInContext("openSearchHistoryDelete();confirmClearSearchHistory()",ctx);
+assert.equal(vm.runInContext("data.searches.length",ctx),0,"Confirmation removes the search history");
+assert.equal(historyDialogRoot.innerHTML,"","Successful deletion closes modal");
+assert.doesNotMatch(nodes.get("app").innerHTML,/Mis búsquedas anteriores \(/,"Empty search history disappears from Explore");
+assert.equal(vm.runInContext("data.references[0].id",ctx),"reference-safe","Saved references must survive");
+assert.equal(vm.runInContext("data.boards[0].id",ctx),"board-safe","Boards must survive");
+const clearEpoch=vm.runInContext("searchHistoryClearEpoch",ctx);
+assert.ok(clearEpoch>0,"Search clear generation increases after deletion");
+vm.runInContext("data.searches=[{id:'new-entry',query:'pintura',source:'artic'}];"+
+  "window.__historySave=save;save=()=>false;openSearchHistoryDelete();confirmClearSearchHistory()",ctx);
+assert.equal(vm.runInContext("data.searches.length",ctx),1,"Failed save restores the prior history");
+assert.equal(vm.runInContext("searchHistoryClearEpoch",ctx),clearEpoch,"A failed deletion cannot advance the clear generation");
+vm.runInContext("save=window.__historySave;data.searches=[];data.references=[];data.boards=[];page='inicio';render()",ctx);
+console.log("✓ Search history supports confirmation, cancel, Escape, rollback and safe saved references");
+
 
 // The initial illustration render must be complete even after an auth reset.
 vm.runInContext("currentIdea=null;page='explorar';render()",ctx);

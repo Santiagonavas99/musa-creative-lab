@@ -271,7 +271,7 @@ async function logout(){
 }
 function reset(){
   clearTimeout(saveTimer);loadToken++;user=null;loaded=false;data=blank();currentIdea=null;
-  selectedBoardId='';boardEditor=null;boardDeleteId='';window.MusaMoodboards?.close?.();window.MusaCreativeHub?.reset?.();
+  selectedBoardId='';boardEditor=null;boardDeleteId='';searchHistoryDeleteOpen=false;document.getElementById('search-history-dialog-root')?.replaceChildren?.();window.MusaMoodboards?.close?.();window.MusaCreativeHub?.reset?.();
   images.clear();inspiration.items=[];inspiration.query='collage experimental';inspiration.searched=false;inspiration.requestId++;
   page='inicio';mode='login';renderGate();
 }
