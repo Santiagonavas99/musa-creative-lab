@@ -33,11 +33,22 @@ function heading(active){
   return '<div class="mc-hero"><div><span class="mc-eyebrow">MUSA / MI ESPACIO CREATIVO</span><h1>TODO EMPIEZA <em>CON UNA IDEA.</em></h1><p>Organiza tus proyectos, escribe tu proceso y descubre cuándo y cómo creas.</p></div><img src="/musa-asterisk.svg" aria-hidden="true" alt=""></div>'+nav(active);
 }
 function renderStudioLinks(){
-  return heading('estudio')+'<div class="mc-quick-links">'+[
-    ['proyectos','PROYECTOS',arr('projects').length,'Ideas conectadas, de principio a fin'],
-    ['diario','DIARIO',arr('journalEntries').length,'Tu proceso merece ser recordado'],
-    ['calendario','CALENDARIO',arr('calendarEvents').filter(e=>!e.completed).length,'Planea tu próxima exploración']
-  ].map(([route,label,count,desc],i)=>'<button class="mc-quick mc-q'+i+'" type="button" onclick="go(\''+route+'\')"><span>'+label+' ↗</span><strong>'+count+'</strong><small>'+escHtml(desc)+'</small></button>').join('')+'</div>';
+  const cards=[
+    ['proyectos','PROYECTOS',arr('projects').length,'Organiza tus ideas y obras'],
+    ['calendario','SESIONES',arr('sessions').length,'Ejercicios creativos guardados'],
+    ['diario','DIARIO',arr('journalEntries').length,'Reflexiones sobre tu proceso'],
+    ['calendario','CALENDARIO',arr('calendarEvents').filter(e=>!e.completed).length,'Actividades pendientes']
+  ];
+  return heading('estudio')+
+    '<div class="mc-quick-links mc-quick-links--four">'+cards.map(([route,label,count,desc],i)=>
+      '<button class="mc-quick mc-q'+i+'" type="button" onclick="go(\''+route+'\')" aria-label="'+label+': '+count+'. '+escHtml(desc)+'. Abrir '+(label==='SESIONES'?'calendario':label.toLowerCase())+'">'+
+      '<span>'+label+' ↗</span><strong>'+count+'</strong><small>'+escHtml(desc)+'</small></button>').join('')+'</div>'+
+    '<section class="mc-clarity" aria-labelledby="mc-clarity-title">'+
+      '<span class="mc-eyebrow">GUÍA RÁPIDA / TU ESPACIO</span><h2 id="mc-clarity-title">¿SESIÓN O PROYECTO?</h2>'+
+      '<div class="mc-clarity-grid"><div><strong><span class="mc-clarity-mark">01</span> SESIÓN CREATIVA</strong>'+
+      '<p>Es un ejercicio de escritura o ilustración que realizas y guardas. Puedes consultar lo que hiciste en el <button type="button" onclick="go(\'calendario\')">Calendario ↗</button>.</p></div>'+
+      '<div><strong><span class="mc-clarity-mark">02</span> PROYECTO CREATIVO</strong>'+
+      '<p>Es un espacio que creas para reunir ideas, obras, tableros y notas sobre un objetivo. Hacer una sesión no crea un proyecto automáticamente.</p></div></div></section>';
 }
 function blank(title,desc,button,action){
   return '<div class="mc-empty"><span class="mc-empty-symbol" aria-hidden="true">✳</span><h3>'+escHtml(title)+'</h3><p>'+escHtml(desc)+'</p><button class="btn secondary" type="button" onclick="'+action+'">'+escHtml(button)+' ↗</button></div>';
