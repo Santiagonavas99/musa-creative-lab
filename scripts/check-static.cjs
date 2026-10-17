@@ -64,9 +64,9 @@ console.log("✓ CTA arrow styling, source SVG and dynamic action conversion ver
 
 assert.match(html, /\.swatch\{[^}]*border:1px solid rgba\(255,255,255,\.92\)/,
  "Suggested idea colors should have a thin white border");
-assert.match(favoriteCSS, /\.idea-glass-palette \.swatch\{[^}]*border:1px solid rgba\(255,255,255,\.92\)/,
- "Saved idea colors should have the same white border");
-assert.match(html, /palette\(f\.colors,'favorite'\)/, "Favorites must reuse the original palette renderer");
+assert.doesNotMatch(html,/palette\(f\.colors,'favorite'\)/,"Saved favorites no longer duplicate the palette");
+assert.doesNotMatch(html,/class="mb-favorite-moodboard"/,"Saved favorites no longer duplicate the visual collage");
+assert.match(favoriteCSS,/min-height:0;align-self:start/,"Saved favorites shrink to their content");
 
 // Home onboarding explains MUSA before repeating any specific Explore interaction.
 assert.match(html, /id="musa-intro-title">TU PRÓXIMA IDEA EMPIEZA AQUÍ\./,
