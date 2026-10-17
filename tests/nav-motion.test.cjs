@@ -93,7 +93,8 @@ test("keyboard focus reveals the same traveling underline but never on active li
 });
 
 test("menu labels and navigation calls are preserved while rerenders clear the indicator", () => {
-  assert.match(html,/const items=\[\['inicio','Inicio'\],\['explorar','Explorar'\],\['estudio','Mi estudio'\],\['actividad','Actividad'\]\]/);
+  assert.match(html,/const items=\[\['inicio','Inicio'\],\['explorar','Explorar'\],\['estudio','Mi estudio'\]\]/);
+  assert.doesNotMatch(html,/\['actividad','Actividad'\]/,'The inactive Activity link must not return');
   assert.match(html,/onclick="go/);
   assert.match(html,/class="nav-travel-indicator" aria-hidden="true"/);
   assert.match(html,/window\.musaNavMotion\?\.reset\?\.\(\)/);
